@@ -41,6 +41,7 @@ class ASRResponse(BaseModel):
     segments: Optional[List[TranscriptionSegment]] = None
     stats: Optional[Dict[str, Any]] = None
     failed_segments_details: Optional[List[FailedSegment]] = None
+    task_id: Optional[str] = None  # Task ID for bundle download
 
 
 class ProcessingStatus(BaseModel):

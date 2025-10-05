@@ -245,6 +245,7 @@ class ASRService:
                     segments=[s for s in all_subtitles[:10]],  # 只返回前10条字幕
                     stats=stats,
                     failed_segments_details=failed_segments_details,
+                    task_id=task_id,  # Add task ID for bundle download
                 )
             else:
                 error_msg = "❌ 没有生成任何字幕"

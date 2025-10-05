@@ -1,5 +1,7 @@
 import os
 import uuid
+import zipfile
+import io
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from fastapi.responses import FileResponse
 from typing import Optional
@@ -130,3 +132,54 @@ async def download_file(file_path: str):
         raise HTTPException(status_code=404, detail="File not found")
 
     return FileResponse(full_path, media_type='application/octet-stream')
+
+
+@router.get("/download-bundle/{task_id}")
+async def download_bundle(task_id: str):
+    """
+    Download all subtitle files for a task as a ZIP bundle
+    
+    Args:
+        task_id: The task ID to download files for
+    """
+    try:
+        # Security check - ensure task_id is valid
+        task_output_dir = os.path.join(settings.OUTPUT_DIR, task_id)
+        if not os.path.exists(task_output_dir):
+            raise HTTPException(status_code=404, detail="Task not found")
+
+        # Find all subtitle files in the task directory
+        subtitle_files = []
+        for root, dirs, files in os.walk(task_output_dir):
+            for file in files:
+                if file.endswith(('.srt', '.vtt', '.lrc', '.txt')):
+                    subtitle_files.append(os.path.join(root, file))
+
+        if not subtitle_files:
+            raise HTTPException(status_code=404, detail="No subtitle files found for this task")
+
+        # Create ZIP file in memory
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for subtitle_file in subtitle_files:
+                # Get relative path for ZIP file structure
+                relative_path = os.path.relpath(subtitle_file, task_output_dir)
+                zip_file.write(subtitle_file, relative_path)
+
+        zip_buffer.seek(0)
+
+        # Get base filename for ZIP file naming
+        base_filename = os.path.basename(subtitle_files[0]).split('_silero_subtitles')[0]
+        zip_filename = f"{base_filename}_subtitles_bundle.zip"
+
+        # Return ZIP file as response
+        return FileResponse(
+            path=zip_buffer,
+            filename=zip_filename,
+            media_type='application/zip'
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create bundle: {str(e)}")

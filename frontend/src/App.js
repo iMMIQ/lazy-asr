@@ -95,6 +95,11 @@ function App() {
     window.open(downloadUrl, '_blank');
   };
 
+  const handleBundleDownload = (taskId) => {
+    const downloadUrl = `${API_BASE_URL}/asr/download-bundle/${taskId}`;
+    window.open(downloadUrl, '_blank');
+  };
+
   const handleFormatChange = (format) => {
     setOutputFormats(prev => {
       if (prev.includes(format)) {
@@ -361,6 +366,18 @@ function App() {
               {result.output_files && (
                 <div className="download-buttons">
                   <h3>📥 下载文件:</h3>
+                  
+                  {/* Bundle download button - show when multiple formats are selected */}
+                  {Object.keys(result.output_files).length > 1 && result.task_id && (
+                    <button
+                      onClick={() => handleBundleDownload(result.task_id)}
+                      className="download-button bundle-download-button"
+                    >
+                      📦 打包下载所有格式 ({Object.keys(result.output_files).length}个文件)
+                    </button>
+                  )}
+                  
+                  {/* Individual download buttons */}
                   {Object.entries(result.output_files).map(([format, filePath]) => (
                     <button
                       key={format}
