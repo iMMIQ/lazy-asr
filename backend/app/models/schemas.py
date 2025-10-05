@@ -36,7 +36,8 @@ class FailedSegment(BaseModel):
 class ASRResponse(BaseModel):
     success: bool
     message: str
-    srt_file_path: Optional[str] = None
+    srt_file_path: Optional[str] = None  # Backward compatibility
+    output_files: Optional[Dict[str, str]] = None  # New field: format -> file_path mapping
     segments: Optional[List[TranscriptionSegment]] = None
     stats: Optional[Dict[str, Any]] = None
     failed_segments_details: Optional[List[FailedSegment]] = None

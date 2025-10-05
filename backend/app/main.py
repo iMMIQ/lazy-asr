@@ -3,10 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .core.config import settings
 from .api.api import api_router
 
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json"
-)
+app = FastAPI(title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_STR}/openapi.json")
 
 # Add CORS middleware
 app.add_middleware(

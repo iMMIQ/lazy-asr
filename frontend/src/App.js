@@ -17,6 +17,7 @@ function App() {
   const [asrApiUrl, setAsrApiUrl] = useState('');
   const [asrApiKey, setAsrApiKey] = useState('');
   const [asrModel, setAsrModel] = useState('');
+  const [outputFormats, setOutputFormats] = useState(['srt']); // Default to SRT for backward compatibility
 
   // Fetch available plugins on component mount
   useEffect(() => {
@@ -59,6 +60,9 @@ function App() {
       const formData = new FormData();
       formData.append('audio_file', audioFile);
       formData.append('asr_method', asrMethod);
+      
+      // Add output formats
+      formData.append('output_formats', outputFormats.join(','));
 
       // 添加VAD参数
       if (showAdvancedOptions) {
@@ -89,6 +93,18 @@ function App() {
   const handleDownload = (filePath) => {
     const downloadUrl = `${API_BASE_URL}/asr/download/${encodeURIComponent(filePath)}`;
     window.open(downloadUrl, '_blank');
+  };
+
+  const handleFormatChange = (format) => {
+    setOutputFormats(prev => {
+      if (prev.includes(format)) {
+        // Remove format if already selected
+        return prev.filter(f => f !== format);
+      } else {
+        // Add format if not selected
+        return [...prev, format];
+      }
+    });
   };
 
   return (
@@ -125,6 +141,27 @@ function App() {
                 </option>
               ))}
             </select>
+          </div>
+
+          <div className="form-group">
+            <label>选择输出格式:</label>
+            <div className="format-checkboxes">
+              {['srt', 'vtt', 'lrc', 'txt'].map((format) => (
+                <label 
+                  key={format} 
+                  className={`format-checkbox ${outputFormats.includes(format) ? 'selected' : ''}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={outputFormats.includes(format)}
+                    onChange={() => handleFormatChange(format)}
+                    disabled={isProcessing}
+                  />
+                  <span className="format-label">{format.toUpperCase()}</span>
+                </label>
+              ))}
+            </div>
+            <small>选择要生成的字幕文件格式</small>
           </div>
 
           {/* 高级选项 */}
@@ -321,7 +358,23 @@ function App() {
                 </div>
               )}
 
-              {result.srt_file_path && (
+              {result.output_files && (
+                <div className="download-buttons">
+                  <h3>📥 下载文件:</h3>
+                  {Object.entries(result.output_files).map(([format, filePath]) => (
+                    <button
+                      key={format}
+                      onClick={() => handleDownload(filePath)}
+                      className="download-button"
+                    >
+                      💾 下载{format.toUpperCase()}文件
+                    </button>
+                  ))}
+                </div>
+              )}
+              
+              {/* Backward compatibility: show SRT download button if output_files is not available */}
+              {!result.output_files && result.srt_file_path && (
                 <button
                   onClick={() => handleDownload(result.srt_file_path)}
                   className="download-button"

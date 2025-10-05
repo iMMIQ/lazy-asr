@@ -537,6 +537,84 @@ body {
   font-size: 1.1rem;
 }
 
+/* Format Selection Styling */
+.format-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.format-checkbox {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.format-checkbox:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--text-muted);
+}
+
+.format-checkbox input[type="checkbox"] {
+  display: none;
+}
+
+.format-checkbox input[type="checkbox"]:checked + .format-label {
+  color: #4facfe;
+  font-weight: 600;
+}
+
+.format-checkbox input[type="checkbox"]:checked ~ .format-checkbox {
+  border-color: #4facfe;
+  background: rgba(79, 172, 254, 0.1);
+}
+
+.format-label {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+  font-weight: 500;
+}
+
+.format-checkbox input[type="checkbox"]:checked ~ .format-label {
+  color: #4facfe;
+}
+
+.format-checkbox.selected {
+  border-color: #4facfe;
+  background: rgba(79, 172, 254, 0.1);
+}
+
+.format-checkbox.selected .format-label {
+  color: #4facfe;
+  font-weight: 600;
+}
+
+/* Download Buttons Group */
+.download-buttons {
+  margin-top: var(--space-xl);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--border-light);
+}
+
+.download-buttons h3 {
+  margin-bottom: var(--space-md);
+  color: var(--text-primary);
+  font-size: 1.2rem;
+}
+
+.download-buttons .download-button {
+  margin: var(--space-sm);
+  display: inline-block;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .App {
