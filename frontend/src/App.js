@@ -45,7 +45,7 @@ function App() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
+
     if (!audioFile) {
       setError('请选择音频文件');
       return;
@@ -59,12 +59,12 @@ function App() {
       const formData = new FormData();
       formData.append('audio_file', audioFile);
       formData.append('asr_method', asrMethod);
-      
+
       // 添加VAD参数
       if (showAdvancedOptions) {
         formData.append('min_speech_duration', minSpeechDuration);
         formData.append('min_silence_duration', minSilenceDuration);
-        
+
         // 添加ASR配置参数
         if (asrApiUrl) formData.append('asr_api_url', asrApiUrl);
         if (asrApiKey) formData.append('asr_api_key', asrApiKey);
@@ -94,8 +94,8 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>🎵 Silero VAD 自动分段转录工具</h1>
-        <p>使用Silero VAD进行语音活动检测，并结合ASR服务自动生成字幕文件</p>
+        <h1>🎵 Lazy ASR - 音频转录工具</h1>
+        <p>轻松上传音频文件，自动生成字幕文件</p>
       </header>
 
       <main className="App-main">
@@ -136,7 +136,7 @@ function App() {
             >
               {showAdvancedOptions ? '▼' : '▶'} 高级选项
             </button>
-            
+
             {showAdvancedOptions && (
               <div className="advanced-content">
                 <h3>VAD参数配置</h3>
@@ -154,7 +154,7 @@ function App() {
                   />
                   <small>设置语音段的最小持续时间，较短的语音段将被忽略</small>
                 </div>
-                
+
                 <div className="form-group">
                   <label htmlFor="minSilenceDuration">最小静音时长 (毫秒):</label>
                   <input
@@ -171,7 +171,7 @@ function App() {
                 </div>
 
                 <h3>ASR服务配置</h3>
-                
+
                 {/* Faster Whisper 配置 */}
                 {asrMethod === 'faster-whisper' && (
                   <div className="asr-config-section">
@@ -187,7 +187,7 @@ function App() {
                       />
                       <small>Faster Whisper API服务地址</small>
                     </div>
-                    
+
                     <div className="form-group">
                       <label htmlFor="asrApiKey">API Key (可选):</label>
                       <input
@@ -200,7 +200,7 @@ function App() {
                       />
                       <small>如果API需要认证，请输入API密钥</small>
                     </div>
-                    
+
                     <div className="form-group">
                       <label htmlFor="asrModel">模型名称:</label>
                       <input
@@ -215,7 +215,7 @@ function App() {
                     </div>
                   </div>
                 )}
-                
+
                 {/* Qwen ASR 配置 */}
                 {asrMethod === 'qwen-asr' && (
                   <div className="asr-config-section">
@@ -231,7 +231,7 @@ function App() {
                       />
                       <small>阿里云ASR服务地址 (固定)</small>
                     </div>
-                    
+
                     <div className="form-group">
                       <label htmlFor="asrApiKey">API Key:</label>
                       <input
@@ -244,7 +244,7 @@ function App() {
                       />
                       <small>阿里云DashScope API密钥</small>
                     </div>
-                    
+
                     <div className="form-group">
                       <label htmlFor="asrModel">模型选择:</label>
                       <select
@@ -289,7 +289,7 @@ function App() {
             <h2>处理结果</h2>
             <div className="result-content">
               <p>{result.message}</p>
-              
+
               {result.stats && (
                 <div className="stats">
                   <h3>📊 统计信息:</h3>
