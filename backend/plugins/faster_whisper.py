@@ -14,6 +14,8 @@ class FasterWhisperPlugin(ASRPlugin):
             description="Faster Whisper ASR service"
         )
         self.api_url = settings.FASTER_WHISPER_API_URL
+        self.api_key = settings.FASTER_WHISPER_API_KEY
+        self.model = settings.FASTER_WHISPER_MODEL
     
     def validate_config(self, config: Dict[str, Any]) -> bool:
         """Validate Faster Whisper configuration"""
@@ -46,17 +48,23 @@ class FasterWhisperPlugin(ASRPlugin):
             form_data.add_field('timestamp_granularities', 'segment')
             form_data.add_field('prompt', 'よろしくお願いします.')
             form_data.add_field('batch_size', '1')
-            form_data.add_field('model', 'Systran/faster-whisper-large-v2')
+            form_data.add_field('model', self.model)
             form_data.add_field('temperature', '0')
             form_data.add_field('response_format', 'text')
             form_data.add_field('hotwords', 'string')
             form_data.add_field('vad_filter', 'false')
+            
+            # Prepare headers
+            headers = {}
+            if self.api_key:
+                headers['Authorization'] = f'Bearer {self.api_key}'
             
             # Send the request with FormData
             async with aiohttp.ClientSession() as session:
                 async with session.post(
                     self.api_url,
                     data=form_data,
+                    headers=headers,
                     timeout=aiohttp.ClientTimeout(total=60)
                 ) as response:
                     response.raise_for_status()

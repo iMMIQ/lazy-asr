@@ -13,10 +13,11 @@ class QwenASRPlugin(ASRPlugin):
         )
         self.api_key = settings.QWEN_ASR_API_KEY
         self.model = settings.QWEN_ASR_MODEL
+        self.api_url = settings.QWEN_ASR_API_URL
     
     def validate_config(self, config: Dict[str, Any]) -> bool:
         """Validate Qwen ASR configuration"""
-        # Check if API key is provided
+        # Check if API key is provided (either from settings or dynamic config)
         return bool(self.api_key)
     
     async def transcribe_segment(self, segment_file: str, segment_info: Dict[str, Any]) -> Optional[List[str]]:
