@@ -1,17 +1,16 @@
 import os
 import uuid
-from typing import List, Dict, Any, Optional
-from ..core.config import settings
-from ..utils.audio_processing import (
+from typing import Dict, Any, Optional
+from app.core.config import settings
+from app.utils.audio_processing import (
     silero_vad_segmentation, 
     export_silero_segments,
     parse_transcription_segments,
     time_string_to_seconds,
-    format_timestamp_srt,
     generate_srt_content
 )
-from ...plugins.manager import plugin_manager
-from ..models.schemas import ASRResponse
+from plugins.manager import plugin_manager
+from app.models.schemas import ASRResponse
 
 
 class ASRService:

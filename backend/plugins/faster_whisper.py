@@ -1,8 +1,8 @@
 import aiohttp
 import asyncio
 from typing import List, Dict, Any, Optional
-from .base import ASRPlugin
-from ..app.core.config import settings
+from plugins.base import ASRPlugin
+from app.core.config import settings
 
 
 class FasterWhisperPlugin(ASRPlugin):

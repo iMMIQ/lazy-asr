@@ -1,8 +1,10 @@
-# Use Node 18 alpine image
-FROM node:18-alpine
+# Use Node 22 alpine image
+FROM node:22-alpine
 
 # Set working directory
 WORKDIR /app
+
+RUN npm config set registry https://registry.npmmirror.com/
 
 # Copy package files
 COPY package*.json ./

@@ -68,7 +68,7 @@
 
 3. 构建并启动服务:
    ```bash
-   docker-compose up --build
+   sudo docker compose up --build
    ```
 
 4. 访问应用:
@@ -87,7 +87,8 @@
 
 2. 运行后端服务:
    ```bash
-   uvicorn backend.app.main:app --reload
+   cd backend
+   uvicorn app.main:app --reload
    ```
 
 #### 前端开发

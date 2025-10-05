@@ -1,13 +1,13 @@
 import os
 import uuid
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, BackgroundTasks
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from fastapi.responses import FileResponse
 from typing import Optional
 import json
-from ..services.asr_service import ASRService
-from ...plugins.manager import plugin_manager
-from ..models.schemas import ASRRequest, ASRResponse
-from ..core.config import settings
+from app.services.asr_service import ASRService
+from plugins.manager import plugin_manager
+from app.models.schemas import ASRResponse
+from app.core.config import settings
 
 router = APIRouter()
 asr_service = ASRService()

@@ -1,8 +1,7 @@
 from typing import Dict, List, Optional
-from .base import ASRPlugin
-from .faster_whisper import FasterWhisperPlugin
-from .qwen_asr import QwenASRPlugin
-from ..app.core.config import settings
+from plugins.base import ASRPlugin
+from plugins.faster_whisper import FasterWhisperPlugin
+from plugins.qwen_asr import QwenASRPlugin
 
 
 class PluginManager:
