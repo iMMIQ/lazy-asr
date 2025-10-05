@@ -164,6 +164,12 @@ body {
   backdrop-filter: blur(10px);
 }
 
+/* 修复选择框选项的样式 */
+.form-group select option {
+  background: var(--card-bg);
+  color: var(--text-primary);
+}
+
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
