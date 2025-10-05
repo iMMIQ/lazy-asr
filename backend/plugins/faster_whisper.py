@@ -32,42 +32,41 @@ class FasterWhisperPlugin(ASRPlugin):
             List of transcription strings or None if failed
         """
         try:
-            # Prepare the request data
-            data = {
-                'stream': 'false',
-                'timestamp_granularities': 'segment',
-                'prompt': 'よろしくお願いします.',
-                'batch_size': '1',
-                'model': 'Systran/faster-whisper-large-v2',
-                'temperature': '0',
-                'response_format': 'text',
-                'hotwords': 'string',
-                'vad_filter': 'false'
-            }
+            # Create FormData for multipart upload
+            form_data = aiohttp.FormData()
             
-            # Send the request
+            # Read the audio file content and add to form data
+            with open(segment_file, 'rb') as audio_file:
+                filename = segment_file.split('/')[-1]
+                audio_content = audio_file.read()
+                form_data.add_field('file', audio_content, filename=filename, content_type='audio/wav')
+            
+            # Add other form fields
+            form_data.add_field('stream', 'false')
+            form_data.add_field('timestamp_granularities', 'segment')
+            form_data.add_field('prompt', 'よろしくお願いします.')
+            form_data.add_field('batch_size', '1')
+            form_data.add_field('model', 'Systran/faster-whisper-large-v2')
+            form_data.add_field('temperature', '0')
+            form_data.add_field('response_format', 'text')
+            form_data.add_field('hotwords', 'string')
+            form_data.add_field('vad_filter', 'false')
+            
+            # Send the request with FormData
             async with aiohttp.ClientSession() as session:
-                with open(segment_file, 'rb') as audio_file:
-                    filename = segment_file.split('/')[-1]
-                    files = {'file': (filename, audio_file, 'audio/wav')}
+                async with session.post(
+                    self.api_url,
+                    data=form_data,
+                    timeout=aiohttp.ClientTimeout(total=60)
+                ) as response:
+                    response.raise_for_status()
                     
-                    # Note: aiohttp doesn't support multipart file uploads with fields easily
-                    # We'll send as form data instead
-                    async with session.post(
-                        self.api_url,
-                        data=data,
-                        timeout=aiohttp.ClientTimeout(total=60)
-                    ) as response:
-                        response.raise_for_status()
-                        
-                        # Collect all lines from the streaming response
-                        segments = []
-                        async for line in response.content:
-                            line_str = line.decode('utf-8').strip()
-                            if line_str:
-                                segments.append(line_str)
-                        
-                        return segments if segments else None
+                    # Parse the response as plain text
+                    text = await response.text()
+                    text = text.strip()
+                    
+                    # Return as list with single text segment
+                    return [text] if text else None
                         
         except asyncio.TimeoutError:
             print(f"     ❌ Faster Whisper transcription timed out for segment {segment_info.get('index', 'unknown')}")
