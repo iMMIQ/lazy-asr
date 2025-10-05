@@ -120,21 +120,46 @@ class ASRService:
             successful_transcriptions = 0
             failed_segments = 0
             empty_segments = 0
+            failed_segments_details = []
             
             # 使用插件并发转录所有段
             transcription_results = await plugin.transcribe_segments(exported_segments)
             
             for i, result in enumerate(transcription_results):
-                segment_info = exported_segments[i]
+                # 使用result中的segment_info来获取正确的segment信息
+                segment_info = result.get('segment_info')
+                if not segment_info:
+                    # 如果result中没有segment_info，则使用索引查找
+                    segment_index = result.get('segment_index', i)
+                    if segment_index < len(exported_segments):
+                        segment_info = exported_segments[segment_index]
+                    else:
+                        print(f"   ❌ 无法找到对应的segment信息，索引: {segment_index}")
+                        failed_segments += 1
+                        continue
                 print(f"\n[{i+1}/{len(exported_segments)}] 处理语音段:")
                 print(f"   文件: {os.path.basename(segment_info['file_path'])}")
                 print(f"   时间: {segment_info['start_time']:.2f}s - {segment_info['end_time']:.2f}s")
                 print(f"   时长: {segment_info['duration']:.2f}s")
                 
                 if not result['success']:
-                    # 转录失败，跳过此段
-                    print(f"   ❌ 转录失败，跳过此段")
+                    # 转录失败，记录详细信息
+                    error_msg = result['error'] or "未知错误"
+                    error_type = result['error_type'] or "UnknownError"
+                    print(f"   ❌ 转录失败: {error_msg} (类型: {error_type})")
                     failed_segments += 1
+                    
+                    # 记录失败段的详细信息
+                    failed_segment_detail = {
+                        'index': segment_info['index'],
+                        'start_time': segment_info['start_time'],
+                        'end_time': segment_info['end_time'],
+                        'duration': segment_info['duration'],
+                        'file_path': segment_info['file_path'],
+                        'error': error_msg,
+                        'error_type': error_type
+                    }
+                    failed_segments_details.append(failed_segment_detail)
                     continue
                 
                 transcription = result['transcription']
@@ -196,6 +221,19 @@ class ASRService:
                 print(f"   无内容段数: {empty_segments}")
                 print(f"   总字幕数: {len(all_subtitles)}")
                 
+                # 显示失败段的详细信息
+                if failed_segments_details:
+                    print(f"\n🔍 失败段详细信息:")
+                    print("=" * 60)
+                    for failed_segment in failed_segments_details:
+                        print(f"   段 {failed_segment['index']+1}:")
+                        print(f"     时间: {failed_segment['start_time']:.2f}s - {failed_segment['end_time']:.2f}s")
+                        print(f"     时长: {failed_segment['duration']:.2f}s")
+                        print(f"     错误类型: {failed_segment['error_type']}")
+                        print(f"     错误信息: {failed_segment['error']}")
+                        print(f"     文件: {os.path.basename(failed_segment['file_path'])}")
+                        print()
+                
                 # 预览前几条字幕
                 preview_text = "🎯 字幕预览:\n" + "=" * 50 + "\n"
                 for i, subtitle in enumerate(all_subtitles[:5]):
@@ -208,14 +246,30 @@ class ASRService:
                     message=f"✅ 处理完成! SRT文件已保存: {output_srt_path}",
                     srt_file_path=output_srt_path,
                     segments=[s for s in all_subtitles[:10]],  # 只返回前10条字幕
-                    stats=stats
+                    stats=stats,
+                    failed_segments_details=failed_segments_details
                 )
             else:
                 error_msg = "❌ 没有生成任何字幕"
                 print(error_msg)
+                
+                # 显示失败段的详细信息
+                if failed_segments_details:
+                    print(f"\n🔍 失败段详细信息:")
+                    print("=" * 60)
+                    for failed_segment in failed_segments_details:
+                        print(f"   段 {failed_segment['index']+1}:")
+                        print(f"     时间: {failed_segment['start_time']:.2f}s - {failed_segment['end_time']:.2f}s")
+                        print(f"     时长: {failed_segment['duration']:.2f}s")
+                        print(f"     错误类型: {failed_segment['error_type']}")
+                        print(f"     错误信息: {failed_segment['error']}")
+                        print(f"     文件: {os.path.basename(failed_segment['file_path'])}")
+                        print()
+                
                 return ASRResponse(
                     success=False,
-                    message=error_msg
+                    message=error_msg,
+                    failed_segments_details=failed_segments_details
                 )
                 
         except Exception as e:

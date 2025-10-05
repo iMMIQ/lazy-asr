@@ -77,8 +77,10 @@ class FasterWhisperPlugin(ASRPlugin):
                     return [text] if text else None
                         
         except asyncio.TimeoutError:
-            print(f"     ❌ Faster Whisper transcription timed out for segment {segment_info.get('index', 'unknown')}")
-            return None
+            error_msg = f"Faster Whisper transcription timed out for segment {segment_info.get('index', 'unknown')}"
+            print(f"     ❌ {error_msg}")
+            raise Exception(error_msg)
         except Exception as e:
-            print(f"     ❌ Faster Whisper transcription failed: {e}")
-            return None
+            error_msg = f"Faster Whisper transcription failed: {str(e)}"
+            print(f"     ❌ {error_msg}")
+            raise Exception(error_msg)

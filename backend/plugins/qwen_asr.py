@@ -84,8 +84,10 @@ class QwenASRPlugin(ASRPlugin):
             return segments if segments else None
             
         except ImportError:
-            print("     ❌ DashScope SDK not installed. Please install with: pip install dashscope")
-            return None
+            error_msg = "DashScope SDK not installed. Please install with: pip install dashscope"
+            print(f"     ❌ {error_msg}")
+            raise Exception(error_msg)
         except Exception as e:
-            print(f"     ❌ Qwen ASR transcription failed: {e}")
-            return None
+            error_msg = f"Qwen ASR transcription failed: {str(e)}"
+            print(f"     ❌ {error_msg}")
+            raise Exception(error_msg)

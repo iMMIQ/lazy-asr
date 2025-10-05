@@ -23,12 +23,23 @@ class TranscriptionSegment(BaseModel):
     text: str
 
 
+class FailedSegment(BaseModel):
+    index: int
+    start_time: float
+    end_time: float
+    duration: float
+    file_path: str
+    error: str
+    error_type: Optional[str] = None
+
+
 class ASRResponse(BaseModel):
     success: bool
     message: str
     srt_file_path: Optional[str] = None
     segments: Optional[List[TranscriptionSegment]] = None
     stats: Optional[Dict[str, Any]] = None
+    failed_segments_details: Optional[List[FailedSegment]] = None
 
 
 class ProcessingStatus(BaseModel):

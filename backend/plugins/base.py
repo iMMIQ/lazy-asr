@@ -54,12 +54,12 @@ class ASRPlugin(ABC):
     async def transcribe_segments(self, segments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
         Transcribe multiple segments concurrently with concurrency control and progress bar
-        
+
         Args:
             segments: List of segment dictionaries
-            
+
         Returns:
-            List of transcription results
+            List of transcription results with detailed error information
         """
         semaphore = asyncio.Semaphore(settings.MAX_CONCURRENT_TASKS)
         
@@ -71,14 +71,20 @@ class ASRPlugin(ABC):
                         'segment_index': segment['index'],
                         'success': transcription is not None,
                         'error': None,
-                        'transcription': transcription
+                        'error_type': None,
+                        'transcription': transcription,
+                        'segment_info': segment  # Include full segment info for error reporting
                     }
                 except Exception as e:
+                    error_type = type(e).__name__
+                    error_message = str(e)
                     return {
                         'segment_index': segment['index'],
                         'success': False,
-                        'error': str(e),
-                        'transcription': None
+                        'error': error_message,
+                        'error_type': error_type,
+                        'transcription': None,
+                        'segment_info': segment  # Include full segment info for error reporting
                     }
         
         # Create progress bar
