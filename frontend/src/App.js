@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
+import ProgressPanel from './components/ProgressPanel';
 
 const API_BASE_URL = 'http://localhost:8000/api/v1';
 
@@ -17,6 +18,10 @@ function App() {
   const [asrApiUrl, setAsrApiUrl] = useState('');
   const [asrApiKey, setAsrApiKey] = useState('');
   const [asrModel, setAsrModel] = useState('');
+  
+  // Progress panel state
+  const [showProgressPanel, setShowProgressPanel] = useState(false);
+  const [currentTaskId, setCurrentTaskId] = useState(null);
 
   // Fetch available plugins on component mount
   useEffect(() => {
@@ -54,18 +59,19 @@ function App() {
     setIsProcessing(true);
     setError(null);
     setResult(null);
+    setShowProgressPanel(true);
 
     try {
       const formData = new FormData();
       formData.append('audio_file', audioFile);
       formData.append('asr_method', asrMethod);
 
-      // 添加VAD参数
+      // Add VAD parameters
       if (showAdvancedOptions) {
         formData.append('min_speech_duration', minSpeechDuration);
         formData.append('min_silence_duration', minSilenceDuration);
 
-        // 添加ASR配置参数
+        // Add ASR configuration parameters
         if (asrApiUrl) formData.append('asr_api_url', asrApiUrl);
         if (asrApiKey) formData.append('asr_api_key', asrApiKey);
         if (asrModel) formData.append('asr_model', asrModel);
@@ -77,10 +83,16 @@ function App() {
         },
       });
 
+      // Set task ID for WebSocket connection
+      if (response.data.task_id) {
+        setCurrentTaskId(response.data.task_id);
+      }
+
       setResult(response.data);
     } catch (err) {
       console.error('Processing failed:', err);
       setError(err.response?.data?.detail || '处理失败');
+      setShowProgressPanel(false);
     } finally {
       setIsProcessing(false);
     }
@@ -89,6 +101,11 @@ function App() {
   const handleDownload = (filePath) => {
     const downloadUrl = `${API_BASE_URL}/asr/download/${encodeURIComponent(filePath)}`;
     window.open(downloadUrl, '_blank');
+  };
+
+  const handleCloseProgressPanel = () => {
+    setShowProgressPanel(false);
+    setCurrentTaskId(null);
   };
 
   return (
@@ -127,7 +144,7 @@ function App() {
             </select>
           </div>
 
-          {/* 高级选项 */}
+          {/* Advanced Options */}
           <div className="advanced-options">
             <button
               type="button"
@@ -172,7 +189,7 @@ function App() {
 
                 <h3>ASR服务配置</h3>
 
-                {/* Faster Whisper 配置 */}
+                {/* Faster Whisper Configuration */}
                 {asrMethod === 'faster-whisper' && (
                   <div className="asr-config-section">
                     <div className="form-group">
@@ -216,7 +233,7 @@ function App() {
                   </div>
                 )}
 
-                {/* Qwen ASR 配置 */}
+                {/* Qwen ASR Configuration */}
                 {asrMethod === 'qwen-asr' && (
                   <div className="asr-config-section">
                     <div className="form-group">
@@ -278,7 +295,7 @@ function App() {
           </div>
         )}
 
-        {isProcessing && (
+        {isProcessing && !showProgressPanel && (
           <div className="processing-indicator">
             <p>正在处理音频文件，请稍候...</p>
           </div>
@@ -333,6 +350,13 @@ function App() {
           </div>
         )}
       </main>
+
+      {/* Progress Panel */}
+      <ProgressPanel
+        taskId={currentTaskId}
+        isVisible={showProgressPanel}
+        onClose={handleCloseProgressPanel}
+      />
     </div>
   );
 }

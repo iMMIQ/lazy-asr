@@ -1,6 +1,6 @@
 import os
 import uuid
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse
 from typing import Optional
 import json
@@ -36,10 +36,11 @@ async def process_audio(
     min_silence_duration: Optional[int] = Form(None),
     asr_api_url: Optional[str] = Form(None),
     asr_api_key: Optional[str] = Form(None),
-    asr_model: Optional[str] = Form(None)
+    asr_model: Optional[str] = Form(None),
+    task_id: Optional[str] = Form(None)
 ):
     """
-    Process audio file through ASR pipeline
+    Process audio file through ASR pipeline with real-time progress updates
     
     Args:
         audio_file: Audio file to process
@@ -48,6 +49,7 @@ async def process_audio(
         asr_options: ASR options as JSON string
         min_speech_duration: Minimum speech duration in milliseconds
         min_silence_duration: Minimum silence duration in milliseconds
+        task_id: Task ID for WebSocket communication (optional, will be generated if not provided)
     """
     try:
         # Validate ASR method
@@ -82,8 +84,11 @@ async def process_audio(
             if min_silence_duration is not None:
                 parsed_vad_options['min_silence_duration_ms'] = min_silence_duration
         
+        # Generate task ID if not provided
+        if not task_id:
+            task_id = str(uuid.uuid4())
+        
         # Save uploaded file
-        task_id = str(uuid.uuid4())
         upload_dir = os.path.join(settings.UPLOAD_DIR, task_id)
         os.makedirs(upload_dir, exist_ok=True)
         
@@ -92,7 +97,7 @@ async def process_audio(
             content = await audio_file.read()
             buffer.write(content)
         
-        # Process audio
+        # Process audio with real-time progress updates
         result = await asr_service.process_audio(
             audio_path=file_path,
             asr_method=asr_method,
@@ -100,8 +105,12 @@ async def process_audio(
             asr_options=parsed_asr_options,
             asr_api_url=asr_api_url,
             asr_api_key=asr_api_key,
-            asr_model=asr_model
+            asr_model=asr_model,
+            task_id=task_id
         )
+        
+        # Add task_id to response for WebSocket connection
+        result.task_id = task_id
         
         return result
         

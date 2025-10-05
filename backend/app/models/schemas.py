@@ -29,6 +29,7 @@ class ASRResponse(BaseModel):
     srt_file_path: Optional[str] = None
     segments: Optional[List[TranscriptionSegment]] = None
     stats: Optional[Dict[str, Any]] = None
+    task_id: Optional[str] = None
 
 
 class ProcessingStatus(BaseModel):

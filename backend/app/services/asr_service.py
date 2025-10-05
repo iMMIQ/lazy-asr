@@ -11,6 +11,7 @@ from app.utils.audio_processing import (
 )
 from plugins.manager import plugin_manager
 from app.models.schemas import ASRResponse
+from app.api.websocket import ProgressPublisher
 
 
 class ASRService:
@@ -27,81 +28,119 @@ class ASRService:
                            asr_options: Optional[Dict[str, Any]] = None,
                            asr_api_url: Optional[str] = None,
                            asr_api_key: Optional[str] = None,
-                           asr_model: Optional[str] = None) -> ASRResponse:
+                           asr_model: Optional[str] = None,
+                           task_id: Optional[str] = None) -> ASRResponse:
         """
-        Process audio file through the complete ASR pipeline
+        Process audio file through the complete ASR pipeline with real-time progress updates
         
         Args:
             audio_path: Path to the audio file
             asr_method: ASR method to use
             vad_options: VAD options
             asr_options: ASR options
+            task_id: Task ID for WebSocket communication
             
         Returns:
             ASRResponse with results
         """
+        # Create task ID if not provided
+        if not task_id:
+            task_id = str(uuid.uuid4())
+        
+        # Create progress publisher for WebSocket updates
+        progress_publisher = ProgressPublisher(task_id)
+        
         try:
-            print(f"🚀 开始Silero VAD自动分段转录流程")
-            print("=" * 60)
-            print(f"ASR方法: {asr_method}")
-            print(f"输出目录: {self.output_dir}")
+            # Send initial progress update
+            await progress_publisher.send_progress(
+                step="initialization",
+                message="🚀 Starting Silero VAD automatic segmentation transcription process",
+                progress=0.0
+            )
             
-            # 检查文件是否存在
+            await progress_publisher.send_log("info", f"ASR Method: {asr_method}")
+            await progress_publisher.send_log("info", f"Output Directory: {self.output_dir}")
+            
+            # Check if file exists
             if not os.path.exists(audio_path):
-                print(f"❌ 音频文件不存在: {audio_path}")
+                error_msg = f"❌ Audio file does not exist: {audio_path}"
+                await progress_publisher.send_error(error_msg)
                 return ASRResponse(
                     success=False,
-                    message="❌ 音频文件不存在"
+                    message=error_msg
                 )
             
-            # 创建任务ID和输出目录
-            task_id = str(uuid.uuid4())
+            # Create task output directory
             task_output_dir = os.path.join(self.output_dir, task_id)
             os.makedirs(task_output_dir, exist_ok=True)
             
-            # 1. Silero VAD检测分段
+            # 1. Silero VAD speech segmentation
+            await progress_publisher.send_progress(
+                step="vad_detection",
+                message="🔍 Performing Silero VAD speech detection and segmentation",
+                progress=10.0
+            )
+            
             try:
                 speech_timestamps, audio_data, sample_rate = silero_vad_segmentation(
                     audio_path, vad_options or {}
                 )
+                await progress_publisher.send_log("info", f"VAD detected {len(speech_timestamps)} speech segments")
             except Exception as e:
-                print(f"❌ Silero VAD检测失败: {e}")
+                error_msg = f"❌ Silero VAD detection failed: {e}"
+                await progress_publisher.send_error(error_msg)
                 return ASRResponse(
                     success=False,
-                    message=f"❌ Silero VAD检测失败: {e}"
+                    message=error_msg
                 )
             
             if not speech_timestamps:
-                print("❌ 未检测到任何语音段")
+                error_msg = "❌ No speech segments detected"
+                await progress_publisher.send_error(error_msg)
                 return ASRResponse(
                     success=False,
-                    message="❌ 未检测到任何语音段"
+                    message=error_msg
                 )
             
-            # 2. 导出分段音频
-            print(f"\n📁 导出语音段文件...")
+            # 2. Export segmented audio files
+            await progress_publisher.send_progress(
+                step="segment_export",
+                message="📁 Exporting speech segment files",
+                progress=30.0
+            )
+            
             segments_output_dir = os.path.join(task_output_dir, "silero_segments")
             exported_segments = export_silero_segments(
                 speech_timestamps, audio_data, sample_rate, segments_output_dir
             )
             
             if not exported_segments:
-                print("❌ 没有可导出的语音段")
+                error_msg = "❌ No speech segments available for export"
+                await progress_publisher.send_error(error_msg)
                 return ASRResponse(
                     success=False,
-                    message="❌ 没有可导出的语音段"
+                    message=error_msg
                 )
             
-            # 3. 获取ASR插件
+            await progress_publisher.send_log("info", f"Exported {len(exported_segments)} segment files")
+            
+            # 3. Get ASR plugin
+            await progress_publisher.send_progress(
+                step="plugin_setup",
+                message="🔧 Setting up ASR plugin",
+                progress=40.0
+            )
+            
             plugin = plugin_manager.get_plugin(asr_method)
             if not plugin:
-                print(f"❌ 不支持的ASR方法: {asr_method}")
+                error_msg = f"❌ Unsupported ASR method: {asr_method}"
+                await progress_publisher.send_error(error_msg)
                 return ASRResponse(
                     success=False,
-                    message=f"❌ 不支持的ASR方法: {asr_method}"
+                    message=error_msg
                 )
             
-            # 更新插件配置
+            # Update plugin configuration
             plugin_config = {}
             if asr_api_url:
                 plugin_config['api_url'] = asr_api_url
@@ -112,39 +151,55 @@ class ASRService:
             
             if plugin_config:
                 plugin.update_config(plugin_config)
-                print(f"🔧 更新插件配置: {plugin_config}")
+                await progress_publisher.send_log("info", f"Updated plugin configuration: {plugin_config}")
             
-            # 4. 并发转录
-            print(f"\n🎯 开始并发转录...")
+            # 4. Concurrent transcription
+            await progress_publisher.send_progress(
+                step="transcription",
+                message="🎯 Starting concurrent transcription of segments",
+                progress=50.0
+            )
+            
             all_subtitles = []
             successful_transcriptions = 0
             failed_segments = 0
             empty_segments = 0
             
-            # 使用插件并发转录所有段
+            # Use plugin to transcribe all segments concurrently
             transcription_results = await plugin.transcribe_segments(exported_segments)
             
             for i, result in enumerate(transcription_results):
                 segment_info = exported_segments[i]
-                print(f"\n[{i+1}/{len(exported_segments)}] 处理语音段:")
-                print(f"   文件: {os.path.basename(segment_info['file_path'])}")
-                print(f"   时间: {segment_info['start_time']:.2f}s - {segment_info['end_time']:.2f}s")
-                print(f"   时长: {segment_info['duration']:.2f}s")
+                segment_progress = 50.0 + (i / len(exported_segments)) * 40.0
+                
+                # Send segment processing update
+                await progress_publisher.send_progress(
+                    step="transcription",
+                    message=f"Processing segment {i+1}/{len(exported_segments)}",
+                    progress=segment_progress,
+                    details={
+                        "current_segment": i + 1,
+                        "total_segments": len(exported_segments),
+                        "segment_file": os.path.basename(segment_info['file_path']),
+                        "segment_time": f"{segment_info['start_time']:.2f}s - {segment_info['end_time']:.2f}s",
+                        "segment_duration": f"{segment_info['duration']:.2f}s"
+                    }
+                )
                 
                 if not result['success']:
-                    # 转录失败，跳过此段
-                    print(f"   ❌ 转录失败，跳过此段")
+                    # Transcription failed, skip this segment
+                    await progress_publisher.send_log("error", f"Segment {i+1} transcription failed, skipping")
                     failed_segments += 1
                     continue
                 
                 transcription = result['transcription']
                 if transcription is None:
-                    # 转录无内容，跳过此段
-                    print(f"   ⚠️ 转录无内容，跳过此段")
+                    # Transcription has no content, skip this segment
+                    await progress_publisher.send_log("warning", f"Segment {i+1} has no transcription content, skipping")
                     empty_segments += 1
                     continue
                 
-                # 解析转录结果
+                # Parse transcription results
                 adjusted_subtitles = parse_transcription_segments(
                     transcription, 
                     segment_info['start_time'], 
@@ -154,20 +209,26 @@ class ASRService:
                 if adjusted_subtitles:
                     all_subtitles.extend(adjusted_subtitles)
                     successful_transcriptions += 1
-                    print(f"   ✅ 成功添加 {len(adjusted_subtitles)} 条字幕")
+                    await progress_publisher.send_log("success", f"Segment {i+1} successfully added {len(adjusted_subtitles)} subtitles")
                     
-                    # 显示第一条字幕预览
+                    # Show preview of first subtitle
                     if adjusted_subtitles:
                         first_sub = adjusted_subtitles[0]
                         preview_text = first_sub['text'][:50] + "..." if len(first_sub['text']) > 50 else first_sub['text']
-                        print(f"   预览: {preview_text}")
+                        await progress_publisher.send_log("info", f"Segment {i+1} preview: {preview_text}")
                 else:
-                    print(f"   ⚠️ 转录无内容，跳过此段")
+                    await progress_publisher.send_log("warning", f"Segment {i+1} has no transcription content, skipping")
                     empty_segments += 1
             
-            # 5. 生成SRT文件
+            # 5. Generate SRT file
+            await progress_publisher.send_progress(
+                step="srt_generation",
+                message="💾 Generating SRT subtitle file",
+                progress=95.0
+            )
+            
             if all_subtitles:
-                # 按时间排序字幕
+                # Sort subtitles by time
                 all_subtitles.sort(key=lambda x: time_string_to_seconds(x['start'].replace(',', '.')))
                 
                 srt_content = generate_srt_content(all_subtitles)
@@ -178,7 +239,7 @@ class ASRService:
                 with open(output_srt_path, 'w', encoding='utf-8') as f:
                     f.write(srt_content)
                 
-                # 生成统计信息
+                # Generate statistics
                 stats = {
                     "total_segments": len(exported_segments),
                     "successful_transcriptions": successful_transcriptions,
@@ -187,40 +248,51 @@ class ASRService:
                     "total_subtitles": len(all_subtitles)
                 }
                 
-                print(f"\n✅ 处理完成!")
-                print(f"💾 SRT文件已保存: {output_srt_path}")
-                print(f"📊 统计信息:")
-                print(f"   总语音段数: {len(exported_segments)}")
-                print(f"   成功转录段数: {successful_transcriptions}")
-                print(f"   失败段数: {failed_segments}")
-                print(f"   无内容段数: {empty_segments}")
-                print(f"   总字幕数: {len(all_subtitles)}")
+                # Send completion message
+                await progress_publisher.send_progress(
+                    step="completion",
+                    message="✅ Processing completed successfully!",
+                    progress=100.0,
+                    details=stats
+                )
                 
-                # 预览前几条字幕
-                preview_text = "🎯 字幕预览:\n" + "=" * 50 + "\n"
-                for i, subtitle in enumerate(all_subtitles[:5]):
-                    preview_text += f"{i+1}\n"
-                    preview_text += f"{subtitle['start']} --> {subtitle['end']}\n"
-                    preview_text += f"{subtitle['text']}\n\n"
+                await progress_publisher.send_log("success", f"SRT file saved: {output_srt_path}")
+                await progress_publisher.send_log("info", f"Statistics: Total segments: {len(exported_segments)}, "
+                                                       f"Successful: {successful_transcriptions}, "
+                                                       f"Failed: {failed_segments}, "
+                                                       f"Empty: {empty_segments}, "
+                                                       f"Total subtitles: {len(all_subtitles)}")
+                
+                # Send completion result
+                result_data = {
+                    "success": True,
+                    "message": f"✅ Processing completed! SRT file saved: {output_srt_path}",
+                    "srt_file_path": output_srt_path,
+                    "segments": [s for s in all_subtitles[:10]],  # Only return first 10 subtitles
+                    "stats": stats
+                }
+                
+                await progress_publisher.send_completion(result_data)
                 
                 return ASRResponse(
                     success=True,
-                    message=f"✅ 处理完成! SRT文件已保存: {output_srt_path}",
+                    message=f"✅ Processing completed! SRT file saved: {output_srt_path}",
                     srt_file_path=output_srt_path,
-                    segments=[s for s in all_subtitles[:10]],  # 只返回前10条字幕
+                    segments=[s for s in all_subtitles[:10]],
                     stats=stats
                 )
             else:
-                error_msg = "❌ 没有生成任何字幕"
-                print(error_msg)
+                error_msg = "❌ No subtitles generated"
+                await progress_publisher.send_error(error_msg)
                 return ASRResponse(
                     success=False,
                     message=error_msg
                 )
                 
         except Exception as e:
-            print(f"❌ 处理过程中发生错误: {e}")
+            error_msg = f"❌ Error occurred during processing: {e}"
+            await progress_publisher.send_error(error_msg)
             return ASRResponse(
                 success=False,
-                message=f"❌ 处理过程中发生错误: {e}"
+                message=error_msg
             )
