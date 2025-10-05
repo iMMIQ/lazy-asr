@@ -114,14 +114,14 @@ class ASRService:
                 plugin.update_config(plugin_config)
                 print(f"🔧 更新插件配置: {plugin_config}")
             
-            # 4. 逐段转录
-            print(f"\n🎯 开始逐段转录...")
+            # 4. 并发转录
+            print(f"\n🎯 开始并发转录...")
             all_subtitles = []
             successful_transcriptions = 0
             failed_segments = 0
             empty_segments = 0
             
-            # 使用插件转录所有段
+            # 使用插件并发转录所有段
             transcription_results = await plugin.transcribe_segments(exported_segments)
             
             for i, result in enumerate(transcription_results):

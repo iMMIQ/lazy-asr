@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     QWEN_ASR_API_URL: str = "https://dashscope.aliyuncs.com/api/v1/services/aigc/audio/asr"  # 阿里云ASR API URL (只读)
     QWEN_ASR_AVAILABLE_MODELS: list = ["qwen3-asr-flash"]  # 阿里云可选的模型列表
     
+    # Concurrency settings
+    MAX_CONCURRENT_TASKS: int = 16  # Maximum concurrent transcription tasks
+    
     class Config:
         env_file = ".env"
 

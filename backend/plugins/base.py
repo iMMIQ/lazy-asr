@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any, Optional
 import asyncio
+from tqdm import tqdm
+from app.core.config import settings
 
 
 class ASRPlugin(ABC):
@@ -51,7 +53,7 @@ class ASRPlugin(ABC):
     
     async def transcribe_segments(self, segments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
-        Transcribe multiple segments concurrently
+        Transcribe multiple segments concurrently with concurrency control and progress bar
         
         Args:
             segments: List of segment dictionaries
@@ -59,28 +61,54 @@ class ASRPlugin(ABC):
         Returns:
             List of transcription results
         """
+        semaphore = asyncio.Semaphore(settings.MAX_CONCURRENT_TASKS)
+        
+        async def transcribe_with_semaphore(segment: Dict[str, Any]) -> Dict[str, Any]:
+            async with semaphore:
+                try:
+                    transcription = await self.transcribe_segment(segment['file_path'], segment)
+                    return {
+                        'segment_index': segment['index'],
+                        'success': transcription is not None,
+                        'error': None,
+                        'transcription': transcription
+                    }
+                except Exception as e:
+                    return {
+                        'segment_index': segment['index'],
+                        'success': False,
+                        'error': str(e),
+                        'transcription': None
+                    }
+        
+        # Create progress bar
+        print(f"\n🎯 开始并发转录 (最大并发数: {settings.MAX_CONCURRENT_TASKS})...")
+        progress_bar = tqdm(
+            total=len(segments),
+            desc="转录进度",
+            unit="段",
+            bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]"
+        )
+        
+        # Process segments with concurrency control
         tasks = []
         for segment in segments:
-            task = self.transcribe_segment(segment['file_path'], segment)
+            task = asyncio.create_task(transcribe_with_semaphore(segment))
+            task.add_done_callback(lambda _: progress_bar.update(1))
             tasks.append(task)
         
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        # Wait for all tasks to complete
+        results = await asyncio.gather(*tasks)
         
-        transcriptions = []
-        for i, result in enumerate(results):
-            if isinstance(result, Exception):
-                transcriptions.append({
-                    'segment_index': segments[i]['index'],
-                    'success': False,
-                    'error': str(result),
-                    'transcription': None
-                })
-            else:
-                transcriptions.append({
-                    'segment_index': segments[i]['index'],
-                    'success': result is not None,
-                    'error': None,
-                    'transcription': result
-                })
+        # Close progress bar
+        progress_bar.close()
         
-        return transcriptions
+        # Print summary statistics
+        successful = sum(1 for r in results if r['success'])
+        failed = sum(1 for r in results if not r['success'])
+        
+        print(f"\n📊 转录统计:")
+        print(f"   成功: {successful}/{len(segments)} 段")
+        print(f"   失败: {failed}/{len(segments)} 段")
+        
+        return results
