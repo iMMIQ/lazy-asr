@@ -2,6 +2,7 @@ from typing import Dict, List, Optional
 from plugins.base import ASRPlugin
 from plugins.faster_whisper import FasterWhisperPlugin
 from plugins.qwen_asr import QwenASRPlugin
+from plugins.local_whisper import LocalWhisperPlugin
 
 
 class PluginManager:
@@ -20,6 +21,10 @@ class PluginManager:
         # Load Qwen ASR plugin
         qwen_asr_plugin = QwenASRPlugin()
         self.plugins[qwen_asr_plugin.name] = qwen_asr_plugin
+
+        # Load Local Whisper plugin
+        local_whisper_plugin = LocalWhisperPlugin()
+        self.plugins[local_whisper_plugin.name] = local_whisper_plugin
 
     def get_plugin(self, name: str) -> Optional[ASRPlugin]:
         """Get a plugin by name"""

@@ -23,9 +23,12 @@ async def health_check():
 
 @router.get("/plugins")
 async def get_available_plugins():
-    """Get list of available ASR plugins"""
+    """Get list of available ASR plugins and default method"""
     plugins = plugin_manager.get_available_plugins()
-    return {"plugins": plugins}
+    return {
+        "plugins": plugins,
+        "default_method": settings.DEFAULT_ASR_METHOD
+    }
 
 
 @router.post("/process", response_model=ASRResponse)
