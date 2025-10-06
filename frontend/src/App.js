@@ -8,7 +8,7 @@ const API_BASE_URL = 'http://localhost:8000/api/v1';
 function App() {
   const { t, i18n } = useTranslation();
   const [audioFiles, setAudioFiles] = useState([]);
-  const [asrMethod, setAsrMethod] = useState('faster-whisper');
+  const [asrMethod, setAsrMethod] = useState('');
   const [availablePlugins, setAvailablePlugins] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState(null);
@@ -31,7 +31,17 @@ function App() {
   const fetchAvailablePlugins = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/asr/plugins`);
-      setAvailablePlugins(response.data.plugins);
+      const plugins = response.data.plugins;
+      const defaultMethod = response.data.default_method;
+      setAvailablePlugins(plugins);
+      
+      // Set the default method from backend configuration
+      if (defaultMethod && plugins.includes(defaultMethod)) {
+        setAsrMethod(defaultMethod);
+      } else if (plugins.length > 0 && !asrMethod) {
+        // Fallback to first plugin if default is not available
+        setAsrMethod(plugins[0]);
+      }
     } catch (err) {
       console.error('Failed to fetch plugins:', err);
       setError('Failed to fetch available ASR methods');
@@ -494,9 +504,9 @@ function App() {
                   <div className="segments-list">
                     {result.segments.map((segment, index) => (
                       <div key={index} className="segment-item">
-                        <div className="segment-time">
-                          {segment.start} --> {segment.end}
-                        </div>
+                  <div className="segment-time">
+                    {segment.start} --> {segment.end}
+                  </div>
                         <div className="segment-text">
                           {segment.text}
                         </div>
