@@ -5,11 +5,12 @@ import './App.css';
 const API_BASE_URL = 'http://localhost:8000/api/v1';
 
 function App() {
-  const [audioFile, setAudioFile] = useState(null);
+  const [audioFiles, setAudioFiles] = useState([]);
   const [asrMethod, setAsrMethod] = useState('faster-whisper');
   const [availablePlugins, setAvailablePlugins] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState(null);
+  const [multiFileResult, setMultiFileResult] = useState(null);
   const [error, setError] = useState(null);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [minSpeechDuration, setMinSpeechDuration] = useState(500);
@@ -35,30 +36,39 @@ function App() {
   };
 
   const handleFileChange = (event) => {
-    setAudioFile(event.target.files[0]);
+    const files = Array.from(event.target.files);
+    setAudioFiles(files);
     setError(null);
     setResult(null);
+    setMultiFileResult(null);
+  };
+
+  const removeFile = (index) => {
+    const newFiles = [...audioFiles];
+    newFiles.splice(index, 1);
+    setAudioFiles(newFiles);
   };
 
   const handleMethodChange = (event) => {
     setAsrMethod(event.target.value);
   };
 
-  const handleSubmit = async (event) => {
+  const handleSingleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!audioFile) {
-      setError('请选择音频文件');
+    if (audioFiles.length !== 1) {
+      setError('请选择单个音频文件');
       return;
     }
 
     setIsProcessing(true);
     setError(null);
     setResult(null);
+    setMultiFileResult(null);
 
     try {
       const formData = new FormData();
-      formData.append('audio_file', audioFile);
+      formData.append('audio_file', audioFiles[0]);
       formData.append('asr_method', asrMethod);
       
       // Add output formats
@@ -85,6 +95,61 @@ function App() {
     } catch (err) {
       console.error('Processing failed:', err);
       setError(err.response?.data?.detail || '处理失败');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleMultipleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (audioFiles.length === 0) {
+      setError('请选择音频文件');
+      return;
+    }
+
+    if (audioFiles.length > 10) {
+      setError('一次最多处理10个文件');
+      return;
+    }
+
+    setIsProcessing(true);
+    setError(null);
+    setResult(null);
+    setMultiFileResult(null);
+
+    try {
+      const formData = new FormData();
+      
+      // Add all files
+      audioFiles.forEach(file => {
+        formData.append('audio_files', file);
+      });
+      
+      formData.append('asr_method', asrMethod);
+      formData.append('output_formats', outputFormats.join(','));
+
+      // 添加VAD参数
+      if (showAdvancedOptions) {
+        formData.append('min_speech_duration', minSpeechDuration);
+        formData.append('min_silence_duration', minSilenceDuration);
+
+        // 添加ASR配置参数
+        if (asrApiUrl) formData.append('asr_api_url', asrApiUrl);
+        if (asrApiKey) formData.append('asr_api_key', asrApiKey);
+        if (asrModel) formData.append('asr_model', asrModel);
+      }
+
+      const response = await axios.post(`${API_BASE_URL}/asr/process-multiple`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      setMultiFileResult(response.data);
+    } catch (err) {
+      console.error('Batch processing failed:', err);
+      setError(err.response?.data?.detail || '批量处理失败');
     } finally {
       setIsProcessing(false);
     }
@@ -120,17 +185,40 @@ function App() {
       </header>
 
       <main className="App-main">
-        <form onSubmit={handleSubmit} className="processing-form">
+        <div className="processing-form">
           <div className="form-group">
             <label htmlFor="audioFile">上传音频文件:</label>
             <input
               type="file"
               id="audioFile"
               accept="audio/*"
+              multiple
               onChange={handleFileChange}
               disabled={isProcessing}
             />
+            <small>支持多文件上传，最多10个文件</small>
           </div>
+
+          {audioFiles.length > 0 && (
+            <div className="file-list">
+              <h4>已选择的文件 ({audioFiles.length}个):</h4>
+              <ul>
+                {audioFiles.map((file, index) => (
+                  <li key={index} className="file-item">
+                    <span>{file.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeFile(index)}
+                      disabled={isProcessing}
+                      className="remove-file-btn"
+                    >
+                      ✕
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="form-group">
             <label htmlFor="asrMethod">选择ASR服务:</label>
@@ -305,14 +393,26 @@ function App() {
             )}
           </div>
 
-          <button
-            type="submit"
-            className="process-button"
-            disabled={isProcessing || !audioFile}
-          >
-            {isProcessing ? '🚀 处理中...' : '🚀 开始处理'}
-          </button>
-        </form>
+          <div className="submit-buttons">
+            <button
+              type="button"
+              onClick={handleSingleSubmit}
+              className="process-button"
+              disabled={isProcessing || audioFiles.length !== 1}
+            >
+              {isProcessing ? '🚀 处理中...' : '🚀 处理单个文件'}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleMultipleSubmit}
+              className="process-button multiple"
+              disabled={isProcessing || audioFiles.length === 0}
+            >
+              {isProcessing ? '🚀 批量处理中...' : `🚀 批量处理 (${audioFiles.length}个文件)`}
+            </button>
+          </div>
+        </div>
 
         {error && (
           <div className="error-message">
@@ -399,6 +499,73 @@ function App() {
                   💾 下载SRT文件
                 </button>
               )}
+            </div>
+          </div>
+        )}
+
+        {multiFileResult && (
+          <div className="result-section">
+            <h2>批量处理结果</h2>
+            <div className="result-content">
+              <p>{multiFileResult.message}</p>
+
+              {multiFileResult.overall_stats && (
+                <div className="stats">
+                  <h3>📊 总体统计信息:</h3>
+                  <ul>
+                    <li>总文件数: {multiFileResult.overall_stats.total_files}</li>
+                    <li>成功处理文件数: {multiFileResult.overall_stats.successful_files}</li>
+                    <li>失败文件数: {multiFileResult.overall_stats.failed_files}</li>
+                    <li>总字幕数: {multiFileResult.overall_stats.total_subtitles}</li>
+                    <li>总语音段数: {multiFileResult.overall_stats.total_segments}</li>
+                  </ul>
+                </div>
+              )}
+
+              <div className="file-results">
+                <h3>📄 文件处理详情:</h3>
+                {multiFileResult.file_results.map((fileResult, index) => (
+                  <div key={index} className={`file-result ${fileResult.success ? 'success' : 'error'}`}>
+                    <h4>
+                      {fileResult.success ? '✅' : '❌'} {fileResult.filename}
+                    </h4>
+                    <p>{fileResult.message}</p>
+                    
+                    {fileResult.success && fileResult.output_files && (
+                      <div className="file-download-buttons">
+                        {Object.entries(fileResult.output_files).map(([format, filePath]) => (
+                          <button
+                            key={format}
+                            onClick={() => handleDownload(filePath)}
+                            className="download-button small"
+                          >
+                            💾 {format.toUpperCase()}
+                          </button>
+                        ))}
+                        {fileResult.task_id && (
+                          <button
+                            onClick={() => handleBundleDownload(fileResult.task_id)}
+                            className="download-button small bundle"
+                          >
+                            📦 打包
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    
+                    {fileResult.stats && (
+                      <div className="file-stats">
+                        <small>
+                          字幕数: {fileResult.stats.total_subtitles} | 
+                          语音段: {fileResult.stats.total_segments} | 
+                          成功: {fileResult.stats.successful_transcriptions} | 
+                          失败: {fileResult.stats.failed_segments}
+                        </small>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}

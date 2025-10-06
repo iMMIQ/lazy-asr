@@ -201,6 +201,14 @@ body {
   background: rgba(102, 126, 234, 0.05);
 }
 
+/* Submit Buttons Group */
+.submit-buttons {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  margin-top: var(--space-xl);
+}
+
 /* Process Button Styling */
 .process-button {
   background: var(--primary-gradient);
@@ -215,6 +223,12 @@ body {
   box-shadow: var(--shadow-md);
   position: relative;
   overflow: hidden;
+  flex: 1;
+  min-width: 200px;
+}
+
+.process-button.multiple {
+  background: var(--secondary-gradient);
 }
 
 .process-button::before {
@@ -696,6 +710,139 @@ body {
   }
 }
 
+/* File List Styling */
+.file-list {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin: var(--space-md) 0;
+}
+
+.file-list h4 {
+  margin-bottom: var(--space-md);
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
+
+.file-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-sm);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-fast);
+}
+
+.file-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--border-light);
+}
+
+.file-item:last-child {
+  margin-bottom: 0;
+}
+
+.file-item span {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  flex: 1;
+}
+
+.remove-file-btn {
+  background: rgba(245, 101, 101, 0.1);
+  color: #fed7d7;
+  border: 1px solid rgba(245, 101, 101, 0.3);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.remove-file-btn:hover:not(:disabled) {
+  background: rgba(245, 101, 101, 0.2);
+  border-color: rgba(245, 101, 101, 0.5);
+  transform: scale(1.1);
+}
+
+.remove-file-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* File Results Styling */
+.file-results {
+  margin-top: var(--space-xl);
+}
+
+.file-result {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
+  transition: all var(--transition-fast);
+}
+
+.file-result.success {
+  border-left: 4px solid #48bb78;
+}
+
+.file-result.error {
+  border-left: 4px solid #f56565;
+}
+
+.file-result h4 {
+  margin: 0 0 var(--space-sm) 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.file-result p {
+  margin: 0 0 var(--space-md) 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.file-download-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.download-button.small {
+  padding: var(--space-sm) var(--space-md);
+  font-size: 0.8rem;
+  margin-top: 0;
+}
+
+.download-button.small.bundle {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+}
+
+.file-stats {
+  margin-top: var(--space-sm);
+}
+
+.file-stats small {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
 /* Scrollbar Styling */
 .segments-list::-webkit-scrollbar {
   width: 6px;
@@ -713,4 +860,15 @@ body {
 
 .segments-list::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
+}
+
+/* Responsive adjustments for submit buttons */
+@media (max-width: 768px) {
+  .submit-buttons {
+    flex-direction: column;
+  }
+  
+  .process-button {
+    min-width: auto;
+  }
 }

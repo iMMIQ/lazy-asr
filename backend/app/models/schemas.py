@@ -44,6 +44,32 @@ class ASRResponse(BaseModel):
     task_id: Optional[str] = None  # Task ID for bundle download
 
 
+class FileResult(BaseModel):
+    """单个文件处理结果"""
+
+    filename: str
+    success: bool
+    message: str
+    output_files: Optional[Dict[str, str]] = None
+    segments: Optional[List[TranscriptionSegment]] = None
+    stats: Optional[Dict[str, Any]] = None
+    failed_segments_details: Optional[List[FailedSegment]] = None
+    task_id: Optional[str] = None
+
+
+class MultiFileASRResponse(BaseModel):
+    """多文件处理响应"""
+
+    success: bool
+    message: str
+    batch_id: str  # 批次ID
+    total_files: int
+    processed_files: int
+    failed_files: int
+    file_results: List[FileResult]
+    overall_stats: Optional[Dict[str, Any]] = None
+
+
 class ProcessingStatus(BaseModel):
     task_id: str
     status: str  # pending, processing, completed, failed
