@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import './App.css';
 
 const API_BASE_URL = 'http://localhost:8000/api/v1';
 
 function App() {
+  const { t, i18n } = useTranslation();
   const [audioFiles, setAudioFiles] = useState([]);
   const [asrMethod, setAsrMethod] = useState('faster-whisper');
   const [availablePlugins, setAvailablePlugins] = useState([]);
@@ -57,7 +59,7 @@ function App() {
     event.preventDefault();
 
     if (audioFiles.length !== 1) {
-      setError('请选择单个音频文件');
+      setError(t('errors.selectSingleFile'));
       return;
     }
 
@@ -74,12 +76,12 @@ function App() {
       // Add output formats
       formData.append('output_formats', outputFormats.join(','));
 
-      // 添加VAD参数
+      // Add VAD parameters
       if (showAdvancedOptions) {
         formData.append('min_speech_duration', minSpeechDuration);
         formData.append('min_silence_duration', minSilenceDuration);
 
-        // 添加ASR配置参数
+        // Add ASR configuration parameters
         if (asrApiUrl) formData.append('asr_api_url', asrApiUrl);
         if (asrApiKey) formData.append('asr_api_key', asrApiKey);
         if (asrModel) formData.append('asr_model', asrModel);
@@ -94,7 +96,7 @@ function App() {
       setResult(response.data);
     } catch (err) {
       console.error('Processing failed:', err);
-      setError(err.response?.data?.detail || '处理失败');
+      setError(err.response?.data?.detail || t('errors.processingFailed'));
     } finally {
       setIsProcessing(false);
     }
@@ -104,12 +106,12 @@ function App() {
     event.preventDefault();
 
     if (audioFiles.length === 0) {
-      setError('请选择音频文件');
+      setError(t('errors.selectFiles'));
       return;
     }
 
     if (audioFiles.length > 10) {
-      setError('一次最多处理10个文件');
+      setError(t('errors.maxFilesExceeded'));
       return;
     }
 
@@ -129,12 +131,12 @@ function App() {
       formData.append('asr_method', asrMethod);
       formData.append('output_formats', outputFormats.join(','));
 
-      // 添加VAD参数
+      // Add VAD parameters
       if (showAdvancedOptions) {
         formData.append('min_speech_duration', minSpeechDuration);
         formData.append('min_silence_duration', minSilenceDuration);
 
-        // 添加ASR配置参数
+        // Add ASR configuration parameters
         if (asrApiUrl) formData.append('asr_api_url', asrApiUrl);
         if (asrApiKey) formData.append('asr_api_key', asrApiKey);
         if (asrModel) formData.append('asr_model', asrModel);
@@ -149,7 +151,7 @@ function App() {
       setMultiFileResult(response.data);
     } catch (err) {
       console.error('Batch processing failed:', err);
-      setError(err.response?.data?.detail || '批量处理失败');
+      setError(err.response?.data?.detail || t('errors.batchProcessingFailed'));
     } finally {
       setIsProcessing(false);
     }
@@ -177,17 +179,36 @@ function App() {
     });
   };
 
+  // Language switcher function
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+  };
+
   return (
     <div className="App">
       <header className="App-header">
-        <h1>🎵 Lazy ASR - 音频转录工具</h1>
-        <p>轻松上传音频文件，自动生成字幕文件</p>
+        <h1>{t('app.title')}</h1>
+        <p>{t('app.description')}</p>
+        <div className="language-switcher">
+          <button 
+            onClick={() => changeLanguage('zh')} 
+            className={i18n.language === 'zh' ? 'active' : ''}
+          >
+            {t('language.chinese')}
+          </button>
+          <button 
+            onClick={() => changeLanguage('en')} 
+            className={i18n.language === 'en' ? 'active' : ''}
+          >
+            {t('language.english')}
+          </button>
+        </div>
       </header>
 
       <main className="App-main">
         <div className="processing-form">
           <div className="form-group">
-            <label htmlFor="audioFile">上传音频文件:</label>
+            <label htmlFor="audioFile">{t('form.uploadAudio')}</label>
             <input
               type="file"
               id="audioFile"
@@ -196,12 +217,12 @@ function App() {
               onChange={handleFileChange}
               disabled={isProcessing}
             />
-            <small>支持多文件上传，最多10个文件</small>
+            <small>{t('form.maxFiles')}</small>
           </div>
 
           {audioFiles.length > 0 && (
             <div className="file-list">
-              <h4>已选择的文件 ({audioFiles.length}个):</h4>
+              <h4>{t('form.selectedFiles')} ({audioFiles.length}):</h4>
               <ul>
                 {audioFiles.map((file, index) => (
                   <li key={index} className="file-item">
@@ -212,7 +233,7 @@ function App() {
                       disabled={isProcessing}
                       className="remove-file-btn"
                     >
-                      ✕
+                      {t('form.removeFile')}
                     </button>
                   </li>
                 ))}
@@ -221,7 +242,7 @@ function App() {
           )}
 
           <div className="form-group">
-            <label htmlFor="asrMethod">选择ASR服务:</label>
+            <label htmlFor="asrMethod">{t('form.selectASR')}</label>
             <select
               id="asrMethod"
               value={asrMethod}
@@ -237,7 +258,7 @@ function App() {
           </div>
 
           <div className="form-group">
-            <label>选择输出格式:</label>
+            <label>{t('form.selectOutputFormats')}</label>
             <div className="format-checkboxes">
               {['srt', 'vtt', 'lrc', 'txt'].map((format) => (
                 <label 
@@ -254,24 +275,24 @@ function App() {
                 </label>
               ))}
             </div>
-            <small>选择要生成的字幕文件格式</small>
+            <small>{t('form.outputFormatsDescription')}</small>
           </div>
 
-          {/* 高级选项 */}
+          {/* Advanced Options */}
           <div className="advanced-options">
             <button
               type="button"
               className="advanced-toggle"
               onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
             >
-              {showAdvancedOptions ? '▼' : '▶'} 高级选项
+              {showAdvancedOptions ? '▼' : '▶'} {t('form.advancedOptions')}
             </button>
 
             {showAdvancedOptions && (
               <div className="advanced-content">
-                <h3>VAD参数配置</h3>
+                <h3>{t('form.vadConfig')}</h3>
                 <div className="form-group">
-                  <label htmlFor="minSpeechDuration">最小语音时长 (毫秒):</label>
+                  <label htmlFor="minSpeechDuration">{t('form.minSpeechDuration')}</label>
                   <input
                     type="number"
                     id="minSpeechDuration"
@@ -282,11 +303,11 @@ function App() {
                     step="100"
                     disabled={isProcessing}
                   />
-                  <small>设置语音段的最小持续时间，较短的语音段将被忽略</small>
+                  <small>{t('form.minSpeechDurationDescription')}</small>
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="minSilenceDuration">最小静音时长 (毫秒):</label>
+                  <label htmlFor="minSilenceDuration">{t('form.minSilenceDuration')}</label>
                   <input
                     type="number"
                     id="minSilenceDuration"
@@ -297,16 +318,16 @@ function App() {
                     step="100"
                     disabled={isProcessing}
                   />
-                  <small>设置静音段的最小持续时间，用于分割语音段</small>
+                  <small>{t('form.minSilenceDurationDescription')}</small>
                 </div>
 
-                <h3>ASR服务配置</h3>
+                <h3>{t('form.asrConfig')}</h3>
 
-                {/* Faster Whisper 配置 */}
+                {/* Faster Whisper configuration */}
                 {asrMethod === 'faster-whisper' && (
                   <div className="asr-config-section">
                     <div className="form-group">
-                      <label htmlFor="asrApiUrl">API URL:</label>
+                      <label htmlFor="asrApiUrl">{t('asr.fasterWhisper.apiUrl')}</label>
                       <input
                         type="text"
                         id="asrApiUrl"
@@ -315,24 +336,24 @@ function App() {
                         placeholder="https://asr-ai.immiqnas.heiyu.space/v1/audio/transcriptions"
                         disabled={isProcessing}
                       />
-                      <small>Faster Whisper API服务地址</small>
+                      <small>{t('asr.fasterWhisper.apiUrlDescription')}</small>
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor="asrApiKey">API Key (可选):</label>
+                      <label htmlFor="asrApiKey">{t('asr.fasterWhisper.apiKey')}</label>
                       <input
                         type="password"
                         id="asrApiKey"
                         value={asrApiKey}
                         onChange={(e) => setAsrApiKey(e.target.value)}
-                        placeholder="API密钥"
+                        placeholder="API Key"
                         disabled={isProcessing}
                       />
-                      <small>如果API需要认证，请输入API密钥</small>
+                      <small>{t('asr.fasterWhisper.apiKeyDescription')}</small>
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor="asrModel">模型名称:</label>
+                      <label htmlFor="asrModel">{t('asr.fasterWhisper.model')}</label>
                       <input
                         type="text"
                         id="asrModel"
@@ -341,16 +362,16 @@ function App() {
                         placeholder="Systran/faster-whisper-large-v2"
                         disabled={isProcessing}
                       />
-                      <small>使用的语音识别模型</small>
+                      <small>{t('asr.fasterWhisper.modelDescription')}</small>
                     </div>
                   </div>
                 )}
 
-                {/* Qwen ASR 配置 */}
+                {/* Qwen ASR configuration */}
                 {asrMethod === 'qwen-asr' && (
                   <div className="asr-config-section">
                     <div className="form-group">
-                      <label htmlFor="asrApiUrl">API URL:</label>
+                      <label htmlFor="asrApiUrl">{t('asr.qwenASR.apiUrl')}</label>
                       <input
                         type="text"
                         id="asrApiUrl"
@@ -359,24 +380,24 @@ function App() {
                         disabled
                         className="readonly-input"
                       />
-                      <small>阿里云ASR服务地址 (固定)</small>
+                      <small>{t('asr.qwenASR.apiUrlDescription')}</small>
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor="asrApiKey">API Key:</label>
+                      <label htmlFor="asrApiKey">{t('asr.qwenASR.apiKey')}</label>
                       <input
                         type="password"
                         id="asrApiKey"
                         value={asrApiKey}
                         onChange={(e) => setAsrApiKey(e.target.value)}
-                        placeholder="请输入阿里云API密钥"
+                        placeholder="Enter Alibaba Cloud API Key"
                         disabled={isProcessing}
                       />
-                      <small>阿里云DashScope API密钥</small>
+                      <small>{t('asr.qwenASR.apiKeyDescription')}</small>
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor="asrModel">模型选择:</label>
+                      <label htmlFor="asrModel">{t('asr.qwenASR.model')}</label>
                       <select
                         id="asrModel"
                         value={asrModel}
@@ -385,7 +406,7 @@ function App() {
                       >
                         <option value="qwen3-asr-flash">qwen3-asr-flash</option>
                       </select>
-                      <small>阿里云ASR模型 (目前仅支持qwen3-asr-flash)</small>
+                      <small>{t('asr.qwenASR.modelDescription')}</small>
                     </div>
                   </div>
                 )}
@@ -400,7 +421,7 @@ function App() {
               className="process-button"
               disabled={isProcessing || audioFiles.length !== 1}
             >
-              {isProcessing ? '🚀 处理中...' : '🚀 处理单个文件'}
+              {isProcessing ? t('buttons.processing') : t('buttons.processSingle')}
             </button>
 
             <button
@@ -409,7 +430,7 @@ function App() {
               className="process-button multiple"
               disabled={isProcessing || audioFiles.length === 0}
             >
-              {isProcessing ? '🚀 批量处理中...' : `🚀 批量处理 (${audioFiles.length}个文件)`}
+              {isProcessing ? t('buttons.batchProcessing') : `${t('buttons.processMultiple')} (${audioFiles.length})`}
             </button>
           </div>
         </div>
@@ -422,32 +443,32 @@ function App() {
 
         {isProcessing && (
           <div className="processing-indicator">
-            <p>正在处理音频文件，请稍候...</p>
+            <p>{t('processing.processing')}</p>
           </div>
         )}
 
         {result && (
           <div className="result-section">
-            <h2>处理结果</h2>
+            <h2>{t('results.title')}</h2>
             <div className="result-content">
               <p>{result.message}</p>
 
               {result.stats && (
                 <div className="stats">
-                  <h3>📊 统计信息:</h3>
+                  <h3>{t('results.stats')}</h3>
                   <ul>
-                    <li>总语音段数: {result.stats.total_segments}</li>
-                    <li>成功转录段数: {result.stats.successful_transcriptions}</li>
-                    <li>失败段数: {result.stats.failed_segments}</li>
-                    <li>无内容段数: {result.stats.empty_segments}</li>
-                    <li>总字幕数: {result.stats.total_subtitles}</li>
+                    <li>{t('stats.totalSegments')}: {result.stats.total_segments}</li>
+                    <li>{t('stats.successfulTranscriptions')}: {result.stats.successful_transcriptions}</li>
+                    <li>{t('stats.failedSegments')}: {result.stats.failed_segments}</li>
+                    <li>{t('stats.emptySegments')}: {result.stats.empty_segments}</li>
+                    <li>{t('stats.totalSubtitles')}: {result.stats.total_subtitles}</li>
                   </ul>
                 </div>
               )}
 
               {result.segments && result.segments.length > 0 && (
                 <div className="segments-preview">
-                  <h3>🎯 字幕预览:</h3>
+                  <h3>{t('results.preview')}</h3>
                   <div className="segments-list">
                     {result.segments.map((segment, index) => (
                       <div key={index} className="segment-item">
@@ -465,7 +486,7 @@ function App() {
 
               {result.output_files && (
                 <div className="download-buttons">
-                  <h3>📥 下载文件:</h3>
+                  <h3>{t('results.downloadFiles')}</h3>
                   
                   {/* Bundle download button - show when multiple formats are selected */}
                   {Object.keys(result.output_files).length > 1 && result.task_id && (
@@ -473,7 +494,7 @@ function App() {
                       onClick={() => handleBundleDownload(result.task_id)}
                       className="download-button bundle-download-button"
                     >
-                      📦 打包下载所有格式 ({Object.keys(result.output_files).length}个文件)
+                      {t('buttons.downloadBundle')} ({Object.keys(result.output_files).length})
                     </button>
                   )}
                   
@@ -484,7 +505,7 @@ function App() {
                       onClick={() => handleDownload(filePath)}
                       className="download-button"
                     >
-                      💾 下载{format.toUpperCase()}文件
+                      {t('buttons.download')} {format.toUpperCase()}
                     </button>
                   ))}
                 </div>
@@ -496,7 +517,7 @@ function App() {
                   onClick={() => handleDownload(result.srt_file_path)}
                   className="download-button"
                 >
-                  💾 下载SRT文件
+                  {t('buttons.downloadSRT')}
                 </button>
               )}
             </div>
@@ -505,25 +526,25 @@ function App() {
 
         {multiFileResult && (
           <div className="result-section">
-            <h2>批量处理结果</h2>
+            <h2>{t('results.batchTitle')}</h2>
             <div className="result-content">
               <p>{multiFileResult.message}</p>
 
               {multiFileResult.overall_stats && (
                 <div className="stats">
-                  <h3>📊 总体统计信息:</h3>
+                  <h3>{t('results.overallStats')}</h3>
                   <ul>
-                    <li>总文件数: {multiFileResult.overall_stats.total_files}</li>
-                    <li>成功处理文件数: {multiFileResult.overall_stats.successful_files}</li>
-                    <li>失败文件数: {multiFileResult.overall_stats.failed_files}</li>
-                    <li>总字幕数: {multiFileResult.overall_stats.total_subtitles}</li>
-                    <li>总语音段数: {multiFileResult.overall_stats.total_segments}</li>
+                    <li>{t('stats.totalFiles')}: {multiFileResult.overall_stats.total_files}</li>
+                    <li>{t('stats.successfulFiles')}: {multiFileResult.overall_stats.successful_files}</li>
+                    <li>{t('stats.failedFiles')}: {multiFileResult.overall_stats.failed_files}</li>
+                    <li>{t('stats.totalSubtitles')}: {multiFileResult.overall_stats.total_subtitles}</li>
+                    <li>{t('stats.totalSegments')}: {multiFileResult.overall_stats.total_segments}</li>
                   </ul>
                 </div>
               )}
 
               <div className="file-results">
-                <h3>📄 文件处理详情:</h3>
+                <h3>{t('results.fileDetails')}</h3>
                 {multiFileResult.file_results.map((fileResult, index) => (
                   <div key={index} className={`file-result ${fileResult.success ? 'success' : 'error'}`}>
                     <h4>
@@ -539,7 +560,7 @@ function App() {
                             onClick={() => handleDownload(filePath)}
                             className="download-button small"
                           >
-                            💾 {format.toUpperCase()}
+                            {t('buttons.download')} {format.toUpperCase()}
                           </button>
                         ))}
                         {fileResult.task_id && (
@@ -547,7 +568,7 @@ function App() {
                             onClick={() => handleBundleDownload(fileResult.task_id)}
                             className="download-button small bundle"
                           >
-                            📦 打包
+                            {t('buttons.downloadBundle')}
                           </button>
                         )}
                       </div>
@@ -556,10 +577,10 @@ function App() {
                     {fileResult.stats && (
                       <div className="file-stats">
                         <small>
-                          字幕数: {fileResult.stats.total_subtitles} | 
-                          语音段: {fileResult.stats.total_segments} | 
-                          成功: {fileResult.stats.successful_transcriptions} | 
-                          失败: {fileResult.stats.failed_segments}
+                          {t('stats.totalSubtitles')}: {fileResult.stats.total_subtitles} | 
+                          {t('stats.totalSegments')}: {fileResult.stats.total_segments} | 
+                          {t('stats.successfulTranscriptions')}: {fileResult.stats.successful_transcriptions} | 
+                          {t('stats.failedSegments')}: {fileResult.stats.failed_segments}
                         </small>
                       </div>
                     )}

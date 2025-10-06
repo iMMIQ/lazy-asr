@@ -1,0 +1,82 @@
+{
+  "app": {
+    "title": "🎵 Lazy ASR - 音频转录工具",
+    "description": "轻松上传音频文件，自动生成字幕文件"
+  },
+  "form": {
+    "uploadAudio": "上传音频文件:",
+    "selectASR": "选择ASR服务:",
+    "selectOutputFormats": "选择输出格式:",
+    "outputFormatsDescription": "选择要生成的字幕文件格式",
+    "maxFiles": "支持多文件上传，最多10个文件",
+    "selectedFiles": "已选择的文件",
+    "removeFile": "✕",
+    "advancedOptions": "高级选项",
+    "vadConfig": "VAD参数配置",
+    "asrConfig": "ASR服务配置",
+    "minSpeechDuration": "最小语音时长 (毫秒):",
+    "minSpeechDurationDescription": "设置语音段的最小持续时间，较短的语音段将被忽略",
+    "minSilenceDuration": "最小静音时长 (毫秒):",
+    "minSilenceDurationDescription": "设置静音段的最小持续时间，用于分割语音段"
+  },
+  "buttons": {
+    "processSingle": "🚀 处理单个文件",
+    "processMultiple": "🚀 批量处理",
+    "processing": "🚀 处理中...",
+    "batchProcessing": "🚀 批量处理中...",
+    "download": "💾 下载",
+    "downloadBundle": "📦 打包下载所有格式",
+    "downloadSRT": "💾 下载SRT文件"
+  },
+  "errors": {
+    "selectSingleFile": "请选择单个音频文件",
+    "selectFiles": "请选择音频文件",
+    "maxFilesExceeded": "一次最多处理10个文件",
+    "processingFailed": "处理失败",
+    "batchProcessingFailed": "批量处理失败"
+  },
+  "results": {
+    "title": "处理结果",
+    "batchTitle": "批量处理结果",
+    "stats": "📊 统计信息:",
+    "preview": "🎯 字幕预览:",
+    "downloadFiles": "📥 下载文件:",
+    "fileDetails": "📄 文件处理详情:",
+    "overallStats": "📊 总体统计信息:"
+  },
+  "stats": {
+    "totalSegments": "总语音段数",
+    "successfulTranscriptions": "成功转录段数",
+    "failedSegments": "失败段数",
+    "emptySegments": "无内容段数",
+    "totalSubtitles": "总字幕数",
+    "totalFiles": "总文件数",
+    "successfulFiles": "成功处理文件数",
+    "failedFiles": "失败文件数"
+  },
+  "processing": {
+    "processing": "正在处理音频文件，请稍候..."
+  },
+  "asr": {
+    "fasterWhisper": {
+      "apiUrl": "API URL:",
+      "apiUrlDescription": "Faster Whisper API服务地址",
+      "apiKey": "API Key (可选):",
+      "apiKeyDescription": "如果API需要认证，请输入API密钥",
+      "model": "模型名称:",
+      "modelDescription": "使用的语音识别模型"
+    },
+    "qwenASR": {
+      "apiUrl": "API URL:",
+      "apiUrlDescription": "阿里云ASR服务地址 (固定)",
+      "apiKey": "API Key:",
+      "apiKeyDescription": "阿里云DashScope API密钥",
+      "model": "模型选择:",
+      "modelDescription": "阿里云ASR模型 (目前仅支持qwen3-asr-flash)"
+    }
+  },
+  "language": {
+    "chinese": "中文",
+    "english": "English"
+  }
+}

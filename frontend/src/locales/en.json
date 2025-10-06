@@ -1,0 +1,82 @@
+{
+  "app": {
+    "title": "🎵 Lazy ASR - Audio Transcription Tool",
+    "description": "Easily upload audio files and automatically generate subtitle files"
+  },
+  "form": {
+    "uploadAudio": "Upload Audio Files:",
+    "selectASR": "Select ASR Service:",
+    "selectOutputFormats": "Select Output Formats:",
+    "outputFormatsDescription": "Select subtitle file formats to generate",
+    "maxFiles": "Multiple files supported, maximum 10 files",
+    "selectedFiles": "Selected Files",
+    "removeFile": "✕",
+    "advancedOptions": "Advanced Options",
+    "vadConfig": "VAD Parameter Configuration",
+    "asrConfig": "ASR Service Configuration",
+    "minSpeechDuration": "Minimum Speech Duration (ms):",
+    "minSpeechDurationDescription": "Set minimum duration for speech segments, shorter segments will be ignored",
+    "minSilenceDuration": "Minimum Silence Duration (ms):",
+    "minSilenceDurationDescription": "Set minimum duration for silence segments, used to split speech segments"
+  },
+  "buttons": {
+    "processSingle": "🚀 Process Single File",
+    "processMultiple": "🚀 Batch Process",
+    "processing": "🚀 Processing...",
+    "batchProcessing": "🚀 Batch Processing...",
+    "download": "💾 Download",
+    "downloadBundle": "📦 Download All Formats Bundle",
+    "downloadSRT": "💾 Download SRT File"
+  },
+  "errors": {
+    "selectSingleFile": "Please select a single audio file",
+    "selectFiles": "Please select audio files",
+    "maxFilesExceeded": "Maximum 10 files per batch",
+    "processingFailed": "Processing failed",
+    "batchProcessingFailed": "Batch processing failed"
+  },
+  "results": {
+    "title": "Processing Result",
+    "batchTitle": "Batch Processing Result",
+    "stats": "📊 Statistics:",
+    "preview": "🎯 Subtitle Preview:",
+    "downloadFiles": "📥 Download Files:",
+    "fileDetails": "📄 File Processing Details:",
+    "overallStats": "📊 Overall Statistics:"
+  },
+  "stats": {
+    "totalSegments": "Total Speech Segments",
+    "successfulTranscriptions": "Successful Transcriptions",
+    "failedSegments": "Failed Segments",
+    "emptySegments": "Empty Segments",
+    "totalSubtitles": "Total Subtitles",
+    "totalFiles": "Total Files",
+    "successfulFiles": "Successful Files",
+    "failedFiles": "Failed Files"
+  },
+  "processing": {
+    "processing": "Processing audio files, please wait..."
+  },
+  "asr": {
+    "fasterWhisper": {
+      "apiUrl": "API URL:",
+      "apiUrlDescription": "Faster Whisper API service address",
+      "apiKey": "API Key (optional):",
+      "apiKeyDescription": "If API requires authentication, enter API key",
+      "model": "Model Name:",
+      "modelDescription": "Speech recognition model to use"
+    },
+    "qwenASR": {
+      "apiUrl": "API URL:",
+      "apiUrlDescription": "Alibaba Cloud ASR service address (fixed)",
+      "apiKey": "API Key:",
+      "apiKeyDescription": "Alibaba Cloud DashScope API key",
+      "model": "Model Selection:",
+      "modelDescription": "Alibaba Cloud ASR model (currently only supports qwen3-asr-flash)"
+    }
+  },
+  "language": {
+    "chinese": "中文",
+    "english": "English"
+  }
+}
