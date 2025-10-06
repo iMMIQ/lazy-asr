@@ -3,6 +3,9 @@ import asyncio
 from typing import List, Dict, Any, Optional
 from plugins.base import ASRPlugin
 from app.core.config import settings
+from app.core.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class FasterWhisperPlugin(ASRPlugin):
@@ -72,9 +75,9 @@ class FasterWhisperPlugin(ASRPlugin):
 
         except asyncio.TimeoutError:
             error_msg = f"Faster Whisper transcription timed out for segment {segment_info.get('index', 'unknown')}"
-            print(f"     ❌ {error_msg}")
+            logger.error(f"  {error_msg}")
             raise Exception(error_msg)
         except Exception as e:
             error_msg = f"Faster Whisper transcription failed: {str(e)}"
-            print(f"     ❌ {error_msg}")
+            logger.error(f"  {error_msg}")
             raise Exception(error_msg)

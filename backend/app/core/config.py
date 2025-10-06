@@ -25,8 +25,8 @@ class Settings(BaseSettings):
     # Qwen ASR settings
     QWEN_ASR_API_KEY: Optional[str] = None
     QWEN_ASR_MODEL: str = "qwen3-asr-flash"
-    QWEN_ASR_API_URL: str = "https://dashscope.aliyuncs.com/api/v1/services/aigc/audio/asr"  # 阿里云ASR API URL (只读)
-    QWEN_ASR_AVAILABLE_MODELS: list = ["qwen3-asr-flash"]  # 阿里云可选的模型列表
+    QWEN_ASR_API_URL: str = "https://dashscope.aliyuncs.com/api/v1/services/aigc/audio/asr"  # Alibaba Cloud ASR API URL (read-only)
+    QWEN_ASR_AVAILABLE_MODELS: list = ["qwen3-asr-flash"]  # Alibaba Cloud available model list
 
     # Concurrency settings
     MAX_CONCURRENT_TASKS: int = 16  # Maximum concurrent transcription tasks

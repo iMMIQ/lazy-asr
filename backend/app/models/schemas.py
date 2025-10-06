@@ -45,7 +45,7 @@ class ASRResponse(BaseModel):
 
 
 class FileResult(BaseModel):
-    """单个文件处理结果"""
+    """Single file processing result"""
 
     filename: str
     success: bool
@@ -58,11 +58,11 @@ class FileResult(BaseModel):
 
 
 class MultiFileASRResponse(BaseModel):
-    """多文件处理响应"""
+    """Multiple file processing response"""
 
     success: bool
     message: str
-    batch_id: str  # 批次ID
+    batch_id: str  # Batch ID
     total_files: int
     processed_files: int
     failed_files: int

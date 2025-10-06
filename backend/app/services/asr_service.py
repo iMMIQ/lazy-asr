@@ -2,6 +2,7 @@ import os
 import uuid
 from typing import Dict, Any, Optional, List
 from app.core.config import settings
+from app.core.logger import get_logger
 from app.utils.audio_processing import (
     silero_vad_segmentation,
     export_silero_segments,
@@ -11,6 +12,8 @@ from app.utils.audio_processing import (
 from app.utils.subtitle_formatters import generate_subtitle_files
 from plugins.manager import plugin_manager
 from app.models.schemas import ASRResponse
+
+logger = get_logger(__name__)
 
 
 class ASRService:
@@ -46,48 +49,48 @@ class ASRService:
             ASRResponse with results
         """
         try:
-            print(f"🚀 开始Silero VAD自动分段转录流程")
-            print("=" * 60)
-            print(f"ASR方法: {asr_method}")
-            print(f"输出目录: {self.output_dir}")
+            logger.info("Starting Silero VAD automatic segmentation transcription process")
+            logger.info("=" * 60)
+            logger.info(f"ASR method: {asr_method}")
+            logger.info(f"Output directory: {self.output_dir}")
 
-            # 检查文件是否存在
+            # Check if file exists
             if not os.path.exists(audio_path):
-                print(f"❌ 音频文件不存在: {audio_path}")
-                return ASRResponse(success=False, message="❌ 音频文件不存在")
+                logger.error(f"Audio file does not exist: {audio_path}")
+                return ASRResponse(success=False, message="Audio file does not exist")
 
-            # 创建任务ID和输出目录
+            # Create task ID and output directory
             task_id = str(uuid.uuid4())
             task_output_dir = os.path.join(self.output_dir, task_id)
             os.makedirs(task_output_dir, exist_ok=True)
 
-            # 1. Silero VAD检测分段
+            # 1. Silero VAD segmentation
             try:
                 speech_timestamps, audio_data, sample_rate = silero_vad_segmentation(audio_path, vad_options or {})
             except Exception as e:
-                print(f"❌ Silero VAD检测失败: {e}")
-                return ASRResponse(success=False, message=f"❌ Silero VAD检测失败: {e}")
+                logger.error(f"Silero VAD detection failed: {e}")
+                return ASRResponse(success=False, message=f"Silero VAD detection failed: {e}")
 
             if not speech_timestamps:
-                print("❌ 未检测到任何语音段")
-                return ASRResponse(success=False, message="❌ 未检测到任何语音段")
+                logger.error("No speech segments detected")
+                return ASRResponse(success=False, message="No speech segments detected")
 
-            # 2. 导出分段音频
-            print(f"\n📁 导出语音段文件...")
+            # 2. Export segment audio
+            logger.info("Exporting speech segment files...")
             segments_output_dir = os.path.join(task_output_dir, "silero_segments")
             exported_segments = export_silero_segments(speech_timestamps, audio_data, sample_rate, segments_output_dir)
 
             if not exported_segments:
-                print("❌ 没有可导出的语音段")
-                return ASRResponse(success=False, message="❌ 没有可导出的语音段")
+                logger.error("No speech segments available for export")
+                return ASRResponse(success=False, message="No speech segments available for export")
 
-            # 3. 获取ASR插件
+            # 3. Get ASR plugin
             plugin = plugin_manager.get_plugin(asr_method)
             if not plugin:
-                print(f"❌ 不支持的ASR方法: {asr_method}")
-                return ASRResponse(success=False, message=f"❌ 不支持的ASR方法: {asr_method}")
+                logger.error(f"Unsupported ASR method: {asr_method}")
+                return ASRResponse(success=False, message=f"Unsupported ASR method: {asr_method}")
 
-            # 更新插件配置
+            # Update plugin configuration
             plugin_config = {}
             if asr_api_url:
                 plugin_config['api_url'] = asr_api_url
@@ -98,44 +101,45 @@ class ASRService:
 
             if plugin_config:
                 plugin.update_config(plugin_config)
-                print(f"🔧 更新插件配置: {plugin_config}")
+                logger.info(f"Updated plugin configuration: {plugin_config}")
 
-            # 4. 并发转录
-            print(f"\n🎯 开始并发转录...")
+            # 4. Concurrent transcription
+            logger.info("Starting concurrent transcription...")
             all_subtitles = []
             successful_transcriptions = 0
             failed_segments = 0
             empty_segments = 0
             failed_segments_details = []
 
-            # 使用插件并发转录所有段
+            # Use plugin to transcribe all segments concurrently
             transcription_results = await plugin.transcribe_segments(exported_segments)
 
             for i, result in enumerate(transcription_results):
-                # 使用result中的segment_info来获取正确的segment信息
+                # Use segment_info from result to get correct segment information
                 segment_info = result.get('segment_info')
                 if not segment_info:
-                    # 如果result中没有segment_info，则使用索引查找
+                    # If result doesn't have segment_info, use index to find it
                     segment_index = result.get('segment_index', i)
                     if segment_index < len(exported_segments):
                         segment_info = exported_segments[segment_index]
                     else:
-                        print(f"   ❌ 无法找到对应的segment信息，索引: {segment_index}")
+                        logger.error(f"Cannot find corresponding segment information, index: {segment_index}")
                         failed_segments += 1
                         continue
-                print(f"\n[{i+1}/{len(exported_segments)}] 处理语音段:")
-                print(f"   文件: {os.path.basename(segment_info['file_path'])}")
-                print(f"   时间: {segment_info['start_time']:.2f}s - {segment_info['end_time']:.2f}s")
-                print(f"   时长: {segment_info['duration']:.2f}s")
+                
+                logger.info(f"[{i+1}/{len(exported_segments)}] Processing speech segment:")
+                logger.info(f"  File: {os.path.basename(segment_info['file_path'])}")
+                logger.info(f"  Time: {segment_info['start_time']:.2f}s - {segment_info['end_time']:.2f}s")
+                logger.info(f"  Duration: {segment_info['duration']:.2f}s")
 
                 if not result['success']:
-                    # 转录失败，记录详细信息
-                    error_msg = result['error'] or "未知错误"
+                    # Transcription failed, record detailed information
+                    error_msg = result['error'] or "Unknown error"
                     error_type = result['error_type'] or "UnknownError"
-                    print(f"   ❌ 转录失败: {error_msg} (类型: {error_type})")
+                    logger.error(f"  Transcription failed: {error_msg} (type: {error_type})")
                     failed_segments += 1
 
-                    # 记录失败段的详细信息
+                    # Record failed segment details
                     failed_segment_detail = {
                         'index': segment_info['index'],
                         'start_time': segment_info['start_time'],
@@ -150,12 +154,12 @@ class ASRService:
 
                 transcription = result['transcription']
                 if transcription is None:
-                    # 转录无内容，跳过此段
-                    print(f"   ⚠️ 转录无内容，跳过此段")
+                    # No transcription content, skip this segment
+                    logger.warning(f"  No transcription content, skipping segment")
                     empty_segments += 1
                     continue
 
-                # 解析转录结果
+                # Parse transcription results
                 adjusted_subtitles = parse_transcription_segments(
                     transcription, segment_info['start_time'], segment_info['end_time']
                 )
@@ -163,17 +167,17 @@ class ASRService:
                 if adjusted_subtitles:
                     all_subtitles.extend(adjusted_subtitles)
                     successful_transcriptions += 1
-                    print(f"   ✅ 成功添加 {len(adjusted_subtitles)} 条字幕")
+                    logger.info(f"  Successfully added {len(adjusted_subtitles)} subtitles")
 
-                    # 显示第一条字幕预览
+                    # Show first subtitle preview
                     if adjusted_subtitles:
                         first_sub = adjusted_subtitles[0]
                         preview_text = (
                             first_sub['text'][:50] + "..." if len(first_sub['text']) > 50 else first_sub['text']
                         )
-                        print(f"   预览: {preview_text}")
+                        logger.info(f"  Preview: {preview_text}")
                 else:
-                    print(f"   ⚠️ 转录无内容，跳过此段")
+                    logger.warning(f"  No transcription content, skipping segment")
                     empty_segments += 1
 
             # 5. Generate subtitle files
@@ -201,34 +205,34 @@ class ASRService:
                     "output_formats": output_formats,
                 }
 
-                print(f"\n✅ 处理完成!")
-                print(f"📊 统计信息:")
-                print(f"   总语音段数: {len(exported_segments)}")
-                print(f"   成功转录段数: {successful_transcriptions}")
-                print(f"   失败段数: {failed_segments}")
-                print(f"   无内容段数: {empty_segments}")
-                print(f"   总字幕数: {len(all_subtitles)}")
-                print(f"   输出格式: {', '.join(output_formats)}")
+                logger.info("Processing completed!")
+                logger.info("Statistics:")
+                logger.info(f"  Total speech segments: {len(exported_segments)}")
+                logger.info(f"  Successful transcriptions: {successful_transcriptions}")
+                logger.info(f"  Failed segments: {failed_segments}")
+                logger.info(f"  Empty segments: {empty_segments}")
+                logger.info(f"  Total subtitles: {len(all_subtitles)}")
+                logger.info(f"  Output formats: {', '.join(output_formats)}")
 
                 # Display generated files
                 for fmt, file_path in output_files.items():
-                    print(f"💾 {fmt.upper()}文件已保存: {file_path}")
+                    logger.info(f"  {fmt.upper()} file saved: {file_path}")
 
                 # Display failed segment details
                 if failed_segments_details:
-                    print(f"\n🔍 失败段详细信息:")
-                    print("=" * 60)
+                    logger.info("Failed segment details:")
+                    logger.info("=" * 60)
                     for failed_segment in failed_segments_details:
-                        print(f"   段 {failed_segment['index']+1}:")
-                        print(f"     时间: {failed_segment['start_time']:.2f}s - {failed_segment['end_time']:.2f}s")
-                        print(f"     时长: {failed_segment['duration']:.2f}s")
-                        print(f"     错误类型: {failed_segment['error_type']}")
-                        print(f"     错误信息: {failed_segment['error']}")
-                        print(f"     文件: {os.path.basename(failed_segment['file_path'])}")
-                        print()
+                        logger.info(f"  Segment {failed_segment['index']+1}:")
+                        logger.info(f"    Time: {failed_segment['start_time']:.2f}s - {failed_segment['end_time']:.2f}s")
+                        logger.info(f"    Duration: {failed_segment['duration']:.2f}s")
+                        logger.info(f"    Error type: {failed_segment['error_type']}")
+                        logger.info(f"    Error message: {failed_segment['error']}")
+                        logger.info(f"    File: {os.path.basename(failed_segment['file_path'])}")
+                        logger.info("")
 
                 # Preview first few subtitles
-                preview_text = "🎯 字幕预览:\n" + "=" * 50 + "\n"
+                preview_text = "Subtitle preview:\n" + "=" * 50 + "\n"
                 for i, subtitle in enumerate(all_subtitles[:5]):
                     preview_text += f"{i+1}\n"
                     preview_text += f"{subtitle['start']} --> {subtitle['end']}\n"
@@ -239,33 +243,33 @@ class ASRService:
 
                 return ASRResponse(
                     success=True,
-                    message=f"✅ 处理完成! 已生成 {len(output_files)} 种格式的字幕文件",
+                    message=f"Processing completed! Generated {len(output_files)} format subtitle files",
                     srt_file_path=srt_file_path,  # Backward compatibility
                     output_files=output_files,  # New field: all format file paths
-                    segments=[s for s in all_subtitles[:10]],  # 只返回前10条字幕
+                    segments=[s for s in all_subtitles[:10]],  # Return only first 10 subtitles
                     stats=stats,
                     failed_segments_details=failed_segments_details,
                     task_id=task_id,  # Add task ID for bundle download
                 )
             else:
-                error_msg = "❌ 没有生成任何字幕"
-                print(error_msg)
+                error_msg = "No subtitles generated"
+                logger.error(error_msg)
 
-                # 显示失败段的详细信息
+                # Display failed segment details
                 if failed_segments_details:
-                    print(f"\n🔍 失败段详细信息:")
-                    print("=" * 60)
+                    logger.info("Failed segment details:")
+                    logger.info("=" * 60)
                     for failed_segment in failed_segments_details:
-                        print(f"   段 {failed_segment['index']+1}:")
-                        print(f"     时间: {failed_segment['start_time']:.2f}s - {failed_segment['end_time']:.2f}s")
-                        print(f"     时长: {failed_segment['duration']:.2f}s")
-                        print(f"     错误类型: {failed_segment['error_type']}")
-                        print(f"     错误信息: {failed_segment['error']}")
-                        print(f"     文件: {os.path.basename(failed_segment['file_path'])}")
-                        print()
+                        logger.info(f"  Segment {failed_segment['index']+1}:")
+                        logger.info(f"    Time: {failed_segment['start_time']:.2f}s - {failed_segment['end_time']:.2f}s")
+                        logger.info(f"    Duration: {failed_segment['duration']:.2f}s")
+                        logger.info(f"    Error type: {failed_segment['error_type']}")
+                        logger.info(f"    Error message: {failed_segment['error']}")
+                        logger.info(f"    File: {os.path.basename(failed_segment['file_path'])}")
+                        logger.info("")
 
                 return ASRResponse(success=False, message=error_msg, failed_segments_details=failed_segments_details)
 
         except Exception as e:
-            print(f"❌ 处理过程中发生错误: {e}")
-            return ASRResponse(success=False, message=f"❌ 处理过程中发生错误: {e}")
+            logger.error(f"Error occurred during processing: {e}")
+            return ASRResponse(success=False, message=f"Error occurred during processing: {e}")

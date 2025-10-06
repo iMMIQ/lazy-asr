@@ -3,6 +3,9 @@ from typing import List, Dict, Any, Optional
 import asyncio
 from tqdm import tqdm
 from app.core.config import settings
+from app.core.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class ASRPlugin(ABC):
@@ -88,11 +91,11 @@ class ASRPlugin(ABC):
                     }
 
         # Create progress bar
-        print(f"\n🎯 开始并发转录 (最大并发数: {settings.MAX_CONCURRENT_TASKS})...")
+        logger.info(f"Starting concurrent transcription (max concurrent tasks: {settings.MAX_CONCURRENT_TASKS})...")
         progress_bar = tqdm(
             total=len(segments),
-            desc="转录进度",
-            unit="段",
+            desc="Transcription progress",
+            unit="segment",
             bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]",
         )
 
@@ -113,8 +116,8 @@ class ASRPlugin(ABC):
         successful = sum(1 for r in results if r['success'])
         failed = sum(1 for r in results if not r['success'])
 
-        print(f"\n📊 转录统计:")
-        print(f"   成功: {successful}/{len(segments)} 段")
-        print(f"   失败: {failed}/{len(segments)} 段")
+        logger.info("Transcription statistics:")
+        logger.info(f"  Successful: {successful}/{len(segments)} segments")
+        logger.info(f"  Failed: {failed}/{len(segments)} segments")
 
         return results

@@ -4,13 +4,13 @@ from typing import List, Dict, Any
 
 def format_timestamp_srt(seconds: float) -> str:
     """
-    将秒数格式化为SRT时间戳格式 (HH:MM:SS,mmm)
+    Format seconds to SRT timestamp format (HH:MM:SS,mmm)
 
     Args:
-        seconds: 秒数
+        seconds: Seconds
 
     Returns:
-        SRT时间戳字符串
+        SRT timestamp string
     """
     hours = int(seconds // 3600)
     minutes = int((seconds % 3600) // 60)
@@ -22,13 +22,13 @@ def format_timestamp_srt(seconds: float) -> str:
 
 def format_timestamp_vtt(seconds: float) -> str:
     """
-    将秒数格式化为VTT时间戳格式 (HH:MM:SS.mmm)
+    Format seconds to VTT timestamp format (HH:MM:SS.mmm)
 
     Args:
-        seconds: 秒数
+        seconds: Seconds
 
     Returns:
-        VTT时间戳字符串
+        VTT timestamp string
     """
     hours = int(seconds // 3600)
     minutes = int((seconds % 3600) // 60)
@@ -40,13 +40,13 @@ def format_timestamp_vtt(seconds: float) -> str:
 
 def format_timestamp_lrc(seconds: float) -> str:
     """
-    将秒数格式化为LRC时间戳格式 [MM:SS.mm]
+    Format seconds to LRC timestamp format [MM:SS.mm]
 
     Args:
-        seconds: 秒数
+        seconds: Seconds
 
     Returns:
-        LRC时间戳字符串
+        LRC timestamp string
     """
     minutes = int(seconds // 60)
     secs = int(seconds % 60)
@@ -57,13 +57,13 @@ def format_timestamp_lrc(seconds: float) -> str:
 
 def time_string_to_seconds(time_str: str) -> float:
     """
-    将时间字符串转换为秒数
+    Convert time string to seconds
 
     Args:
-        time_str: 时间字符串 (HH:MM:SS,mmm 或 HH:MM:SS.mmm)
+        time_str: Time string (HH:MM:SS,mmm or HH:MM:SS.mmm)
 
     Returns:
-        秒数
+        Seconds as float
     """
     time_str = time_str.replace(',', '.')
     parts = time_str.split(':')
@@ -79,13 +79,13 @@ def time_string_to_seconds(time_str: str) -> float:
 
 def generate_srt_content(subtitles: List[Dict]) -> str:
     """
-    生成SRT文件内容
+    Generate SRT file content
 
     Args:
-        subtitles: 字幕列表
+        subtitles: List of subtitles
 
     Returns:
-        SRT文件内容字符串
+        SRT file content string
     """
     srt_content = ""
 
@@ -99,18 +99,18 @@ def generate_srt_content(subtitles: List[Dict]) -> str:
 
 def generate_vtt_content(subtitles: List[Dict]) -> str:
     """
-    生成VTT文件内容
+    Generate VTT file content
 
     Args:
-        subtitles: 字幕列表
+        subtitles: List of subtitles
 
     Returns:
-        VTT文件内容字符串
+        VTT file content string
     """
     vtt_content = "WEBVTT\n\n"
 
     for i, subtitle in enumerate(subtitles, 1):
-        # 转换时间戳格式
+        # Convert timestamp format
         start_seconds = time_string_to_seconds(subtitle['start'])
         end_seconds = time_string_to_seconds(subtitle['end'])
 
@@ -126,18 +126,18 @@ def generate_vtt_content(subtitles: List[Dict]) -> str:
 
 def generate_lrc_content(subtitles: List[Dict]) -> str:
     """
-    生成LRC文件内容
+    Generate LRC file content
 
     Args:
-        subtitles: 字幕列表
+        subtitles: List of subtitles
 
     Returns:
-        LRC文件内容字符串
+        LRC file content string
     """
     lrc_content = ""
 
     for subtitle in subtitles:
-        # 转换时间戳格式
+        # Convert timestamp format
         start_seconds = time_string_to_seconds(subtitle['start'])
         lrc_timestamp = format_timestamp_lrc(start_seconds)
 
@@ -148,13 +148,13 @@ def generate_lrc_content(subtitles: List[Dict]) -> str:
 
 def generate_txt_content(subtitles: List[Dict]) -> str:
     """
-    生成TXT文件内容
+    Generate TXT file content
 
     Args:
-        subtitles: 字幕列表
+        subtitles: List of subtitles
 
     Returns:
-        TXT文件内容字符串
+        TXT file content string
     """
     txt_content = ""
 
@@ -168,28 +168,28 @@ def generate_subtitle_files(
     subtitles: List[Dict], base_output_path: str, output_formats: List[str] = None
 ) -> Dict[str, str]:
     """
-    生成多种格式的字幕文件
+    Generate multiple format subtitle files
 
     Args:
-        subtitles: 字幕列表
-        base_output_path: 基础输出路径（不含扩展名）
-        output_formats: 输出格式列表，默认为 ['srt']
+        subtitles: List of subtitles
+        base_output_path: Base output path (without extension)
+        output_formats: Output format list, defaults to ['srt']
 
     Returns:
-        字典，包含格式到文件路径的映射
+        Dictionary containing format to file path mapping
     """
     if output_formats is None:
         output_formats = ['srt']
 
-    # 验证支持的格式
+    # Validate supported formats
     supported_formats = ['srt', 'vtt', 'lrc', 'txt']
     invalid_formats = [fmt for fmt in output_formats if fmt not in supported_formats]
     if invalid_formats:
-        raise ValueError(f"不支持的输出格式: {invalid_formats}")
+        raise ValueError(f"Unsupported output formats: {invalid_formats}")
 
     output_files = {}
 
-    # 按时间排序字幕
+    # Sort subtitles by time
     subtitles.sort(key=lambda x: time_string_to_seconds(x['start'].replace(',', '.')))
 
     for fmt in output_formats:
@@ -214,7 +214,7 @@ def generate_subtitle_files(
     return output_files
 
 
-# 向后兼容的函数
+# Backward compatible function
 def generate_srt_content_legacy(subtitles: List[Dict]) -> str:
-    """向后兼容的SRT生成函数"""
+    """Backward compatible SRT generation function"""
     return generate_srt_content(subtitles)

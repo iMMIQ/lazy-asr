@@ -1,6 +1,9 @@
 from typing import List, Dict, Any, Optional
 from plugins.base import ASRPlugin
 from app.core.config import settings
+from app.core.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class QwenASRPlugin(ASRPlugin):
@@ -59,7 +62,7 @@ class QwenASRPlugin(ASRPlugin):
 
             # Check response status
             if response.status_code != 200:
-                print(f"     ❌ Qwen ASR request failed: {response.code} - {response.message}")
+                logger.error(f"  Qwen ASR request failed: {response.code} - {response.message}")
                 return None
 
             # Extract transcription text
@@ -78,9 +81,9 @@ class QwenASRPlugin(ASRPlugin):
 
         except ImportError:
             error_msg = "DashScope SDK not installed. Please install with: pip install dashscope"
-            print(f"     ❌ {error_msg}")
+            logger.error(f"  {error_msg}")
             raise Exception(error_msg)
         except Exception as e:
             error_msg = f"Qwen ASR transcription failed: {str(e)}"
-            print(f"     ❌ {error_msg}")
+            logger.error(f"  {error_msg}")
             raise Exception(error_msg)
