@@ -22,13 +22,33 @@ class FasterWhisperPlugin(ASRPlugin):
         # For now, we don't have specific validation requirements
         return True
 
-    async def transcribe_segment(self, segment_file: str, segment_info: Dict[str, Any]) -> Optional[List[str]]:
+    def _get_language_prompt(self, language: str) -> str:
+        """
+        Get language-specific prompt for Faster Whisper
+        
+        Args:
+            language: Language code
+            
+        Returns:
+            Language-specific prompt text
+        """
+        language_prompts = {
+            "auto": "",  # Default prompt for auto detect
+            "ja": "よろしくお願いします.",  # Japanese
+            "zh": "请转录这段音频。",  # Chinese
+            "en": "Please transcribe this audio.",  # English
+        }
+        
+        return language_prompts.get(language, language_prompts["auto"])
+
+    async def transcribe_segment(self, segment_file: str, segment_info: Dict[str, Any], language: str = "auto") -> Optional[List[str]]:
         """
         Transcribe a single audio segment using Faster Whisper
 
         Args:
             segment_file: Path to the audio segment file
             segment_info: Dictionary containing segment information
+            language: Language code for transcription
 
         Returns:
             List of transcription strings or None if failed
@@ -43,10 +63,13 @@ class FasterWhisperPlugin(ASRPlugin):
                 audio_content = audio_file.read()
                 form_data.add_field('file', audio_content, filename=filename, content_type='audio/wav')
 
+            # Add language-specific prompt
+            prompt_text = self._get_language_prompt(language)
+            
             # Add other form fields
             form_data.add_field('stream', 'false')
             form_data.add_field('timestamp_granularities', 'segment')
-            form_data.add_field('prompt', 'よろしくお願いします.')
+            form_data.add_field('prompt', prompt_text)
             form_data.add_field('batch_size', '1')
             form_data.add_field('model', self.model)
             form_data.add_field('temperature', '0')

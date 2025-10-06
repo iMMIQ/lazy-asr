@@ -34,6 +34,7 @@ class ASRService:
         asr_api_url: Optional[str] = None,
         asr_api_key: Optional[str] = None,
         asr_model: Optional[str] = None,
+        language: Optional[str] = "auto",  # Default to auto detect
         output_formats: List[str] = None,
     ) -> ASRResponse:
         """
@@ -112,7 +113,7 @@ class ASRService:
             failed_segments_details = []
 
             # Use plugin to transcribe all segments concurrently
-            transcription_results = await plugin.transcribe_segments(exported_segments)
+            transcription_results = await plugin.transcribe_segments(exported_segments, language)
 
             for i, result in enumerate(transcription_results):
                 # Use segment_info from result to get correct segment information

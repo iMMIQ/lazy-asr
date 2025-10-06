@@ -16,13 +16,14 @@ class ASRPlugin(ABC):
         self.description = description
 
     @abstractmethod
-    async def transcribe_segment(self, segment_file: str, segment_info: Dict[str, Any]) -> Optional[List[str]]:
+    async def transcribe_segment(self, segment_file: str, segment_info: Dict[str, Any], language: str = "auto") -> Optional[List[str]]:
         """
         Transcribe a single audio segment
 
         Args:
             segment_file: Path to the audio segment file
             segment_info: Dictionary containing segment information
+            language: Language code for transcription
 
         Returns:
             List of transcription strings or None if failed
@@ -54,12 +55,13 @@ class ASRPlugin(ABC):
             if hasattr(self, key):
                 setattr(self, key, value)
 
-    async def transcribe_segments(self, segments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    async def transcribe_segments(self, segments: List[Dict[str, Any]], language: str = "auto") -> List[Dict[str, Any]]:
         """
         Transcribe multiple segments concurrently with concurrency control and progress bar
 
         Args:
             segments: List of segment dictionaries
+            language: Language code for transcription
 
         Returns:
             List of transcription results with detailed error information
@@ -69,7 +71,7 @@ class ASRPlugin(ABC):
         async def transcribe_with_semaphore(segment: Dict[str, Any]) -> Dict[str, Any]:
             async with semaphore:
                 try:
-                    transcription = await self.transcribe_segment(segment['file_path'], segment)
+                    transcription = await self.transcribe_segment(segment['file_path'], segment, language)
                     return {
                         'segment_index': segment['index'],
                         'success': transcription is not None,

@@ -58,6 +58,12 @@
     "processing": "正在处理音频文件，请稍候..."
   },
   "asr": {
+    "language": "识别语言:",
+    "languageDescription": "选择语音识别的语言",
+    "autoDetect": "自动检测",
+    "chinese": "中文",
+    "english": "English",
+    "japanese": "日本語",
     "fasterWhisper": {
       "apiUrl": "API URL:",
       "apiUrlDescription": "Faster Whisper API服务地址",

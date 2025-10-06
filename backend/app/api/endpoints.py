@@ -39,6 +39,7 @@ async def process_audio(
     asr_api_url: Optional[str] = Form(None),
     asr_api_key: Optional[str] = Form(None),
     asr_model: Optional[str] = Form(None),
+    language: Optional[str] = Form("auto"),  # Default to auto detect
     output_formats: Optional[str] = Form("srt"),  # Default to srt for backward compatibility
 ):
     """
@@ -109,6 +110,7 @@ async def process_audio(
             asr_api_url=asr_api_url,
             asr_api_key=asr_api_key,
             asr_model=asr_model,
+            language=language,
             output_formats=parsed_output_formats,
         )
 
@@ -129,6 +131,7 @@ async def process_multiple_audio(
     asr_api_url: Optional[str] = Form(None),
     asr_api_key: Optional[str] = Form(None),
     asr_model: Optional[str] = Form(None),
+    language: Optional[str] = Form("auto"),  # Default to auto detect
     output_formats: Optional[str] = Form("srt"),
 ):
     """
@@ -213,6 +216,7 @@ async def process_multiple_audio(
                     asr_api_url=asr_api_url,
                     asr_api_key=asr_api_key,
                     asr_model=asr_model,
+                    language=language,
                     output_formats=parsed_output_formats,
                 )
 

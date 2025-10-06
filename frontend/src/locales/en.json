@@ -58,6 +58,12 @@
     "processing": "Processing audio files, please wait..."
   },
   "asr": {
+    "language": "Language:",
+    "languageDescription": "Select the language for speech recognition",
+    "autoDetect": "Auto Detect",
+    "chinese": "Chinese",
+    "english": "English",
+    "japanese": "Japanese",
     "fasterWhisper": {
       "apiUrl": "API URL:",
       "apiUrlDescription": "Faster Whisper API service address",

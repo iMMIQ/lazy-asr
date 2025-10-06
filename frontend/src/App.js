@@ -20,6 +20,7 @@ function App() {
   const [asrApiUrl, setAsrApiUrl] = useState('');
   const [asrApiKey, setAsrApiKey] = useState('');
   const [asrModel, setAsrModel] = useState('');
+  const [asrLanguage, setAsrLanguage] = useState('auto'); // Default to auto detect
   const [outputFormats, setOutputFormats] = useState(['srt']); // Default to SRT for backward compatibility
 
   // Fetch available plugins on component mount
@@ -85,6 +86,8 @@ function App() {
         if (asrApiUrl) formData.append('asr_api_url', asrApiUrl);
         if (asrApiKey) formData.append('asr_api_key', asrApiKey);
         if (asrModel) formData.append('asr_model', asrModel);
+        // Add language parameter
+        formData.append('language', asrLanguage);
       }
 
       const response = await axios.post(`${API_BASE_URL}/asr/process`, formData, {
@@ -140,6 +143,8 @@ function App() {
         if (asrApiUrl) formData.append('asr_api_url', asrApiUrl);
         if (asrApiKey) formData.append('asr_api_key', asrApiKey);
         if (asrModel) formData.append('asr_model', asrModel);
+        // Add language parameter
+        formData.append('language', asrLanguage);
       }
 
       const response = await axios.post(`${API_BASE_URL}/asr/process-multiple`, formData, {
@@ -322,6 +327,23 @@ function App() {
                 </div>
 
                 <h3>{t('form.asrConfig')}</h3>
+
+                {/* Language selection - common for all ASR methods */}
+                <div className="form-group">
+                  <label htmlFor="asrLanguage">{t('asr.language')}</label>
+                  <select
+                    id="asrLanguage"
+                    value={asrLanguage}
+                    onChange={(e) => setAsrLanguage(e.target.value)}
+                    disabled={isProcessing}
+                  >
+                    <option value="auto">{t('asr.autoDetect')}</option>
+                    <option value="zh">{t('asr.chinese')}</option>
+                    <option value="en">{t('asr.english')}</option>
+                    <option value="ja">{t('asr.japanese')}</option>
+                  </select>
+                  <small>{t('asr.languageDescription')}</small>
+                </div>
 
                 {/* Faster Whisper configuration */}
                 {asrMethod === 'faster-whisper' && (
