@@ -14,6 +14,7 @@ from app.utils.video_processing import (
     validate_media_file,
 )
 from app.utils.subtitle_formatters import generate_subtitle_files
+from app.utils.file_manager import FileManager
 from plugins.manager import plugin_manager
 from app.models.schemas import ASRResponse
 
@@ -53,6 +54,10 @@ class ASRService:
         Returns:
             ASRResponse with results
         """
+        # Initialize file manager for cleanup
+        file_manager = FileManager()
+        task_id = None
+
         try:
             logger.info("Starting media processing with Silero VAD automatic segmentation")
             logger.info("=" * 60)
@@ -262,6 +267,10 @@ class ASRService:
                 # Backward compatibility: keep srt_file_path field
                 srt_file_path = output_files.get('srt')
 
+                # Clean up temporary files after successful processing
+                if task_id and media_path:
+                    file_manager.cleanup_by_media_path(media_path, task_id, keep_output=True)
+
                 return ASRResponse(
                     success=True,
                     message=f"Processing completed! Generated {len(output_files)} format subtitle files",
@@ -291,10 +300,17 @@ class ASRService:
                         logger.info(f"    File: {os.path.basename(failed_segment['file_path'])}")
                         logger.info("")
 
+                # Clean up temporary files even if processing failed
+                if task_id and media_path:
+                    file_manager.cleanup_by_media_path(media_path, task_id, keep_output=False)
+
                 return ASRResponse(success=False, message=error_msg, failed_segments_details=failed_segments_details)
 
         except Exception as e:
             logger.error(f"Error occurred during processing: {e}")
+            # Clean up temporary files in case of exception
+            if task_id and media_path:
+                file_manager.cleanup_by_media_path(media_path, task_id, keep_output=False)
             return ASRResponse(success=False, message=f"Error occurred during processing: {e}")
 
     async def process_audio(
