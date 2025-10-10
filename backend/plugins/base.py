@@ -16,7 +16,9 @@ class ASRPlugin(ABC):
         self.description = description
 
     @abstractmethod
-    async def transcribe_segment(self, segment_file: str, segment_info: Dict[str, Any], language: str = "auto") -> Optional[List[str]]:
+    async def transcribe_segment(
+        self, segment_file: str, segment_info: Dict[str, Any], language: str = "auto"
+    ) -> Optional[List[str]]:
         """
         Transcribe a single audio segment
 

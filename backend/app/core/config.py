@@ -25,7 +25,9 @@ class Settings(BaseSettings):
     # Qwen ASR settings
     QWEN_ASR_API_KEY: Optional[str] = None
     QWEN_ASR_MODEL: str = "qwen3-asr-flash"
-    QWEN_ASR_API_URL: str = "https://dashscope.aliyuncs.com/api/v1/services/aigc/audio/asr"  # Alibaba Cloud ASR API URL (read-only)
+    QWEN_ASR_API_URL: str = (
+        "https://dashscope.aliyuncs.com/api/v1/services/aigc/audio/asr"  # Alibaba Cloud ASR API URL (read-only)
+    )
     QWEN_ASR_AVAILABLE_MODELS: list = ["qwen3-asr-flash"]  # Alibaba Cloud available model list
 
     # Local Whisper settings
