@@ -1,14 +1,14 @@
 {
   "app": {
-    "title": "🎵 Lazy ASR - Audio Transcription Tool",
-    "description": "Easily upload audio files and automatically generate subtitle files"
+    "title": "🎵 Lazy ASR - Media Transcription Tool",
+    "description": "Easily upload audio or video files and automatically generate subtitle files"
   },
   "form": {
-    "uploadAudio": "Upload Audio Files:",
+    "uploadAudio": "Upload Media Files:",
     "selectASR": "Select ASR Service:",
     "selectOutputFormats": "Select Output Formats:",
     "outputFormatsDescription": "Select subtitle file formats to generate",
-    "maxFiles": "Multiple files supported, maximum 10 files",
+    "maxFiles": "Multiple files supported, maximum 10 files (supports audio and video formats)",
     "selectedFiles": "Selected Files",
     "removeFile": "✕",
     "advancedOptions": "Advanced Options",
@@ -29,8 +29,8 @@
     "downloadSRT": "💾 Download SRT File"
   },
   "errors": {
-    "selectSingleFile": "Please select a single audio file",
-    "selectFiles": "Please select audio files",
+    "selectSingleFile": "Please select a single media file",
+    "selectFiles": "Please select media files",
     "maxFilesExceeded": "Maximum 10 files per batch",
     "processingFailed": "Processing failed",
     "batchProcessingFailed": "Batch processing failed"
@@ -55,7 +55,7 @@
     "failedFiles": "Failed Files"
   },
   "processing": {
-    "processing": "Processing audio files, please wait..."
+    "processing": "Processing media files, please wait..."
   },
   "asr": {
     "language": "Language:",

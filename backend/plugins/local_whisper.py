@@ -16,7 +16,7 @@ class LocalWhisperPlugin(ASRPlugin):
         self.model_name = getattr(settings, 'LOCAL_WHISPER_MODEL', 'tiny')
         self.device = getattr(settings, 'LOCAL_WHISPER_DEVICE', 'auto')
         self.model_cache_dir = getattr(settings, 'LOCAL_WHISPER_MODEL_CACHE_DIR', 'models')
-        
+
         # Initialize model (will be loaded on first use)
         self.model = None
         self._ensure_model_cache_dir()
@@ -34,7 +34,7 @@ class LocalWhisperPlugin(ASRPlugin):
                 self.model = whisper.load_model(
                     self.model_name,
                     device="cpu",  # Force CPU to avoid compatibility issues
-                    download_root=self.model_cache_dir
+                    download_root=self.model_cache_dir,
                 )
                 logger.info(f"Whisper model {self.model_name} loaded successfully on CPU")
             except Exception as e:
@@ -43,14 +43,11 @@ class LocalWhisperPlugin(ASRPlugin):
                 try:
                     logger.info("Trying alternative model loading approach...")
                     import torch
+
                     # Clear any cached models and try again
                     if torch.cuda.is_available():
                         torch.cuda.empty_cache()
-                    self.model = whisper.load_model(
-                        self.model_name,
-                        device="cpu",
-                        download_root=self.model_cache_dir
-                    )
+                    self.model = whisper.load_model(self.model_name, device="cpu", download_root=self.model_cache_dir)
                     logger.info(f"Whisper model {self.model_name} loaded successfully with alternative approach")
                 except Exception as e2:
                     logger.error(f"Alternative loading also failed: {e2}")
@@ -64,41 +61,43 @@ class LocalWhisperPlugin(ASRPlugin):
         if model_name not in valid_models:
             logger.error(f"Invalid Whisper model: {model_name}. Valid models: {valid_models}")
             return False
-        
+
         # Check if device is valid
         valid_devices = ['auto', 'cpu', 'cuda']
         device = config.get('device', self.device)
         if device not in valid_devices:
             logger.error(f"Invalid device: {device}. Valid devices: {valid_devices}")
             return False
-            
+
         return True
 
     def _get_language_code(self, language: str) -> str:
         """
         Get language code for Whisper
-        
+
         Args:
             language: Language code
-            
+
         Returns:
             Whisper language code
         """
         language_mapping = {
             "auto": None,  # Auto detect
-            "ja": "ja",    # Japanese
-            "zh": "zh",    # Chinese
-            "en": "en",    # English
-            "fr": "fr",    # French
-            "de": "de",    # German
-            "es": "es",    # Spanish
-            "ru": "ru",    # Russian
-            "ko": "ko",    # Korean
+            "ja": "ja",  # Japanese
+            "zh": "zh",  # Chinese
+            "en": "en",  # English
+            "fr": "fr",  # French
+            "de": "de",  # German
+            "es": "es",  # Spanish
+            "ru": "ru",  # Russian
+            "ko": "ko",  # Korean
         }
-        
+
         return language_mapping.get(language, None)
 
-    async def transcribe_segment(self, segment_file: str, segment_info: Dict[str, Any], language: str = "auto") -> Optional[List[str]]:
+    async def transcribe_segment(
+        self, segment_file: str, segment_info: Dict[str, Any], language: str = "auto"
+    ) -> Optional[List[str]]:
         """
         Transcribe a single audio segment using local Whisper
 
@@ -116,13 +115,13 @@ class LocalWhisperPlugin(ASRPlugin):
 
             # Get language code for Whisper
             whisper_language = self._get_language_code(language)
-            
+
             # Transcribe audio using Whisper
             result = self.model.transcribe(
                 segment_file,
                 language=whisper_language,  # None for auto detect
                 fp16=False,  # Use fp32 for better compatibility
-                verbose=False  # Disable verbose output
+                verbose=False,  # Disable verbose output
             )
 
             # Extract text segments

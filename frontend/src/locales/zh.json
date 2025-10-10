@@ -1,14 +1,14 @@
 {
   "app": {
-    "title": "🎵 Lazy ASR - 音频转录工具",
-    "description": "轻松上传音频文件，自动生成字幕文件"
+    "title": "🎵 Lazy ASR - 媒体转录工具",
+    "description": "轻松上传音频或视频文件，自动生成字幕文件"
   },
   "form": {
-    "uploadAudio": "上传音频文件:",
+    "uploadAudio": "上传媒体文件:",
     "selectASR": "选择ASR服务:",
     "selectOutputFormats": "选择输出格式:",
     "outputFormatsDescription": "选择要生成的字幕文件格式",
-    "maxFiles": "支持多文件上传，最多10个文件",
+    "maxFiles": "支持多文件上传，最多10个文件 (支持音频和视频格式)",
     "selectedFiles": "已选择的文件",
     "removeFile": "✕",
     "advancedOptions": "高级选项",
@@ -29,8 +29,8 @@
     "downloadSRT": "💾 下载SRT文件"
   },
   "errors": {
-    "selectSingleFile": "请选择单个音频文件",
-    "selectFiles": "请选择音频文件",
+    "selectSingleFile": "请选择单个媒体文件",
+    "selectFiles": "请选择媒体文件",
     "maxFilesExceeded": "一次最多处理10个文件",
     "processingFailed": "处理失败",
     "batchProcessingFailed": "批量处理失败"
@@ -55,7 +55,7 @@
     "failedFiles": "失败文件数"
   },
   "processing": {
-    "processing": "正在处理音频文件，请稍候..."
+    "processing": "正在处理媒体文件，请稍候..."
   },
   "asr": {
     "language": "识别语言:",

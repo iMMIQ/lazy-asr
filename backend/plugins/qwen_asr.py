@@ -23,10 +23,10 @@ class QwenASRPlugin(ASRPlugin):
     def _get_language_prompt(self, language: str) -> str:
         """
         Get language-specific system prompt for Qwen ASR
-        
+
         Args:
             language: Language code
-            
+
         Returns:
             Language-specific prompt text
         """
@@ -36,29 +36,31 @@ class QwenASRPlugin(ASRPlugin):
             "zh": "请转录这段音频。",  # Chinese
             "en": "Please transcribe this audio.",  # English
         }
-        
+
         return language_prompts.get(language, language_prompts["auto"])
 
     def _get_asr_language(self, language: str) -> str:
         """
         Get language code for Qwen ASR options
-        
+
         Args:
             language: Language code
-            
+
         Returns:
             ASR language code
         """
         language_mapping = {
             "auto": "ja",  # Default to Japanese for auto detect
-            "ja": "ja",    # Japanese
-            "zh": "zh",    # Chinese
-            "en": "en",    # English
+            "ja": "ja",  # Japanese
+            "zh": "zh",  # Chinese
+            "en": "en",  # English
         }
-        
+
         return language_mapping.get(language, language_mapping["auto"])
 
-    async def transcribe_segment(self, segment_file: str, segment_info: Dict[str, Any], language: str = "auto") -> Optional[List[str]]:
+    async def transcribe_segment(
+        self, segment_file: str, segment_info: Dict[str, Any], language: str = "auto"
+    ) -> Optional[List[str]]:
         """
         Transcribe a single audio segment using Qwen ASR
 
@@ -76,7 +78,7 @@ class QwenASRPlugin(ASRPlugin):
 
             # Get language-specific system prompt
             system_prompt = self._get_language_prompt(language)
-            
+
             # Prepare the messages
             messages = [
                 {
@@ -95,7 +97,7 @@ class QwenASRPlugin(ASRPlugin):
 
             # Get language code for ASR options
             asr_language = self._get_asr_language(language)
-            
+
             # Call the Qwen ASR API
             response = MultiModalConversation.call(
                 api_key=self.api_key,

@@ -34,7 +34,7 @@ function App() {
       const plugins = response.data.plugins;
       const defaultMethod = response.data.default_method;
       setAvailablePlugins(plugins);
-      
+
       // Set the default method from backend configuration
       if (defaultMethod && plugins.includes(defaultMethod)) {
         setAsrMethod(defaultMethod);
@@ -81,9 +81,9 @@ function App() {
 
     try {
       const formData = new FormData();
-      formData.append('audio_file', audioFiles[0]);
+      formData.append('media_file', audioFiles[0]);
       formData.append('asr_method', asrMethod);
-      
+
       // Add output formats
       formData.append('output_formats', outputFormats.join(','));
 
@@ -135,12 +135,12 @@ function App() {
 
     try {
       const formData = new FormData();
-      
+
       // Add all files
       audioFiles.forEach(file => {
         formData.append('audio_files', file);
       });
-      
+
       formData.append('asr_method', asrMethod);
       formData.append('output_formats', outputFormats.join(','));
 
@@ -205,14 +205,14 @@ function App() {
         <h1>{t('app.title')}</h1>
         <p>{t('app.description')}</p>
         <div className="language-switcher">
-          <button 
-            onClick={() => changeLanguage('zh')} 
+          <button
+            onClick={() => changeLanguage('zh')}
             className={i18n.language === 'zh' ? 'active' : ''}
           >
             {t('language.chinese')}
           </button>
-          <button 
-            onClick={() => changeLanguage('en')} 
+          <button
+            onClick={() => changeLanguage('en')}
             className={i18n.language === 'en' ? 'active' : ''}
           >
             {t('language.english')}
@@ -226,8 +226,8 @@ function App() {
             <label htmlFor="audioFile">{t('form.uploadAudio')}</label>
             <input
               type="file"
-              id="audioFile"
-              accept="audio/*"
+              id="mediaFile"
+              accept="audio/*,video/*"
               multiple
               onChange={handleFileChange}
               disabled={isProcessing}
@@ -276,8 +276,8 @@ function App() {
             <label>{t('form.selectOutputFormats')}</label>
             <div className="format-checkboxes">
               {['srt', 'vtt', 'lrc', 'txt'].map((format) => (
-                <label 
-                  key={format} 
+                <label
+                  key={format}
                   className={`format-checkbox ${outputFormats.includes(format) ? 'selected' : ''}`}
                 >
                   <input
@@ -504,9 +504,9 @@ function App() {
                   <div className="segments-list">
                     {result.segments.map((segment, index) => (
                       <div key={index} className="segment-item">
-                  <div className="segment-time">
-                    {segment.start} --> {segment.end}
-                  </div>
+                        <div className="segment-time">
+                          {segment.start} --> {segment.end}
+                        </div>
                         <div className="segment-text">
                           {segment.text}
                         </div>
@@ -519,7 +519,7 @@ function App() {
               {result.output_files && (
                 <div className="download-buttons">
                   <h3>{t('results.downloadFiles')}</h3>
-                  
+
                   {/* Bundle download button - show when multiple formats are selected */}
                   {Object.keys(result.output_files).length > 1 && result.task_id && (
                     <button
@@ -529,7 +529,7 @@ function App() {
                       {t('buttons.downloadBundle')} ({Object.keys(result.output_files).length})
                     </button>
                   )}
-                  
+
                   {/* Individual download buttons */}
                   {Object.entries(result.output_files).map(([format, filePath]) => (
                     <button
@@ -542,7 +542,7 @@ function App() {
                   ))}
                 </div>
               )}
-              
+
               {/* Backward compatibility: show SRT download button if output_files is not available */}
               {!result.output_files && result.srt_file_path && (
                 <button
@@ -583,7 +583,7 @@ function App() {
                       {fileResult.success ? '✅' : '❌'} {fileResult.filename}
                     </h4>
                     <p>{fileResult.message}</p>
-                    
+
                     {fileResult.success && fileResult.output_files && (
                       <div className="file-download-buttons">
                         {Object.entries(fileResult.output_files).map(([format, filePath]) => (
@@ -605,13 +605,13 @@ function App() {
                         )}
                       </div>
                     )}
-                    
+
                     {fileResult.stats && (
                       <div className="file-stats">
                         <small>
-                          {t('stats.totalSubtitles')}: {fileResult.stats.total_subtitles} | 
-                          {t('stats.totalSegments')}: {fileResult.stats.total_segments} | 
-                          {t('stats.successfulTranscriptions')}: {fileResult.stats.successful_transcriptions} | 
+                          {t('stats.totalSubtitles')}: {fileResult.stats.total_subtitles} |
+                          {t('stats.totalSegments')}: {fileResult.stats.total_segments} |
+                          {t('stats.successfulTranscriptions')}: {fileResult.stats.successful_transcriptions} |
                           {t('stats.failedSegments')}: {fileResult.stats.failed_segments}
                         </small>
                       </div>

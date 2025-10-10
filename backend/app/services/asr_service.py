@@ -9,6 +9,10 @@ from app.utils.audio_processing import (
     parse_transcription_segments,
     time_string_to_seconds,
 )
+from app.utils.video_processing import (
+    prepare_media_for_asr,
+    validate_media_file,
+)
 from app.utils.subtitle_formatters import generate_subtitle_files
 from plugins.manager import plugin_manager
 from app.models.schemas import ASRResponse
@@ -25,9 +29,9 @@ class ASRService:
         os.makedirs(self.upload_dir, exist_ok=True)
         os.makedirs(self.output_dir, exist_ok=True)
 
-    async def process_audio(
+    async def process_media(
         self,
-        audio_path: str,
+        media_path: str,
         asr_method: str = "faster-whisper",
         vad_options: Optional[Dict[str, Any]] = None,
         asr_options: Optional[Dict[str, Any]] = None,
@@ -38,10 +42,10 @@ class ASRService:
         output_formats: List[str] = None,
     ) -> ASRResponse:
         """
-        Process audio file through the complete ASR pipeline
+        Process media file (audio or video) through the complete ASR pipeline
 
         Args:
-            audio_path: Path to the audio file
+            media_path: Path to the media file (audio or video)
             asr_method: ASR method to use
             vad_options: VAD options
             asr_options: ASR options
@@ -50,24 +54,38 @@ class ASRService:
             ASRResponse with results
         """
         try:
-            logger.info("Starting Silero VAD automatic segmentation transcription process")
+            logger.info("Starting media processing with Silero VAD automatic segmentation")
             logger.info("=" * 60)
             logger.info(f"ASR method: {asr_method}")
             logger.info(f"Output directory: {self.output_dir}")
 
             # Check if file exists
-            if not os.path.exists(audio_path):
-                logger.error(f"Audio file does not exist: {audio_path}")
-                return ASRResponse(success=False, message="Audio file does not exist")
+            if not os.path.exists(media_path):
+                logger.error(f"Media file does not exist: {media_path}")
+                return ASRResponse(success=False, message="Media file does not exist")
+
+            # Validate media file
+            is_valid, validation_msg = validate_media_file(media_path)
+            if not is_valid:
+                logger.error(f"Media file validation failed: {validation_msg}")
+                return ASRResponse(success=False, message=f"Media file validation failed: {validation_msg}")
 
             # Create task ID and output directory
             task_id = str(uuid.uuid4())
             task_output_dir = os.path.join(self.output_dir, task_id)
             os.makedirs(task_output_dir, exist_ok=True)
 
+            # Prepare media for ASR processing (extract audio from video if needed)
+            logger.info("Preparing media for ASR processing...")
+            processed_audio_path, media_type = prepare_media_for_asr(media_path, task_output_dir)
+            logger.info(f"Media type: {media_type}")
+            logger.info(f"Processed audio path: {processed_audio_path}")
+
             # 1. Silero VAD segmentation
             try:
-                speech_timestamps, audio_data, sample_rate = silero_vad_segmentation(audio_path, vad_options or {})
+                speech_timestamps, audio_data, sample_rate = silero_vad_segmentation(
+                    processed_audio_path, vad_options or {}
+                )
             except Exception as e:
                 logger.error(f"Silero VAD detection failed: {e}")
                 return ASRResponse(success=False, message=f"Silero VAD detection failed: {e}")
@@ -127,7 +145,7 @@ class ASRService:
                         logger.error(f"Cannot find corresponding segment information, index: {segment_index}")
                         failed_segments += 1
                         continue
-                
+
                 logger.info(f"[{i+1}/{len(exported_segments)}] Processing speech segment:")
                 logger.info(f"  File: {os.path.basename(segment_info['file_path'])}")
                 logger.info(f"  Time: {segment_info['start_time']:.2f}s - {segment_info['end_time']:.2f}s")
@@ -190,7 +208,7 @@ class ASRService:
                 if output_formats is None:
                     output_formats = ['srt']
 
-                base_name = os.path.splitext(os.path.basename(audio_path))[0]
+                base_name = os.path.splitext(os.path.basename(media_path))[0]
                 base_output_path = os.path.join(task_output_dir, f"{base_name}_silero_subtitles")
 
                 # Generate multiple format subtitle files
@@ -225,7 +243,9 @@ class ASRService:
                     logger.info("=" * 60)
                     for failed_segment in failed_segments_details:
                         logger.info(f"  Segment {failed_segment['index']+1}:")
-                        logger.info(f"    Time: {failed_segment['start_time']:.2f}s - {failed_segment['end_time']:.2f}s")
+                        logger.info(
+                            f"    Time: {failed_segment['start_time']:.2f}s - {failed_segment['end_time']:.2f}s"
+                        )
                         logger.info(f"    Duration: {failed_segment['duration']:.2f}s")
                         logger.info(f"    Error type: {failed_segment['error_type']}")
                         logger.info(f"    Error message: {failed_segment['error']}")
@@ -262,7 +282,9 @@ class ASRService:
                     logger.info("=" * 60)
                     for failed_segment in failed_segments_details:
                         logger.info(f"  Segment {failed_segment['index']+1}:")
-                        logger.info(f"    Time: {failed_segment['start_time']:.2f}s - {failed_segment['end_time']:.2f}s")
+                        logger.info(
+                            f"    Time: {failed_segment['start_time']:.2f}s - {failed_segment['end_time']:.2f}s"
+                        )
                         logger.info(f"    Duration: {failed_segment['duration']:.2f}s")
                         logger.info(f"    Error type: {failed_segment['error_type']}")
                         logger.info(f"    Error message: {failed_segment['error']}")
@@ -274,3 +296,40 @@ class ASRService:
         except Exception as e:
             logger.error(f"Error occurred during processing: {e}")
             return ASRResponse(success=False, message=f"Error occurred during processing: {e}")
+
+    async def process_audio(
+        self,
+        audio_path: str,
+        asr_method: str = "faster-whisper",
+        vad_options: Optional[Dict[str, Any]] = None,
+        asr_options: Optional[Dict[str, Any]] = None,
+        asr_api_url: Optional[str] = None,
+        asr_api_key: Optional[str] = None,
+        asr_model: Optional[str] = None,
+        language: Optional[str] = "auto",  # Default to auto detect
+        output_formats: List[str] = None,
+    ) -> ASRResponse:
+        """
+        Process audio file through the complete ASR pipeline (backward compatibility)
+
+        Args:
+            audio_path: Path to the audio file
+            asr_method: ASR method to use
+            vad_options: VAD options
+            asr_options: ASR options
+
+        Returns:
+            ASRResponse with results
+        """
+        # For backward compatibility, call process_media with audio file
+        return await self.process_media(
+            media_path=audio_path,
+            asr_method=asr_method,
+            vad_options=vad_options,
+            asr_options=asr_options,
+            asr_api_url=asr_api_url,
+            asr_api_key=asr_api_key,
+            asr_model=asr_model,
+            language=language,
+            output_formats=output_formats,
+        )

@@ -25,15 +25,12 @@ async def health_check():
 async def get_available_plugins():
     """Get list of available ASR plugins and default method"""
     plugins = plugin_manager.get_available_plugins()
-    return {
-        "plugins": plugins,
-        "default_method": settings.DEFAULT_ASR_METHOD
-    }
+    return {"plugins": plugins, "default_method": settings.DEFAULT_ASR_METHOD}
 
 
 @router.post("/process", response_model=ASRResponse)
-async def process_audio(
-    audio_file: UploadFile = File(...),
+async def process_media(
+    media_file: UploadFile = File(..., description="Media file to process (audio or video)"),
     asr_method: str = Form(settings.DEFAULT_ASR_METHOD),
     vad_options: Optional[str] = Form(None),
     asr_options: Optional[str] = Form(None),
@@ -46,10 +43,10 @@ async def process_audio(
     output_formats: Optional[str] = Form("srt"),  # Default to srt for backward compatibility
 ):
     """
-    Process audio file through ASR pipeline
+    Process media file through ASR pipeline
 
     Args:
-        audio_file: Audio file to process
+        media_file: Media file to process (audio or video)
         asr_method: ASR method to use
         vad_options: VAD options as JSON string
         asr_options: ASR options as JSON string
@@ -93,9 +90,9 @@ async def process_audio(
         upload_dir = os.path.join(settings.UPLOAD_DIR, task_id)
         os.makedirs(upload_dir, exist_ok=True)
 
-        file_path = os.path.join(upload_dir, audio_file.filename)
+        file_path = os.path.join(upload_dir, media_file.filename)
         with open(file_path, "wb") as buffer:
-            content = await audio_file.read()
+            content = await media_file.read()
             buffer.write(content)
 
         # Parse output formats

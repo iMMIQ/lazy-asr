@@ -25,10 +25,10 @@ class FasterWhisperPlugin(ASRPlugin):
     def _get_language_prompt(self, language: str) -> str:
         """
         Get language-specific prompt for Faster Whisper
-        
+
         Args:
             language: Language code
-            
+
         Returns:
             Language-specific prompt text
         """
@@ -38,10 +38,12 @@ class FasterWhisperPlugin(ASRPlugin):
             "zh": "请转录这段音频。",  # Chinese
             "en": "Please transcribe this audio.",  # English
         }
-        
+
         return language_prompts.get(language, language_prompts["auto"])
 
-    async def transcribe_segment(self, segment_file: str, segment_info: Dict[str, Any], language: str = "auto") -> Optional[List[str]]:
+    async def transcribe_segment(
+        self, segment_file: str, segment_info: Dict[str, Any], language: str = "auto"
+    ) -> Optional[List[str]]:
         """
         Transcribe a single audio segment using Faster Whisper
 
@@ -65,7 +67,7 @@ class FasterWhisperPlugin(ASRPlugin):
 
             # Add language-specific prompt
             prompt_text = self._get_language_prompt(language)
-            
+
             # Add other form fields
             form_data.add_field('stream', 'false')
             form_data.add_field('timestamp_granularities', 'segment')
