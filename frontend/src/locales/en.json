@@ -64,7 +64,7 @@
     "chinese": "Chinese",
     "english": "English",
     "japanese": "Japanese",
-    "fasterWhisper": {
+    "faster-whisper": {
       "apiUrl": "API URL:",
       "apiUrlDescription": "Faster Whisper API service address",
       "apiKey": "API Key (optional):",
@@ -72,7 +72,7 @@
       "model": "Model Name:",
       "modelDescription": "Speech recognition model to use"
     },
-    "qwenASR": {
+    "qwen-asr": {
       "apiUrl": "API URL:",
       "apiUrlDescription": "Alibaba Cloud ASR service address (fixed)",
       "apiKey": "API Key:",
