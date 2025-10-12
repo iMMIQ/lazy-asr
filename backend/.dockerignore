@@ -5,3 +5,6 @@ venv/
 node_modules/
 output/
 uploads/
+.lzc-cli/
+*.lpk
+build/

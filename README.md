@@ -72,7 +72,7 @@
    ```
 
 4. 访问应用:
-   - 前端界面: http://localhost:3000
+   - 前端界面: http://localhost:8000
    - API文档: http://localhost:8000/docs
 
 ### 本地开发

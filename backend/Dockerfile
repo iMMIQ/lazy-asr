@@ -1,4 +1,20 @@
-# Use Python 3.12 slim image
+# Frontend build stage
+FROM node:22-alpine AS frontend-build
+
+# Set working directory
+WORKDIR /app
+
+# Set npm registry
+RUN npm config set registry https://registry.npmmirror.com/
+
+# Copy frontend files
+COPY ../frontend/package*.json ./
+RUN npm install --legacy-peer-deps
+
+COPY ../frontend/ ./
+RUN npm run build
+
+# Backend runtime stage
 FROM python:3.12-slim
 
 # Set working directory
@@ -29,13 +45,16 @@ RUN pip install uv
 RUN uv --version
 
 # Copy dependency files
-COPY pyproject.toml ./
+COPY backend/pyproject.toml ./
 
 # Sync dependencies using uv
 RUN uv pip install -r pyproject.toml --system --index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
 # Copy application code
 COPY . .
+
+# Copy frontend build from frontend-build stage
+COPY --from=frontend-build /app/build ./static
 
 # Create required directories
 RUN mkdir -p uploads output

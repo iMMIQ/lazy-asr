@@ -1,0 +1,13 @@
+lzc-sdk-version: 0.1
+name: Lazy ASR
+package: cloud.lazycat.app.lazy-asr
+version: 0.1.0
+description: 基于Silero VAD语音活动检测和多种ASR引擎的自动分段转录工具
+license: https://choosealicense.com/licenses/mit/
+homepage: 
+author: 
+application:
+  subdomain: lazy-asr
+  routes:
+    - /=file:///lzcapp/pkg/content/web
+    - /api/=exec://8000,./lzcapp/pkg/content/backend/run.sh
