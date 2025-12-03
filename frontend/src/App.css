@@ -580,12 +580,12 @@ body {
   display: none;
 }
 
-.format-checkbox input[type="checkbox"]:checked + .format-label {
+.format-checkbox input[type="checkbox"]:checked+.format-label {
   color: #4facfe;
   font-weight: 600;
 }
 
-.format-checkbox input[type="checkbox"]:checked ~ .format-checkbox {
+.format-checkbox input[type="checkbox"]:checked~.format-checkbox {
   border-color: #4facfe;
   background: rgba(79, 172, 254, 0.1);
 }
@@ -597,7 +597,7 @@ body {
   font-weight: 500;
 }
 
-.format-checkbox input[type="checkbox"]:checked ~ .format-label {
+.format-checkbox input[type="checkbox"]:checked~.format-label {
   color: #4facfe;
 }
 
@@ -867,7 +867,7 @@ body {
   .submit-buttons {
     flex-direction: column;
   }
-  
+
   .process-button {
     min-width: auto;
   }
@@ -916,9 +916,422 @@ body {
     justify-content: center;
     margin-top: var(--space-md);
   }
-  
+
   .language-switcher button {
     padding: var(--space-xs) var(--space-sm);
     font-size: 0.8rem;
+  }
+}
+
+/* Tab Navigation Styling */
+.tab-navigation {
+  background: var(--card-bg);
+  border-radius: var(--radius-xl);
+  padding: var(--space-md);
+  margin-bottom: var(--space-2xl);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+}
+
+.tab-nav {
+  display: flex;
+  gap: var(--space-sm);
+  border-bottom: none;
+}
+
+.tab-button {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid transparent;
+  color: var(--text-secondary);
+  padding: var(--space-md) var(--space-xl);
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  flex: 1;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.tab-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.tab-button.active {
+  background: var(--primary-gradient);
+  color: white;
+  border-color: rgba(102, 126, 234, 0.3);
+  box-shadow: var(--shadow-md);
+}
+
+.tab-button.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+
+  100% {
+    left: 100%;
+  }
+}
+
+/* Path Scanner Specific Styling */
+.path-scanner {
+  background: var(--card-bg);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-normal);
+}
+
+.path-scanner:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-2px);
+}
+
+.path-scanner h2 {
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 2rem;
+  margin-bottom: var(--space-xl);
+  text-align: center;
+}
+
+/* Scan Status Cards */
+.scan-status-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  margin-bottom: var(--space-xl);
+  transition: all var(--transition-fast);
+}
+
+.scan-status-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--text-muted);
+}
+
+/* Progress Bar Styling */
+.progress-bar-container {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+  height: 12px;
+  margin: var(--space-lg) 0;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: var(--radius-lg);
+  transition: width 0.5s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: shimmer 2s infinite;
+}
+
+.progress-bar.pending {
+  background: var(--primary-gradient);
+}
+
+.progress-bar.scanning {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.progress-bar.processing {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.progress-bar.completed {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+}
+
+.progress-bar.failed {
+  background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+}
+
+.progress-bar.cancelled {
+  background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-md);
+  margin: var(--space-xl) 0;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--text-muted);
+}
+
+.stat-card .value {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-card .label {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Results Table */
+.results-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: var(--space-xl) 0;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+}
+
+.results-table th {
+  background: rgba(255, 255, 255, 0.05);
+  padding: var(--space-lg);
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.results-table td {
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.results-table tr:last-child td {
+  border-bottom: none;
+}
+
+.results-table tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-block;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.success {
+  background: rgba(72, 187, 120, 0.1);
+  color: #9ae6b4;
+  border: 1px solid rgba(72, 187, 120, 0.3);
+}
+
+.status-badge.failed {
+  background: rgba(245, 101, 101, 0.1);
+  color: #fed7d7;
+  border: 1px solid rgba(245, 101, 101, 0.3);
+}
+
+/* Scan Action Buttons */
+.scan-action-buttons {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  margin-top: var(--space-xl);
+}
+
+.scan-button {
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  padding: var(--space-md) var(--space-xl);
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+  flex: 1;
+  min-width: 150px;
+}
+
+.scan-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.scan-button:disabled {
+  background: var(--border-color);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.scan-button.cancel {
+  background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+}
+
+.scan-button.new {
+  background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
+}
+
+/* Error Message Styling for Scanner */
+.scanner-error {
+  background: rgba(245, 101, 101, 0.1);
+  color: #fed7d7;
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  margin: var(--space-xl) 0;
+  border-left: 4px solid #f56565;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  animation: slideInUp 0.5s ease;
+}
+
+.scanner-error::before {
+  content: '❌';
+  font-size: 1.2rem;
+}
+
+/* Checkbox Alignment Fix */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: var(--space-md) 0;
+}
+
+.checkbox-container input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.checkbox-container label {
+  margin: 0;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* Recursive Scan Checkbox Specific Styling */
+.recursive-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+  padding: var(--space-sm) 0;
+}
+
+.recursive-checkbox input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #667eea;
+  cursor: pointer;
+}
+
+.recursive-checkbox span {
+  font-size: 1rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Responsive Design for Tabs and Scanner */
+@media (max-width: 768px) {
+  .tab-nav {
+    flex-direction: column;
+  }
+
+  .tab-button {
+    width: 100%;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .scan-action-buttons {
+    flex-direction: column;
+  }
+
+  .scan-button {
+    width: 100%;
+  }
+
+  .results-table {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .path-scanner {
+    padding: var(--space-lg);
+  }
+
+  .path-scanner h2 {
+    font-size: 1.5rem;
+  }
+
+  .stat-card .value {
+    font-size: 1.5rem;
   }
 }

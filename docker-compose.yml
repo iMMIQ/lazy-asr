@@ -11,8 +11,13 @@ services:
       - ./backend:/app
       - ./uploads:/app/uploads
       - ./output:/app/output
+      # Uncomment and modify the following lines to mount NAS storage paths
+      # - /path/on/nas/audio:/nas/audio:ro
+      # - /path/on/nas/video:/nas/video:ro
     environment:
       - QWEN_ASR_API_KEY=${QWEN_ASR_API_KEY}
+      # Add scan paths for NAS deployment (comma-separated)
+      # Example: SCAN_PATHS=/nas/audio,/nas/video
     depends_on:
       - frontend
 
@@ -27,3 +32,15 @@ services:
       - /app/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
+
+# NAS Deployment Notes:
+# 1. Mount your NAS storage paths as volumes in the backend service
+# 2. Set SCAN_PATHS environment variable to the mounted paths
+# 3. Ensure proper permissions for the Docker container to access NAS files
+# 4. For read-only access, add ':ro' suffix to volume mounts
+# 5. Example configuration for NAS:
+#    volumes:
+#      - /mnt/nas/media/audio:/nas/audio:ro
+#      - /mnt/nas/media/video:/nas/video:ro
+#    environment:
+#      - SCAN_PATHS=/nas/audio,/nas/video

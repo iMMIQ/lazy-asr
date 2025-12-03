@@ -7,8 +7,9 @@ from fastapi.responses import FileResponse, StreamingResponse
 from typing import Optional, List
 import json
 from app.services.asr_service import ASRService
+from app.services.scan_service import scan_service
 from plugins.manager import plugin_manager
-from app.models.schemas import ASRResponse, MultiFileASRResponse, FileResult
+from app.models.schemas import ASRResponse, MultiFileASRResponse, FileResult, ScanRequest, ScanStatus, ScanResult
 from app.core.config import settings
 
 router = APIRouter()
@@ -353,3 +354,81 @@ async def download_bundle(task_id: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create bundle: {str(e)}")
+
+
+# Path scanning endpoints
+@router.post("/scan/start")
+async def start_scan(scan_request: ScanRequest):
+    """
+    Start scanning a path for media files and process them
+
+    Args:
+        scan_request: Scan request containing path and parameters
+    """
+    try:
+        scan_id = await scan_service.scan_path(scan_request)
+        return {"scan_id": scan_id, "message": "Scan started successfully", "status": "pending"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to start scan: {str(e)}")
+
+
+@router.get("/scan/status/{scan_id}", response_model=ScanStatus)
+async def get_scan_status(scan_id: str):
+    """
+    Get the status of a scan operation
+
+    Args:
+        scan_id: Scan ID to check status for
+    """
+    scan_status = scan_service.get_scan_status(scan_id)
+    if not scan_status:
+        raise HTTPException(status_code=404, detail="Scan not found")
+    return scan_status
+
+
+@router.get("/scan/result/{scan_id}", response_model=ScanResult)
+async def get_scan_result(scan_id: str):
+    """
+    Get the result of a completed scan operation
+
+    Args:
+        scan_id: Scan ID to get result for
+    """
+    scan_result = scan_service.get_scan_result(scan_id)
+    if not scan_result:
+        raise HTTPException(status_code=404, detail="Scan result not found")
+    return scan_result
+
+
+@router.get("/scan/all")
+async def get_all_scans():
+    """Get status of all scans"""
+    scans = scan_service.get_all_scans()
+    return {"total_scans": len(scans), "scans": scans}
+
+
+@router.post("/scan/cancel/{scan_id}")
+async def cancel_scan(scan_id: str):
+    """
+    Cancel a scan operation
+
+    Args:
+        scan_id: Scan ID to cancel
+    """
+    success = scan_service.cancel_scan(scan_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Scan not found or cannot be cancelled")
+    return {"message": "Scan cancelled successfully"}
+
+
+@router.get("/scan/config")
+async def get_scan_config():
+    """Get current scan configuration"""
+    return {
+        "scan_paths": settings.SCAN_PATHS,
+        "scan_file_extensions": settings.SCAN_FILE_EXTENSIONS,
+        "scan_recursive": settings.SCAN_RECURSIVE,
+        "scan_max_files": settings.SCAN_MAX_FILES,
+    }

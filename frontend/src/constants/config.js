@@ -27,7 +27,7 @@ export const MAX_FILES = 10;
 export const ASR_METHOD_CONFIGS = {
   'faster-whisper': {
     apiUrl: {
-      placeholder: 'https://asr-ai.immiqnas.heiyu.space/v1/audio/transcriptions',
+      placeholder: 'https://asr-ai.immiqtop.heiyu.space/v1/audio/transcriptions',
       description: 'Faster Whisper API URL'
     },
     apiKey: {

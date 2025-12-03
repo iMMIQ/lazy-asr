@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     AVAILABLE_ASR_METHODS: list = ["local-whisper", "faster-whisper", "qwen-asr"]
 
     # Faster Whisper settings
-    FASTER_WHISPER_API_URL: str = "https://asr-ai.immiqnas.heiyu.space/v1/audio/transcriptions"
+    FASTER_WHISPER_API_URL: str = "https://asr-ai.immiqtop.heiyu.space/v1/audio/transcriptions"
     FASTER_WHISPER_API_KEY: Optional[str] = None
     FASTER_WHISPER_MODEL: str = "Systran/faster-whisper-large-v2"
 
@@ -37,6 +37,27 @@ class Settings(BaseSettings):
 
     # Concurrency settings
     MAX_CONCURRENT_TASKS: int = 16  # Maximum concurrent transcription tasks
+
+    # Path scanning settings
+    SCAN_PATHS: list = []  # List of paths to scan for media files
+    SCAN_FILE_EXTENSIONS: list = [
+        ".mp3",
+        ".wav",
+        ".flac",
+        ".m4a",
+        ".aac",
+        ".ogg",
+        ".opus",
+        ".mp4",
+        ".avi",
+        ".mkv",
+        ".mov",
+        ".wmv",
+        ".flv",
+        ".webm",
+    ]  # Supported file extensions for scanning
+    SCAN_RECURSIVE: bool = True  # Whether to scan recursively
+    SCAN_MAX_FILES: int = 100  # Maximum number of files to process in one scan
 
     class Config:
         env_file = ".env"

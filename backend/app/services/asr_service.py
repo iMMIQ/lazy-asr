@@ -213,8 +213,26 @@ class ASRService:
                 if output_formats is None:
                     output_formats = ['srt']
 
+                # For scan mode: output to same directory as source file
+                # Check if we're in scan mode by looking at media_path location
                 base_name = os.path.splitext(os.path.basename(media_path))[0]
-                base_output_path = os.path.join(task_output_dir, f"{base_name}_silero_subtitles")
+
+                # Determine output directory
+                # If media_path is outside of uploads directory, assume it's scan mode
+                # and output to same directory as source file
+                media_dir = os.path.dirname(media_path)
+                uploads_dir = os.path.abspath(self.upload_dir)
+
+                if not media_path.startswith(uploads_dir):
+                    # This is a scan mode file, output to same directory as source
+                    output_dir = media_dir
+                    # For scan mode: use same base name as source file
+                    base_output_path = os.path.join(output_dir, base_name)
+                else:
+                    # This is a regular upload, output to task directory
+                    output_dir = task_output_dir
+                    # For regular upload: keep original naming with _silero_subtitles
+                    base_output_path = os.path.join(output_dir, f"{base_name}_silero_subtitles")
 
                 # Generate multiple format subtitle files
                 output_files = generate_subtitle_files(all_subtitles, base_output_path, output_formats)

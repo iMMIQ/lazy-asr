@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { fetchPlugins } from './services/api';
 import useASRProcessing from './hooks/useASRProcessing';
-import { 
+import {
   DEFAULT_OUTPUT_FORMATS,
   DEFAULT_MIN_SPEECH_DURATION,
   DEFAULT_MIN_SILENCE_DURATION
@@ -16,13 +16,17 @@ import AdvancedOptions from './components/AdvancedOptions';
 import SubmitButtons from './components/SubmitButtons';
 import ProcessingIndicator from './components/ProcessingIndicator';
 import ResultDisplay from './components/ResultDisplay';
+import PathScanner from './components/PathScanner';
 
 import './App.css';
 
 function App() {
   const { t, i18n } = useTranslation();
-  
-  // State management
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState('upload'); // 'upload' or 'scan'
+
+  // State management for upload tab
   const [audioFiles, setAudioFiles] = useState([]);
   const [asrMethod, setAsrMethod] = useState('');
   const [availablePlugins, setAvailablePlugins] = useState([]);
@@ -181,61 +185,86 @@ function App() {
 
   return (
     <div className="App">
-      <Header 
-        currentLanguage={i18n.language} 
-        onLanguageChange={changeLanguage} 
+      <Header
+        currentLanguage={i18n.language}
+        onLanguageChange={changeLanguage}
       />
 
       <main className="App-main">
-        <div className="processing-form">
-          <FileUpload
-            audioFiles={audioFiles}
-            onFilesChange={handleFileChange}
-            onFileRemove={handleFileRemove}
-            isProcessing={isProcessing}
-          />
-
-          <ASRConfig
-            asrMethod={asrMethod}
-            availablePlugins={availablePlugins}
-            outputFormats={outputFormats}
-            onMethodChange={handleMethodChange}
-            onFormatChange={handleFormatChange}
-            isProcessing={isProcessing}
-          />
-
-          <AdvancedOptions
-            showAdvancedOptions={showAdvancedOptions}
-            onToggleAdvancedOptions={() => setShowAdvancedOptions(!showAdvancedOptions)}
-            minSpeechDuration={minSpeechDuration}
-            minSilenceDuration={minSilenceDuration}
-            asrLanguage={asrLanguage}
-            asrApiUrl={asrApiUrl}
-            asrApiKey={asrApiKey}
-            asrModel={asrModel}
-            asrMethod={asrMethod}
-            onVadConfigChange={handleVadConfigChange}
-            onAsrConfigChange={handleAsrConfigChange}
-            isProcessing={isProcessing}
-          />
-
-          <SubmitButtons
-            audioFiles={audioFiles}
-            isProcessing={isProcessing}
-            onSingleSubmit={handleSingleSubmit}
-            onMultipleSubmit={handleMultipleSubmit}
-          />
+        {/* Tab Navigation */}
+        <div className="tab-navigation">
+          <nav className="tab-nav">
+            <button
+              onClick={() => setActiveTab('upload')}
+              className={`tab-button ${activeTab === 'upload' ? 'active' : ''}`}
+            >
+              {t('tabs.fileUpload')}
+            </button>
+            <button
+              onClick={() => setActiveTab('scan')}
+              className={`tab-button ${activeTab === 'scan' ? 'active' : ''}`}
+            >
+              {t('tabs.pathScan')}
+            </button>
+          </nav>
         </div>
 
-        <ProcessingIndicator
-          isProcessing={isProcessing}
-          error={error}
-        />
+        {/* Tab Content */}
+        {activeTab === 'upload' ? (
+          <>
+            <div className="processing-form">
+              <FileUpload
+                audioFiles={audioFiles}
+                onFilesChange={handleFileChange}
+                onFileRemove={handleFileRemove}
+                isProcessing={isProcessing}
+              />
 
-        <ResultDisplay
-          result={result}
-          multiFileResult={multiFileResult}
-        />
+              <ASRConfig
+                asrMethod={asrMethod}
+                availablePlugins={availablePlugins}
+                outputFormats={outputFormats}
+                onMethodChange={handleMethodChange}
+                onFormatChange={handleFormatChange}
+                isProcessing={isProcessing}
+              />
+
+              <AdvancedOptions
+                showAdvancedOptions={showAdvancedOptions}
+                onToggleAdvancedOptions={() => setShowAdvancedOptions(!showAdvancedOptions)}
+                minSpeechDuration={minSpeechDuration}
+                minSilenceDuration={minSilenceDuration}
+                asrLanguage={asrLanguage}
+                asrApiUrl={asrApiUrl}
+                asrApiKey={asrApiKey}
+                asrModel={asrModel}
+                asrMethod={asrMethod}
+                onVadConfigChange={handleVadConfigChange}
+                onAsrConfigChange={handleAsrConfigChange}
+                isProcessing={isProcessing}
+              />
+
+              <SubmitButtons
+                audioFiles={audioFiles}
+                isProcessing={isProcessing}
+                onSingleSubmit={handleSingleSubmit}
+                onMultipleSubmit={handleMultipleSubmit}
+              />
+            </div>
+
+            <ProcessingIndicator
+              isProcessing={isProcessing}
+              error={error}
+            />
+
+            <ResultDisplay
+              result={result}
+              multiFileResult={multiFileResult}
+            />
+          </>
+        ) : (
+          <PathScanner />
+        )}
       </main>
     </div>
   );

@@ -84,5 +84,43 @@
   "language": {
     "chinese": "中文",
     "english": "English"
+  },
+  "tabs": {
+    "fileUpload": "File Upload",
+    "pathScan": "Path Scan"
+  },
+  "pathScanner": {
+    "title": "📁 Path Scanner - NAS Media Processing",
+    "scanPath": "Scan Path:",
+    "suggestedPaths": "Suggested paths",
+    "asrMethod": "ASR Method:",
+    "maxFiles": "Maximum Files:",
+    "outputFormats": "Output Formats:",
+    "recursiveScan": "Recursive Scan",
+    "startScan": "🚀 Start Scan",
+    "scanning": "🚀 Scanning...",
+    "cancelScan": "❌ Cancel Scan",
+    "newScan": "🔄 New Scan",
+    "scanStatus": "Scan Status",
+    "totalFiles": "Total Files",
+    "processedFiles": "Processed Files",
+    "failedFiles": "Failed Files",
+    "currentFile": "Current File",
+    "noFileProcessing": "No file being processed",
+    "message": "Message",
+    "scanId": "Scan ID",
+    "scanResults": "Scan Results",
+    "successRate": "Success Rate",
+    "duration": "Duration",
+    "seconds": "seconds",
+    "startTime": "Start Time",
+    "endTime": "End Time",
+    "resultsSummary": "Results Summary",
+    "fileIndex": "File Index",
+    "status": "Status",
+    "success": "Success",
+    "failed": "Failed",
+    "showingFirst10": "Showing first 10 of",
+    "results": "results"
   }
 }

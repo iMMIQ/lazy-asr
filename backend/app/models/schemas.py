@@ -78,3 +78,45 @@ class ProcessingStatus(BaseModel):
     created_at: datetime
     updated_at: datetime
     result: Optional[ASRResponse] = None
+
+
+# Path scanning related models
+class ScanRequest(BaseModel):
+    """Request to scan a path for media files"""
+
+    path: str
+    recursive: bool = True
+    asr_method: str = "local-whisper"
+    output_formats: List[str] = ["srt"]
+    max_files: Optional[int] = None
+
+
+class ScanStatus(BaseModel):
+    """Status of a scan operation"""
+
+    scan_id: str
+    status: str  # pending, scanning, processing, completed, failed
+    total_files: int
+    processed_files: int
+    failed_files: int
+    current_file: Optional[str] = None
+    progress: int  # 0-100
+    message: str
+    start_time: datetime
+    end_time: Optional[datetime] = None
+    results: List[ASRResponse] = []
+
+
+class ScanResult(BaseModel):
+    """Result of a scan operation"""
+
+    scan_id: str
+    status: str
+    total_files: int
+    processed_files: int
+    failed_files: int
+    success_rate: float
+    start_time: datetime
+    end_time: datetime
+    duration_seconds: float
+    results: List[ASRResponse] = []
