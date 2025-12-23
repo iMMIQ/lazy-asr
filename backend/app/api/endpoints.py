@@ -42,6 +42,7 @@ async def process_media(
     asr_model: Optional[str] = Form(None),
     language: Optional[str] = Form("auto"),  # Default to auto detect
     output_formats: Optional[str] = Form("srt"),  # Default to srt for backward compatibility
+    output_mode: str = Form("task"),  # "task": 输出到任务目录, "source": 输出到源文件目录
 ):
     """
     Process media file through ASR pipeline
@@ -113,6 +114,7 @@ async def process_media(
             asr_model=asr_model,
             language=language,
             output_formats=parsed_output_formats,
+            output_mode=output_mode,
         )
 
         return result

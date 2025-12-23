@@ -7,6 +7,7 @@ class ASRRequest(BaseModel):
     asr_method: str = "faster-whisper"
     vad_options: Optional[Dict[str, Any]] = None
     asr_options: Optional[Dict[str, Any]] = None
+    output_mode: str = "task"  # "task": 输出到任务目录, "source": 输出到源文件目录
 
 
 class SegmentInfo(BaseModel):

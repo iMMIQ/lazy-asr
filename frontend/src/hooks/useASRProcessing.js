@@ -60,6 +60,7 @@ export const useASRProcessing = () => {
     asrApiKey,
     asrModel,
     asrLanguage,
+    outputMode = 'task',  // 默认输出到任务目录
     isMultiple = false
   }) => {
     const formData = new FormData();
@@ -76,6 +77,7 @@ export const useASRProcessing = () => {
 
     formData.append('asr_method', asrMethod);
     formData.append('output_formats', outputFormats.join(','));
+    formData.append('output_mode', outputMode);  // 添加输出模式参数
 
     // Add VAD parameters
     if (showAdvancedOptions) {

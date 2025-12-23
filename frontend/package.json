@@ -16,8 +16,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-i18next": "^16.0.0",
-    "react-scripts": "5.0.1",
-    "typescript": "^5.9.3"
+    "react-scripts": "5.0.1"
   },
   "browserslist": {
     "production": [
@@ -30,5 +29,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "typescript": "^4.9.5"
   }
 }

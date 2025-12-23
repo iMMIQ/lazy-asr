@@ -1,55 +1,80 @@
 """
 Logger configuration module for the ASR service.
-Provides structured logging with consistent formatting across the application.
+Provides plain text logging with consistent formatting across the application.
 """
 
 import logging
-import structlog
-from typing import Any, Dict
+import sys
+from typing import Any, Dict, Optional
 
 
 def setup_logging() -> None:
     """
-    Configure structured logging for the application.
+    Configure plain text logging for the application.
     """
-    # Configure standard logging
-    logging.basicConfig(
-        format="%(message)s",
-        level=logging.INFO,
-        handlers=[logging.StreamHandler()],
-    )
+    # Configure logging with plain text format
+    formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s [%(name)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
-    # Configure structlog
-    structlog.configure(
-        processors=[
-            structlog.stdlib.filter_by_level,
-            structlog.stdlib.add_logger_name,
-            structlog.stdlib.add_log_level,
-            structlog.stdlib.PositionalArgumentsFormatter(),
-            structlog.processors.TimeStamper(fmt="iso"),
-            structlog.processors.StackInfoRenderer(),
-            structlog.processors.format_exc_info,
-            structlog.processors.UnicodeDecoder(),
-            structlog.processors.JSONRenderer(),
-        ],
-        context_class=dict,
-        logger_factory=structlog.stdlib.LoggerFactory(),
-        wrapper_class=structlog.stdlib.BoundLogger,
-        cache_logger_on_first_use=True,
-    )
+    # Create console handler
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(formatter)
+
+    # Configure root logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)
+
+    # Remove existing handlers to avoid duplicate logs
+    for handler in root_logger.handlers[:]:
+        root_logger.removeHandler(handler)
+
+    # Add our handler
+    root_logger.addHandler(console_handler)
 
 
-def get_logger(name: str) -> structlog.BoundLogger:
+class CustomLogger:
     """
-    Get a structured logger instance for the specified module.
+    Custom logger wrapper that provides a simple interface similar to structlog.
+    """
+
+    def __init__(self, name: str):
+        self.logger = logging.getLogger(name)
+
+    def info(self, msg: str, *args, **kwargs) -> None:
+        """Log an info message."""
+        self.logger.info(msg, *args, **kwargs)
+
+    def error(self, msg: str, *args, **kwargs) -> None:
+        """Log an error message."""
+        self.logger.error(msg, *args, **kwargs)
+
+    def warning(self, msg: str, *args, **kwargs) -> None:
+        """Log a warning message."""
+        self.logger.warning(msg, *args, **kwargs)
+
+    def debug(self, msg: str, *args, **kwargs) -> None:
+        """Log a debug message."""
+        self.logger.debug(msg, *args, **kwargs)
+
+    def exception(self, msg: str, *args, **kwargs) -> None:
+        """Log an exception with traceback."""
+        self.logger.exception(msg, *args, **kwargs)
+
+    def critical(self, msg: str, *args, **kwargs) -> None:
+        """Log a critical message."""
+        self.logger.critical(msg, *args, **kwargs)
+
+
+def get_logger(name: str) -> CustomLogger:
+    """
+    Get a logger instance for the specified module.
 
     Args:
         name: The name of the module (usually __name__)
 
     Returns:
-        A structured logger instance
+        A logger instance
     """
-    return structlog.get_logger(name)
+    return CustomLogger(name)
 
 
 # Initialize logging when module is imported

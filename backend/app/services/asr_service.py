@@ -41,6 +41,7 @@ class ASRService:
         asr_model: Optional[str] = None,
         language: Optional[str] = "auto",  # Default to auto detect
         output_formats: List[str] = None,
+        output_mode: str = "task",  # "task": 输出到任务目录, "source": 输出到源文件目录
     ) -> ASRResponse:
         """
         Process media file (audio or video) through the complete ASR pipeline
@@ -217,21 +218,18 @@ class ASRService:
                 # Check if we're in scan mode by looking at media_path location
                 base_name = os.path.splitext(os.path.basename(media_path))[0]
 
-                # Determine output directory
-                # If media_path is outside of uploads directory, assume it's scan mode
-                # and output to same directory as source file
+                # Determine output directory based on output_mode parameter
                 media_dir = os.path.dirname(media_path)
-                uploads_dir = os.path.abspath(self.upload_dir)
 
-                if not media_path.startswith(uploads_dir):
-                    # This is a scan mode file, output to same directory as source
+                if output_mode == "source":
+                    # Output to same directory as source file (scan mode)
                     output_dir = media_dir
-                    # For scan mode: use same base name as source file
+                    # Use same base name as source file
                     base_output_path = os.path.join(output_dir, base_name)
                 else:
-                    # This is a regular upload, output to task directory
+                    # Default: output to task directory (regular upload mode)
                     output_dir = task_output_dir
-                    # For regular upload: keep original naming with _silero_subtitles
+                    # Keep original naming with _silero_subtitles
                     base_output_path = os.path.join(output_dir, f"{base_name}_silero_subtitles")
 
                 # Generate multiple format subtitle files
@@ -342,6 +340,7 @@ class ASRService:
         asr_model: Optional[str] = None,
         language: Optional[str] = "auto",  # Default to auto detect
         output_formats: List[str] = None,
+        output_mode: str = "task",  # "task": 输出到任务目录, "source": 输出到源文件目录
     ) -> ASRResponse:
         """
         Process audio file through the complete ASR pipeline (backward compatibility)
@@ -366,4 +365,5 @@ class ASRService:
             asr_model=asr_model,
             language=language,
             output_formats=output_formats,
+            output_mode=output_mode,
         )

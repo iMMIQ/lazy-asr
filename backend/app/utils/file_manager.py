@@ -78,16 +78,13 @@ class FileManager:
                         shutil.rmtree(upload_task_dir)
                         logger.info(f"Cleaned up upload file directory: {upload_task_dir}")
 
-            # Clean up temporary files in output directory (keep final output files)
+            # Clean up temporary files in output directory
             output_task_dir = os.path.join(self.output_dir, task_id)
-            if os.path.exists(output_task_dir) and not keep_output:
-                # If not keeping output files, delete entire output directory
-                shutil.rmtree(output_task_dir)
-                logger.info(f"Cleaned up output file directory: {output_task_dir}")
-            elif os.path.exists(output_task_dir):
-                # If keeping output files, only delete temporary files
+            if os.path.exists(output_task_dir):
+                # Always clean up temporary files, regardless of keep_output value
+                # This ensures result files (subtitles) are never deleted
                 self._cleanup_temp_files(output_task_dir)
-                logger.info(f"Cleaned up temporary files, kept output files: {output_task_dir}")
+                logger.info(f"Cleaned up temporary files: {output_task_dir}")
 
             logger.info(f"File cleanup completed for media path: {media_path}")
             return True

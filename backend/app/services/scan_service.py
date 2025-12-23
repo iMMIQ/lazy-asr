@@ -94,12 +94,12 @@ class ScanService:
                     logger.info(f"Processing file {i+1}/{len(media_files)}: {file_path}")
 
                     # Process the file using existing ASR service
-                    # For scan mode, we don't need to specify output directory
-                    # ASR service will automatically detect scan mode and output to same directory
+                    # For scan mode, use output_mode="source" to output to same directory as source file
                     result = await self.asr_service.process_media(
                         media_path=file_path,
                         asr_method=scan_request.asr_method,
                         output_formats=scan_request.output_formats,
+                        output_mode="source",  # Scan mode: output to source directory
                     )
 
                     results.append(result)

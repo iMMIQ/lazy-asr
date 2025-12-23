@@ -38,6 +38,9 @@ function App() {
   const [asrApiKey, setAsrApiKey] = useState('');
   const [asrModel, setAsrModel] = useState('');
   const [asrLanguage, setAsrLanguage] = useState('auto');
+  
+  // Determine output mode based on active tab
+  const outputMode = activeTab === 'upload' ? 'task' : 'source';
 
   // Custom hook for processing logic
   const {
@@ -141,6 +144,7 @@ function App() {
       audioFiles,
       asrMethod,
       outputFormats,
+      outputMode,
       showAdvancedOptions,
       minSpeechDuration,
       minSilenceDuration,
@@ -165,6 +169,7 @@ function App() {
       audioFiles,
       asrMethod,
       outputFormats,
+      outputMode,
       showAdvancedOptions,
       minSpeechDuration,
       minSilenceDuration,
