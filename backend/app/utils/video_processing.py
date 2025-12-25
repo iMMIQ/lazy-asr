@@ -20,23 +20,23 @@ def detect_media_type(file_path: str) -> str:
     try:
         # Use ffprobe to get file information
         probe = ffmpeg.probe(file_path)
-        format_info = probe.get('format', {})
-        streams = probe.get('streams', [])
+        format_info = probe.get("format", {})
+        streams = probe.get("streams", [])
 
         # Check if there are video streams
-        has_video = any(stream.get('codec_type') == 'video' for stream in streams)
-        has_audio = any(stream.get('codec_type') == 'audio' for stream in streams)
+        has_video = any(stream.get("codec_type") == "video" for stream in streams)
+        has_audio = any(stream.get("codec_type") == "audio" for stream in streams)
 
         if has_video:
-            return 'video'
+            return "video"
         elif has_audio:
-            return 'audio'
+            return "audio"
         else:
-            return 'unknown'
+            return "unknown"
 
     except Exception as e:
         logger.error(f"Failed to detect media type for {file_path}: {e}")
-        return 'unknown'
+        return "unknown"
 
 
 def get_supported_formats() -> dict:
@@ -47,8 +47,85 @@ def get_supported_formats() -> dict:
         Dictionary with supported video and audio formats
     """
     return {
-        'video': ['mp4', 'avi', 'mov', 'mkv', 'webm', 'flv', 'wmv', 'm4v', '3gp', 'mpg', 'mpeg', 'ts', 'mts', 'm2ts'],
-        'audio': ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a', 'wma', 'opus', 'aiff', 'amr', 'ac3', 'dts'],
+        "video": [
+            "mp4",
+            "avi",
+            "mov",
+            "mkv",
+            "webm",
+            "flv",
+            "wmv",
+            "m4v",
+            "3gp",
+            "mpg",
+            "mpeg",
+            "ts",
+            "mts",
+            "m2ts",
+            "rm",
+            "rmvb",
+            "asf",
+            "mxf",
+            "dv",
+            "f4v",
+            "qt",
+            "divx",
+            "xvid",
+            "mp4v",
+            "m4p",
+            "m4b",
+            "vob",
+            "evo",
+            "ogv",
+            "drc",
+            "mng",
+            "qt",
+            "yuv",
+            "rm",
+            "rmvb",
+            "svi",
+            "amv",
+            "viv",
+            "3g2",
+        ],
+        "audio": [
+            "mp3",
+            "wav",
+            "flac",
+            "aac",
+            "ogg",
+            "m4a",
+            "wma",
+            "opus",
+            "aiff",
+            "amr",
+            "ac3",
+            "dts",
+            "ra",
+            "au",
+            "gsm",
+            "m4b",
+            "m4p",
+            "dsd",
+            "caf",
+            "adts",
+            "alac",
+            "mka",
+            "ape",
+            "tak",
+            "wv",
+            "tta",
+            "speex",
+            "spx",
+            "mid",
+            "midi",
+            "rmi",
+            "kar",
+            "mod",
+            "it",
+            "s3m",
+            "xm",
+        ],
     }
 
 
@@ -76,7 +153,7 @@ def extract_audio_from_video(video_path: str, output_path: Optional[str] = None)
         # Use ffmpeg to extract audio
         (
             ffmpeg.input(video_path)
-            .output(output_path, acodec='pcm_s16le', ac=1, ar='16000')
+            .output(output_path, acodec="pcm_s16le", ac=1, ar="16000")
             .overwrite_output()
             .run(quiet=True)
         )
@@ -89,7 +166,9 @@ def extract_audio_from_video(video_path: str, output_path: Optional[str] = None)
         raise
 
 
-def convert_audio_format(input_path: str, output_path: str, sample_rate: int = 16000, channels: int = 1) -> str:
+def convert_audio_format(
+    input_path: str, output_path: str, sample_rate: int = 16000, channels: int = 1
+) -> str:
     """
     Convert audio file to standard format for ASR processing
 
@@ -108,7 +187,7 @@ def convert_audio_format(input_path: str, output_path: str, sample_rate: int = 1
         # Use ffmpeg to convert audio format
         (
             ffmpeg.input(input_path)
-            .output(output_path, acodec='pcm_s16le', ac=channels, ar=str(sample_rate))
+            .output(output_path, acodec="pcm_s16le", ac=channels, ar=str(sample_rate))
             .overwrite_output()
             .run(quiet=True)
         )
@@ -133,8 +212,8 @@ def get_media_duration(file_path: str) -> float:
     """
     try:
         probe = ffmpeg.probe(file_path)
-        format_info = probe.get('format', {})
-        duration = float(format_info.get('duration', 0))
+        format_info = probe.get("format", {})
+        duration = float(format_info.get("duration", 0))
         return duration
     except Exception as e:
         logger.error(f"Failed to get duration for {file_path}: {e}")
@@ -161,12 +240,16 @@ def prepare_media_for_asr(media_path: str, output_dir: str) -> Tuple[str, str]:
         base_name = os.path.splitext(os.path.basename(media_path))[0]
         processed_audio_path = os.path.join(output_dir, f"{base_name}_processed.wav")
 
-        if media_type == 'video':
+        if media_type == "video":
             # Extract audio from video
-            processed_audio_path = extract_audio_from_video(media_path, processed_audio_path)
-        elif media_type == 'audio':
+            processed_audio_path = extract_audio_from_video(
+                media_path, processed_audio_path
+            )
+        elif media_type == "audio":
             # Convert audio to standard format
-            processed_audio_path = convert_audio_format(media_path, processed_audio_path)
+            processed_audio_path = convert_audio_format(
+                media_path, processed_audio_path
+            )
         else:
             raise ValueError(f"Unsupported media type: {media_type}")
 
@@ -202,14 +285,14 @@ def validate_media_file(file_path: str) -> Tuple[bool, str]:
 
         # Try to probe the file
         probe = ffmpeg.probe(file_path)
-        format_info = probe.get('format', {})
+        format_info = probe.get("format", {})
 
         if not format_info:
             return False, "Unable to read file format"
 
         # Check if there's at least one audio stream
-        streams = probe.get('streams', [])
-        has_audio = any(stream.get('codec_type') == 'audio' for stream in streams)
+        streams = probe.get("streams", [])
+        has_audio = any(stream.get("codec_type") == "audio" for stream in streams)
 
         if not has_audio:
             return False, "No audio stream found in file"
