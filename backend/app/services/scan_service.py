@@ -58,6 +58,30 @@ class ScanService:
 
         return scan_id
 
+    def _has_existing_subtitles(self, media_path: str, output_formats: List[str]) -> bool:
+        """
+        Check if subtitle files already exist for the given media file
+
+        Args:
+            media_path: Path to the media file
+            output_formats: List of output formats to check
+
+        Returns:
+            True if any subtitle file exists, False otherwise
+        """
+        if not output_formats:
+            return False
+
+        media_dir = os.path.dirname(media_path)
+        base_name = os.path.splitext(os.path.basename(media_path))[0]
+
+        for fmt in output_formats:
+            subtitle_path = os.path.join(media_dir, f"{base_name}.{fmt}")
+            if os.path.exists(subtitle_path):
+                return True
+
+        return False
+
     async def _perform_scan(self, scan_id: str, scan_request: ScanRequest):
         """Perform the actual scan and processing"""
         try:
@@ -77,21 +101,32 @@ class ScanService:
                 scan_status.progress = 100
                 return
 
-            scan_status.total_files = len(media_files)
+            # Filter out files that already have subtitles
+            filtered_media_files = []
+            skipped_files = 0
+
+            for file_path in media_files:
+                if self._has_existing_subtitles(file_path, scan_request.output_formats):
+                    logger.info(f"Skipping file (subtitle already exists): {file_path}")
+                    skipped_files += 1
+                else:
+                    filtered_media_files.append(file_path)
+
+            scan_status.total_files = len(media_files)  # Original total including skipped
             scan_status.status = "processing"
-            scan_status.message = f"Processing {len(media_files)} media files..."
+            scan_status.message = f"Found {len(media_files)} media files, {skipped_files} already have subtitles, processing {len(filtered_media_files)} files..."
 
             # Process each file
             processed_count = 0
             failed_count = 0
             results = []
 
-            for i, file_path in enumerate(media_files):
+            for i, file_path in enumerate(filtered_media_files):
                 try:
                     scan_status.current_file = os.path.basename(file_path)
-                    scan_status.progress = int((i / len(media_files)) * 100)
+                    scan_status.progress = int((i / len(filtered_media_files)) * 100)
 
-                    logger.info(f"Processing file {i+1}/{len(media_files)}: {file_path}")
+                    logger.info(f"Processing file {i+1}/{len(filtered_media_files)}: {file_path}")
 
                     # Process the file using existing ASR service
                     # For scan mode, use output_mode="source" to output to same directory as source file
@@ -129,13 +164,13 @@ class ScanService:
             scan_status.failed_files = failed_count
             scan_status.progress = 100
             scan_status.status = "completed"
-            scan_status.message = f"Scan completed. Processed: {processed_count}, Failed: {failed_count}"
+            scan_status.message = f"Scan completed. Total: {len(media_files)}, Skipped (existing subtitles): {skipped_files}, Processed: {processed_count}, Failed: {failed_count}"
             scan_status.end_time = datetime.now()
             scan_status.results = results
 
             # Create final result
             duration = (scan_status.end_time - scan_status.start_time).total_seconds()
-            success_rate = processed_count / len(media_files) if media_files else 0
+            success_rate = processed_count / len(filtered_media_files) if filtered_media_files else 0
 
             scan_result = ScanResult(
                 scan_id=scan_id,
@@ -152,7 +187,9 @@ class ScanService:
 
             self.scan_results[scan_id] = scan_result
 
-            logger.info(f"Scan {scan_id} completed: {processed_count} processed, {failed_count} failed")
+            logger.info(
+                f"Scan {scan_id} completed: Total: {len(media_files)}, Skipped: {skipped_files}, Processed: {processed_count}, Failed: {failed_count}"
+            )
 
         except Exception as e:
             logger.error(f"Error during scan {scan_id}: {e}")
