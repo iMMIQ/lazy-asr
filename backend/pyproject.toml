@@ -19,4 +19,7 @@ dependencies = [
     "structlog>=23.0.0",
     "openai-whisper>=20231117",
     "ffmpeg-python>=0.2.0",
+    "aiosqlite>=0.22.1",
+    "sqlalchemy>=2.0.45",
+    "asyncio>=4.0.0",
 ]

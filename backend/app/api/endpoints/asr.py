@@ -5,9 +5,12 @@ import io
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
 from typing import Optional, List
+from pydantic import BaseModel
 import json
 from app.services.asr_service import ASRService
 from app.services.scan_service import scan_service
+from app.services.persistent_scan_service import persistent_scan_service
+from app.services.monitor_service import monitor_service
 from plugins.manager import plugin_manager
 from app.models.schemas import (
     ASRResponse,
@@ -18,6 +21,11 @@ from app.models.schemas import (
     ScanResult,
 )
 from app.core.config import settings
+from app.core.database import init_database, close_database
+from app.core.logger import get_logger
+
+logger = get_logger(__name__)
+
 
 router = APIRouter()
 asr_service = ASRService()
@@ -654,3 +662,124 @@ async def get_path_info(path: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get path info: {str(e)}")
+
+
+# Persistent scan endpoints (with database support)
+@router.post("/scan/persistent/start")
+async def start_persistent_scan(scan_request: ScanRequest):
+    """
+    Start scanning a path for media files with database persistence
+
+    Args:
+        scan_request: Scan request containing path and parameters
+    """
+    try:
+        scan_id = await persistent_scan_service.scan_path(scan_request)
+        return {
+            "scan_id": scan_id,
+            "message": "Persistent scan started successfully",
+            "status": "pending",
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to start persistent scan: {str(e)}")
+
+
+@router.get("/scan/persistent/status/{scan_id}", response_model=ScanStatus)
+async def get_persistent_scan_status(scan_id: str):
+    """
+    Get the status of a persistent scan operation
+
+    Args:
+        scan_id: Scan ID to check status for
+    """
+    scan_status = await persistent_scan_service.get_scan_status(scan_id)
+    if not scan_status:
+        raise HTTPException(status_code=404, detail="Scan not found")
+    return scan_status
+
+
+@router.get("/scan/persistent/all")
+async def get_all_persistent_scans(limit: int = 50, offset: int = 0, status: Optional[str] = None):
+    """
+    Get all persistent scan operations with optional filtering
+
+    Args:
+        limit: Maximum number of scans to return
+        offset: Offset for pagination
+        status: Filter by status (optional)
+    """
+    try:
+        scans = await persistent_scan_service.get_all_scans(limit=limit, offset=offset, status=status)
+        return {"total_scans": len(scans), "scans": scans}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get persistent scans: {str(e)}")
+
+
+@router.post("/scan/persistent/cancel/{scan_id}")
+async def cancel_persistent_scan(scan_id: str):
+    """
+    Cancel a persistent scan operation
+
+    Args:
+        scan_id: Scan ID to cancel
+    """
+    try:
+        success = await persistent_scan_service.cancel_scan(scan_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Scan not found or cannot be cancelled")
+        return {"message": "Scan cancelled successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to cancel scan: {str(e)}")
+
+
+@router.delete("/scan/persistent/{scan_id}")
+async def delete_persistent_scan(scan_id: str):
+    """
+    Delete a persistent scan and all associated data
+
+    Args:
+        scan_id: Scan ID to delete
+    """
+    try:
+        success = await persistent_scan_service.delete_scan(scan_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Scan not found")
+        return {"message": "Scan deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete scan: {str(e)}")
+
+
+@router.get("/scan/persistent/{scan_id}/files")
+async def get_persistent_scan_files(scan_id: str, limit: int = 100, offset: int = 0):
+    """
+    Get media files for a persistent scan
+
+    Args:
+        scan_id: Scan ID to get files for
+        limit: Maximum number of files to return
+        offset: Offset for pagination
+    """
+    try:
+        files = await persistent_scan_service.get_media_files(scan_id=scan_id, limit=limit, offset=offset)
+        return {"scan_id": scan_id, "total_files": len(files), "files": files}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get scan files: {str(e)}")
+
+
+@router.get("/database/status")
+async def get_database_status():
+    """
+    Get database status and statistics
+    """
+    try:
+        from app.repositories.scan_repository import ScanRepository
+        from app.core.database import get_db_context
+
+        async with get_db_context() as session:
+            total_scans = await ScanRepository.count_scan_tasks(session)
+
+            return {"database_path": "data/asr_service.db", "total_scan_tasks": total_scans, "status": "active"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get database status: {str(e)}")

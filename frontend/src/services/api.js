@@ -173,4 +173,228 @@ export const getPathInfo = async (path) => {
   }
 };
 
+/**
+ * Monitor Management APIs
+ */
+
+/**
+ * Create a new monitor configuration
+ */
+export const createMonitor = async (config) => {
+  try {
+    const response = await apiClient.post('/asr/monitor/create', config);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to create monitor:', error);
+    throw new Error(error.response?.data?.detail || 'Failed to create monitor');
+  }
+};
+
+/**
+ * Get all monitor configurations
+ */
+export const getAllMonitors = async (activeOnly = false) => {
+  try {
+    const response = await apiClient.get('/asr/monitor/all', {
+      params: { active_only: activeOnly }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to get monitors:', error);
+    throw new Error(error.response?.data?.detail || 'Failed to get monitors');
+  }
+};
+
+/**
+ * Get monitor by ID
+ */
+export const getMonitor = async (monitorId) => {
+  try {
+    const response = await apiClient.get(`/asr/monitor/${monitorId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to get monitor:', error);
+    throw new Error(error.response?.data?.detail || 'Failed to get monitor');
+  }
+};
+
+/**
+ * Update monitor configuration
+ */
+export const updateMonitor = async (monitorId, config) => {
+  try {
+    const response = await apiClient.put(`/asr/monitor/${monitorId}`, config);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to update monitor:', error);
+    throw new Error(error.response?.data?.detail || 'Failed to update monitor');
+  }
+};
+
+/**
+ * Delete monitor configuration
+ */
+export const deleteMonitor = async (monitorId) => {
+  try {
+    const response = await apiClient.delete(`/asr/monitor/${monitorId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to delete monitor:', error);
+    throw new Error(error.response?.data?.detail || 'Failed to delete monitor');
+  }
+};
+
+/**
+ * Toggle monitor active status
+ */
+export const toggleMonitor = async (monitorId, isActive) => {
+  try {
+    const response = await apiClient.post(`/asr/monitor/${monitorId}/toggle`, null, {
+      params: { is_active: isActive }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to toggle monitor:', error);
+    throw new Error(error.response?.data?.detail || 'Failed to toggle monitor');
+  }
+};
+
+/**
+ * Get monitor service status
+ */
+export const getMonitorServiceStatus = async () => {
+  try {
+    const response = await apiClient.get('/asr/monitor/status');
+    return response.data;
+  } catch (error) {
+    console.error('Failed to get monitor service status:', error);
+    throw new Error(error.response?.data?.detail || 'Failed to get monitor service status');
+  }
+};
+
+/**
+ * Start monitor service
+ */
+export const startMonitorService = async () => {
+  try {
+    const response = await apiClient.post('/asr/monitor/service/start');
+    return response.data;
+  } catch (error) {
+    console.error('Failed to start monitor service:', error);
+    throw new Error(error.response?.data?.detail || 'Failed to start monitor service');
+  }
+};
+
+/**
+ * Stop monitor service
+ */
+export const stopMonitorService = async () => {
+  try {
+    const response = await apiClient.post('/asr/monitor/service/stop');
+    return response.data;
+  } catch (error) {
+    console.error('Failed to stop monitor service:', error);
+    throw new Error(error.response?.data?.detail || 'Failed to stop monitor service');
+  }
+};
+
+/**
+ * Persistent Scan APIs
+ */
+
+/**
+ * Start persistent scan with database support
+ */
+export const startPersistentScan = async (scanRequest) => {
+  try {
+    const response = await apiClient.post('/asr/scan/persistent/start', scanRequest);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to start persistent scan:', error);
+    throw new Error(error.response?.data?.detail || 'Failed to start persistent scan');
+  }
+};
+
+/**
+ * Get persistent scan status
+ */
+export const getPersistentScanStatus = async (scanId) => {
+  try {
+    const response = await apiClient.get(`/asr/scan/persistent/status/${scanId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to get persistent scan status:', error);
+    throw new Error(error.response?.data?.detail || 'Failed to get persistent scan status');
+  }
+};
+
+/**
+ * Get all persistent scans
+ */
+export const getAllPersistentScans = async (limit = 50, offset = 0, status = null) => {
+  try {
+    const params = { limit, offset };
+    if (status) params.status = status;
+    const response = await apiClient.get('/asr/scan/persistent/all', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to get persistent scans:', error);
+    throw new Error(error.response?.data?.detail || 'Failed to get persistent scans');
+  }
+};
+
+/**
+ * Cancel persistent scan
+ */
+export const cancelPersistentScan = async (scanId) => {
+  try {
+    const response = await apiClient.post(`/asr/scan/persistent/cancel/${scanId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to cancel persistent scan:', error);
+    throw new Error(error.response?.data?.detail || 'Failed to cancel persistent scan');
+  }
+};
+
+/**
+ * Delete persistent scan
+ */
+export const deletePersistentScan = async (scanId) => {
+  try {
+    const response = await apiClient.delete(`/asr/scan/persistent/${scanId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to delete persistent scan:', error);
+    throw new Error(error.response?.data?.detail || 'Failed to delete persistent scan');
+  }
+};
+
+/**
+ * Get media files for a persistent scan
+ */
+export const getPersistentScanFiles = async (scanId, limit = 100, offset = 0) => {
+  try {
+    const response = await apiClient.get(`/asr/scan/persistent/${scanId}/files`, {
+      params: { limit, offset }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to get persistent scan files:', error);
+    throw new Error(error.response?.data?.detail || 'Failed to get persistent scan files');
+  }
+};
+
+/**
+ * Get database status
+ */
+export const getDatabaseStatus = async () => {
+  try {
+    const response = await apiClient.get('/asr/database/status');
+    return response.data;
+  } catch (error) {
+    console.error('Failed to get database status:', error);
+    throw new Error(error.response?.data?.detail || 'Failed to get database status');
+  }
+};
+
 export default apiClient;
