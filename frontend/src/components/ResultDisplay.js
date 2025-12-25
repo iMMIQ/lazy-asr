@@ -1,17 +1,28 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { getDownloadUrl, getBundleDownloadUrl } from '../services/api';
+import { Download, FileText, CheckCircle2, XCircle, Clock, Database, AlertCircle } from 'lucide-react';
 
 /**
  * Result display component for both single and multiple file processing results
  */
-const ResultDisplay = ({ 
-  result, 
-  multiFileResult, 
-  onDownload, 
-  onBundleDownload 
+const ResultDisplay = ({
+  result,
+  multiFileResult,
+  onDownload,
+  onBundleDownload
 }) => {
   const { t } = useTranslation();
+
+  const StatItem = ({ icon: Icon, label, value }) => (
+    <li>
+      <span className="stat-label">
+        <Icon size={16} className="stat-icon" />
+        {label}
+      </span>
+      <span className="stat-value">{value}</span>
+    </li>
+  );
 
   const handleDownload = (filePath) => {
     const downloadUrl = getDownloadUrl(filePath);
@@ -34,25 +45,32 @@ const ResultDisplay = ({
 
           {result.stats && (
             <div className="stats">
-              <h3>{t('results.stats')}</h3>
+              <h3>
+                <Database size={20} className="stats-icon" />
+                {t('results.stats')}
+              </h3>
               <ul>
-                <li>{t('stats.totalSegments')}: {result.stats.total_segments}</li>
-                <li>{t('stats.successfulTranscriptions')}: {result.stats.successful_transcriptions}</li>
-                <li>{t('stats.failedSegments')}: {result.stats.failed_segments}</li>
-                <li>{t('stats.emptySegments')}: {result.stats.empty_segments}</li>
-                <li>{t('stats.totalSubtitles')}: {result.stats.total_subtitles}</li>
+                <StatItem icon={FileText} label={t('stats.totalSegments')} value={result.stats.total_segments} />
+                <StatItem icon={CheckCircle2} label={t('stats.successfulTranscriptions')} value={result.stats.successful_transcriptions} />
+                <StatItem icon={XCircle} label={t('stats.failedSegments')} value={result.stats.failed_segments} />
+                <StatItem icon={AlertCircle} label={t('stats.emptySegments')} value={result.stats.empty_segments} />
+                <StatItem icon={FileText} label={t('stats.totalSubtitles')} value={result.stats.total_subtitles} />
               </ul>
             </div>
           )}
 
           {result.segments && result.segments.length > 0 && (
             <div className="segments-preview">
-              <h3>{t('results.preview')}</h3>
+              <h3>
+                <Clock size={20} className="preview-icon" />
+                {t('results.preview')}
+              </h3>
               <div className="segments-list">
                 {result.segments.map((segment, index) => (
                   <div key={index} className="segment-item">
                     <div className="segment-time">
-                      {segment.start} --> {segment.end}
+                      <Clock size={14} className="time-icon" />
+                      {segment.start} {'-->'} {segment.end}
                     </div>
                     <div className="segment-text">
                       {segment.text}
@@ -73,6 +91,7 @@ const ResultDisplay = ({
                   onClick={() => handleBundleDownload(result.task_id)}
                   className="download-button bundle-download-button"
                 >
+                  <Download size={18} />
                   {t('buttons.downloadBundle')} ({Object.keys(result.output_files).length})
                 </button>
               )}
@@ -84,6 +103,7 @@ const ResultDisplay = ({
                   onClick={() => handleDownload(filePath)}
                   className="download-button"
                 >
+                  <Download size={18} />
                   {t('buttons.download')} {format.toUpperCase()}
                 </button>
               ))}
@@ -96,6 +116,7 @@ const ResultDisplay = ({
               onClick={() => handleDownload(result.srt_file_path)}
               className="download-button"
             >
+              <Download size={18} />
               {t('buttons.downloadSRT')}
             </button>
           )}
@@ -115,13 +136,16 @@ const ResultDisplay = ({
 
           {multiFileResult.overall_stats && (
             <div className="stats">
-              <h3>{t('results.overallStats')}</h3>
+              <h3>
+                <Database size={20} className="stats-icon" />
+                {t('results.overallStats')}
+              </h3>
               <ul>
-                <li>{t('stats.totalFiles')}: {multiFileResult.overall_stats.total_files}</li>
-                <li>{t('stats.successfulFiles')}: {multiFileResult.overall_stats.successful_files}</li>
-                <li>{t('stats.failedFiles')}: {multiFileResult.overall_stats.failed_files}</li>
-                <li>{t('stats.totalSubtitles')}: {multiFileResult.overall_stats.total_subtitles}</li>
-                <li>{t('stats.totalSegments')}: {multiFileResult.overall_stats.total_segments}</li>
+                <StatItem icon={FileText} label={t('stats.totalFiles')} value={multiFileResult.overall_stats.total_files} />
+                <StatItem icon={CheckCircle2} label={t('stats.successfulFiles')} value={multiFileResult.overall_stats.successful_files} />
+                <StatItem icon={XCircle} label={t('stats.failedFiles')} value={multiFileResult.overall_stats.failed_files} />
+                <StatItem icon={FileText} label={t('stats.totalSubtitles')} value={multiFileResult.overall_stats.total_subtitles} />
+                <StatItem icon={Clock} label={t('stats.totalSegments')} value={multiFileResult.overall_stats.total_segments} />
               </ul>
             </div>
           )}
@@ -131,7 +155,12 @@ const ResultDisplay = ({
             {multiFileResult.file_results.map((fileResult, index) => (
               <div key={index} className={`file-result ${fileResult.success ? 'success' : 'error'}`}>
                 <h4>
-                  {fileResult.success ? '✅' : '❌'} {fileResult.filename}
+                  {fileResult.success ? (
+                    <CheckCircle2 size={20} className="success-icon" />
+                  ) : (
+                    <XCircle size={20} className="error-icon" />
+                  )}
+                  <span>{fileResult.filename}</span>
                 </h4>
                 <p>{fileResult.message}</p>
 
@@ -143,6 +172,7 @@ const ResultDisplay = ({
                         onClick={() => handleDownload(filePath)}
                         className="download-button small"
                       >
+                        <Download size={16} />
                         {t('buttons.download')} {format.toUpperCase()}
                       </button>
                     ))}
@@ -151,6 +181,7 @@ const ResultDisplay = ({
                         onClick={() => handleBundleDownload(fileResult.task_id)}
                         className="download-button small bundle"
                       >
+                        <Download size={16} />
                         {t('buttons.downloadBundle')}
                       </button>
                     )}

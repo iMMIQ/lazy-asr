@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Loader2, AlertCircle } from 'lucide-react';
 
 /**
  * Processing indicator component to show loading state
@@ -10,7 +11,8 @@ const ProcessingIndicator = ({ isProcessing, error }) => {
   if (error) {
     return (
       <div className="error-message">
-        ❌ {error}
+        <AlertCircle size={24} />
+        <span>{error}</span>
       </div>
     );
   }
@@ -18,6 +20,7 @@ const ProcessingIndicator = ({ isProcessing, error }) => {
   if (isProcessing) {
     return (
       <div className="processing-indicator">
+        <Loader2 className="animate-spin" size={32} strokeWidth={2} />
         <p>{t('processing.processing')}</p>
       </div>
     );

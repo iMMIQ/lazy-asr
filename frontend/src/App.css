@@ -76,6 +76,37 @@ body {
   overflow: hidden;
 }
 
+.header-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  margin-bottom: var(--space-lg);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.header-icon svg {
+  color: white;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
 .App-header::before {
   content: '';
   position: absolute;
@@ -186,19 +217,97 @@ body {
   border-color: var(--border-color);
 }
 
-/* File Input Styling */
-.form-group input[type="file"] {
-  background: rgba(255, 255, 255, 0.05);
+/* File Upload Label Styling */
+.file-upload-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.label-icon {
+  color: #667eea;
+}
+
+/* File Upload Container */
+.file-upload-container {
+  position: relative;
+  margin-bottom: var(--space-md);
+}
+
+.file-input {
+  display: none;
+}
+
+.file-upload-dropzone {
+  background: rgba(255, 255, 255, 0.03);
   border: 2px dashed var(--border-light);
-  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2xl);
   text-align: center;
   cursor: pointer;
   transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
 }
 
-.form-group input[type="file"]:hover {
+.file-upload-dropzone:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.file-upload-dropzone::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.file-upload-dropzone:hover {
   border-color: #667eea;
   background: rgba(102, 126, 234, 0.05);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.file-upload-dropzone:hover::before {
+  opacity: 1;
+}
+
+.upload-icon {
+  color: #667eea;
+  margin-bottom: var(--space-md);
+  transition: transform var(--transition-normal);
+}
+
+.file-upload-dropzone:hover .upload-icon {
+  transform: scale(1.1);
+}
+
+.upload-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.upload-subtext {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.max-files-hint {
+  display: block;
+  margin-top: var(--space-sm);
+  color: var(--text-muted);
+  font-size: 0.85rem;
 }
 
 /* Submit Buttons Group */
@@ -225,6 +334,24 @@ body {
   overflow: hidden;
   flex: 1;
   min-width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
 
 .process-button.multiple {
@@ -268,8 +395,12 @@ body {
   border-left: 4px solid #4facfe;
   display: flex;
   align-items: center;
-  gap: var(--space-md);
+  gap: var(--space-lg);
   animation: pulse 2s infinite;
+}
+
+.processing-indicator svg {
+  color: #4facfe;
 }
 
 @keyframes pulse {
@@ -284,9 +415,11 @@ body {
   }
 }
 
-.processing-indicator::before {
-  content: '⏳';
-  font-size: 1.5rem;
+.processing-indicator p {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  font-weight: 500;
 }
 
 /* Error Message Styling */
@@ -300,11 +433,28 @@ body {
   display: flex;
   align-items: center;
   gap: var(--space-md);
+  animation: shake 0.5s ease;
 }
 
-.error-message::before {
-  content: '❌';
-  font-size: 1.2rem;
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+.error-message svg {
+  color: #f56565;
+  flex-shrink: 0;
 }
 
 /* Result Section Styling */
@@ -358,6 +508,13 @@ body {
   margin-bottom: var(--space-md);
   color: var(--text-primary);
   font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.stats-icon {
+  color: #667eea;
 }
 
 .stats ul {
@@ -371,10 +528,28 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--space-md);
 }
 
 .stats li:last-child {
   border-bottom: none;
+}
+
+.stat-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.stat-icon {
+  color: #4facfe;
+}
+
+.stat-value {
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 /* Segments Preview */
@@ -386,6 +561,13 @@ body {
   margin-bottom: var(--space-lg);
   color: var(--text-primary);
   font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.preview-icon {
+  color: #f093fb;
 }
 
 .segments-list {
@@ -422,6 +604,13 @@ body {
   margin-bottom: var(--space-sm);
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.time-icon {
+  color: #a0aec0;
 }
 
 .segment-text {
@@ -443,11 +632,22 @@ body {
   transition: all var(--transition-normal);
   box-shadow: var(--shadow-md);
   margin-top: var(--space-xl);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
 }
 
 .download-button:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
+}
+
+.download-button:hover svg {
+  transform: translateY(1px);
+}
+
+.download-button svg {
+  transition: transform var(--transition-fast);
 }
 
 /* Advanced Options Styling */
@@ -717,12 +917,21 @@ body {
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
   margin: var(--space-md) 0;
+  animation: slideInUp 0.3s ease;
 }
 
-.file-list h4 {
+.file-list-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
   margin-bottom: var(--space-md);
   color: var(--text-primary);
   font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.list-icon {
+  color: #4facfe;
 }
 
 .file-list ul {
@@ -735,27 +944,51 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-sm) var(--space-md);
+  padding: var(--space-md);
   background: rgba(255, 255, 255, 0.02);
   border-radius: var(--radius-md);
   margin-bottom: var(--space-sm);
   border: 1px solid var(--border-color);
   transition: all var(--transition-fast);
+  gap: var(--space-md);
 }
 
 .file-item:hover {
   background: rgba(255, 255, 255, 0.05);
   border-color: var(--border-light);
+  transform: translateX(4px);
+  box-shadow: var(--shadow-sm);
 }
 
 .file-item:last-child {
   margin-bottom: 0;
 }
 
-.file-item span {
-  color: var(--text-primary);
-  font-size: 0.9rem;
+.file-icon {
+  color: #4facfe;
+  flex-shrink: 0;
+}
+
+.file-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
   flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-size {
+  color: var(--text-muted);
+  font-size: 0.8rem;
 }
 
 .remove-file-btn {
@@ -809,6 +1042,14 @@ body {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
+}
+
+.success-icon {
+  color: #48bb78;
+}
+
+.error-icon {
+  color: #f56565;
 }
 
 .file-result p {
@@ -881,6 +1122,21 @@ body {
   display: flex;
   gap: var(--space-sm);
   z-index: 10;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.globe-icon {
+  color: var(--text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.language-switcher:hover .globe-icon {
+  color: var(--text-primary);
 }
 
 .language-switcher button {
