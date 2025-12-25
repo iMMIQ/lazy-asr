@@ -9,7 +9,14 @@ import json
 from app.services.asr_service import ASRService
 from app.services.scan_service import scan_service
 from plugins.manager import plugin_manager
-from app.models.schemas import ASRResponse, MultiFileASRResponse, FileResult, ScanRequest, ScanStatus, ScanResult
+from app.models.schemas import (
+    ASRResponse,
+    MultiFileASRResponse,
+    FileResult,
+    ScanRequest,
+    ScanStatus,
+    ScanResult,
+)
 from app.core.config import settings
 
 router = APIRouter()
@@ -60,7 +67,8 @@ async def process_media(
         available_plugins = plugin_manager.get_available_plugins()
         if asr_method not in available_plugins:
             raise HTTPException(
-                status_code=400, detail=f"Unsupported ASR method: {asr_method}. Available methods: {available_plugins}"
+                status_code=400,
+                detail=f"Unsupported ASR method: {asr_method}. Available methods: {available_plugins}",
             )
 
         # Parse options
@@ -83,9 +91,9 @@ async def process_media(
             if parsed_vad_options is None:
                 parsed_vad_options = {}
             if min_speech_duration is not None:
-                parsed_vad_options['min_speech_duration_ms'] = min_speech_duration
+                parsed_vad_options["min_speech_duration_ms"] = min_speech_duration
             if min_silence_duration is not None:
-                parsed_vad_options['min_silence_duration_ms'] = min_silence_duration
+                parsed_vad_options["min_silence_duration_ms"] = min_silence_duration
 
         # Save uploaded file
         task_id = str(uuid.uuid4())
@@ -101,7 +109,7 @@ async def process_media(
         parsed_output_formats = None
         if output_formats:
             # Support comma-separated formats: "srt,vtt,lrc" or single format: "srt"
-            parsed_output_formats = [fmt.strip() for fmt in output_formats.split(',')]
+            parsed_output_formats = [fmt.strip() for fmt in output_formats.split(",")]
 
         # Process audio
         result = await asr_service.process_audio(
@@ -153,7 +161,8 @@ async def process_multiple_audio(
         available_plugins = plugin_manager.get_available_plugins()
         if asr_method not in available_plugins:
             raise HTTPException(
-                status_code=400, detail=f"Unsupported ASR method: {asr_method}. Available methods: {available_plugins}"
+                status_code=400,
+                detail=f"Unsupported ASR method: {asr_method}. Available methods: {available_plugins}",
             )
 
         # Validate files
@@ -183,14 +192,14 @@ async def process_multiple_audio(
             if parsed_vad_options is None:
                 parsed_vad_options = {}
             if min_speech_duration is not None:
-                parsed_vad_options['min_speech_duration_ms'] = min_speech_duration
+                parsed_vad_options["min_speech_duration_ms"] = min_speech_duration
             if min_silence_duration is not None:
-                parsed_vad_options['min_silence_duration_ms'] = min_silence_duration
+                parsed_vad_options["min_silence_duration_ms"] = min_silence_duration
 
         # Parse output formats
         parsed_output_formats = None
         if output_formats:
-            parsed_output_formats = [fmt.strip() for fmt in output_formats.split(',')]
+            parsed_output_formats = [fmt.strip() for fmt in output_formats.split(",")]
 
         # Process all files
         batch_id = str(uuid.uuid4())
@@ -254,10 +263,10 @@ async def process_multiple_audio(
 
         # Calculate overall stats
         total_subtitles = sum(
-            result.stats.get('total_subtitles', 0) for result in file_results if result.success and result.stats
+            result.stats.get("total_subtitles", 0) for result in file_results if result.success and result.stats
         )
         total_segments = sum(
-            result.stats.get('total_segments', 0) for result in file_results if result.success and result.stats
+            result.stats.get("total_segments", 0) for result in file_results if result.success and result.stats
         )
 
         overall_stats = {
@@ -298,7 +307,7 @@ async def download_file(file_path: str):
     if not os.path.exists(full_path):
         raise HTTPException(status_code=404, detail="File not found")
 
-    return FileResponse(full_path, media_type='application/octet-stream')
+    return FileResponse(full_path, media_type="application/octet-stream")
 
 
 @router.get("/download-bundle/{task_id}")
@@ -319,7 +328,7 @@ async def download_bundle(task_id: str):
         subtitle_files = []
         for root, dirs, files in os.walk(task_output_dir):
             for file in files:
-                if file.endswith(('.srt', '.vtt', '.lrc', '.txt')):
+                if file.endswith((".srt", ".vtt", ".lrc", ".txt")):
                     subtitle_files.append(os.path.join(root, file))
 
         if not subtitle_files:
@@ -327,15 +336,15 @@ async def download_bundle(task_id: str):
 
         # Create ZIP file in memory with proper Unicode filename handling
         zip_buffer = io.BytesIO()
-        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
             for i, subtitle_file in enumerate(subtitle_files):
                 # Read file content
-                with open(subtitle_file, 'rb') as f:
+                with open(subtitle_file, "rb") as f:
                     file_content = f.read()
 
                 # Use simple numeric filenames to avoid encoding issues
                 file_extension = os.path.splitext(subtitle_file)[1]
-                safe_filename = f"subtitle_{i+1}{file_extension}"
+                safe_filename = f"subtitle_{i + 1}{file_extension}"
 
                 # Add file to ZIP
                 zip_file.writestr(safe_filename, file_content)
@@ -348,8 +357,8 @@ async def download_bundle(task_id: str):
         # Return ZIP file as response using StreamingResponse
         return StreamingResponse(
             iter([zip_buffer.getvalue()]),
-            media_type='application/zip',
-            headers={'Content-Disposition': f'attachment; filename="{zip_filename}"'},
+            media_type="application/zip",
+            headers={"Content-Disposition": f'attachment; filename="{zip_filename}"'},
         )
 
     except HTTPException:
@@ -369,7 +378,11 @@ async def start_scan(scan_request: ScanRequest):
     """
     try:
         scan_id = await scan_service.scan_path(scan_request)
-        return {"scan_id": scan_id, "message": "Scan started successfully", "status": "pending"}
+        return {
+            "scan_id": scan_id,
+            "message": "Scan started successfully",
+            "status": "pending",
+        }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -434,3 +447,210 @@ async def get_scan_config():
         "scan_recursive": settings.SCAN_RECURSIVE,
         "scan_max_files": settings.SCAN_MAX_FILES,
     }
+
+
+@router.get("/scan/browse")
+async def browse_directory(path: str = "/"):
+    """
+    Browse a directory to get subdirectories and media files
+
+    Args:
+        path: The directory path to browse (default: root directory)
+    """
+    try:
+        # Validate and normalize the path
+        if not path or path.strip() == "":
+            path = "/"
+
+        # Expand user home directory if present
+        path = os.path.expanduser(path)
+
+        # Resolve the absolute path
+        abs_path = os.path.abspath(path)
+
+        # Security check: ensure path is a directory
+        if not os.path.exists(abs_path):
+            raise HTTPException(status_code=404, detail=f"Path does not exist: {abs_path}")
+
+        if not os.path.isdir(abs_path):
+            raise HTTPException(status_code=400, detail=f"Path is not a directory: {abs_path}")
+
+        # Get parent directory
+        parent_path = os.path.dirname(abs_path)
+        if parent_path == abs_path:  # Root directory
+            parent_path = ""
+
+        # Get subdirectories and media files in current directory only
+        directories = []
+        media_files_in_current_dir = []
+
+        try:
+            for entry in os.listdir(abs_path):
+                entry_path = os.path.join(abs_path, entry)
+
+                if os.path.isdir(entry_path):
+                    # Only list subdirectories, don't count media files inside them
+                    directories.append({"name": entry, "path": entry_path})
+                else:
+                    # Check if it's a media file in the current directory
+                    if any(entry.lower().endswith(ext) for ext in settings.SCAN_FILE_EXTENSIONS):
+                        try:
+                            file_size = os.path.getsize(entry_path)
+                            file_size_mb = round(file_size / (1024 * 1024), 2)
+
+                            # Determine file type
+                            file_type = (
+                                "audio"
+                                if any(
+                                    entry.lower().endswith(ext)
+                                    for ext in [
+                                        ".mp3",
+                                        ".wav",
+                                        ".flac",
+                                        ".m4a",
+                                        ".aac",
+                                        ".ogg",
+                                        ".opus",
+                                    ]
+                                )
+                                else "video"
+                            )
+
+                            media_files_in_current_dir.append(
+                                {
+                                    "name": entry,
+                                    "size": f"{file_size_mb} MB",
+                                    "type": file_type,
+                                }
+                            )
+                        except (PermissionError, OSError):
+                            pass
+
+        except PermissionError:
+            pass  # Skip directories we can't list
+
+        # Sort directories by name
+        directories.sort(key=lambda x: x["name"].lower())
+
+        # Limit media files preview to first 10
+        media_files_in_current_dir = media_files_in_current_dir[:10]
+
+        return {
+            "current_path": abs_path,
+            "parent_path": parent_path,
+            "directories": directories,
+            "media_files": media_files_in_current_dir,
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to browse directory: {str(e)}")
+
+
+@router.get("/scan/path-info")
+async def get_path_info(path: str):
+    """
+    Get detailed information about a specific path
+
+    Args:
+        path: The path to get information for
+    """
+    try:
+        # Validate and normalize the path
+        if not path or path.strip() == "":
+            raise HTTPException(status_code=400, detail="Path cannot be empty")
+
+        # Expand user home directory if present
+        path = os.path.expanduser(path)
+
+        # Resolve the absolute path
+        abs_path = os.path.abspath(path)
+
+        # Check if path exists
+        if not os.path.exists(abs_path):
+            return {
+                "path": abs_path,
+                "exists": False,
+                "is_directory": False,
+                "media_count": 0,
+                "total_size": 0,
+                "files": [],
+            }
+
+        # Check if it's a directory
+        is_directory = os.path.isdir(abs_path)
+
+        if not is_directory:
+            return {
+                "path": abs_path,
+                "exists": True,
+                "is_directory": False,
+                "media_count": 0,
+                "total_size": 0,
+                "files": [],
+            }
+
+        # Count media files recursively and get file list
+        media_count = 0
+        total_size = 0
+        media_files = []
+
+        try:
+            for root, dirs, files in os.walk(abs_path):
+                for file in files:
+                    if any(file.lower().endswith(ext) for ext in settings.SCAN_FILE_EXTENSIONS):
+                        media_count += 1
+                        try:
+                            file_path = os.path.join(root, file)
+                            file_size = os.path.getsize(file_path)
+                            total_size += file_size
+
+                            # Determine file type
+                            file_type = (
+                                "audio"
+                                if any(
+                                    file.lower().endswith(ext)
+                                    for ext in [
+                                        ".mp3",
+                                        ".wav",
+                                        ".flac",
+                                        ".m4a",
+                                        ".aac",
+                                        ".ogg",
+                                        ".opus",
+                                    ]
+                                )
+                                else "video"
+                            )
+
+                            # Only collect first 20 files for preview
+                            if len(media_files) < 20:
+                                media_files.append(
+                                    {
+                                        "name": file,
+                                        "size": round(file_size / (1024 * 1024), 2),
+                                        "type": file_type,
+                                    }
+                                )
+                        except (PermissionError, OSError):
+                            pass
+        except (PermissionError, OSError):
+            pass
+
+        # Convert total size to MB
+        total_size_mb = round(total_size / (1024 * 1024), 2)
+
+        return {
+            "path": abs_path,
+            "exists": True,
+            "is_directory": True,
+            "media_count": media_count,
+            "total_size": total_size_mb,
+            "files": media_files,
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get path info: {str(e)}")

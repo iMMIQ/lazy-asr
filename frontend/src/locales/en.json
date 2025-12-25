@@ -122,5 +122,27 @@
     "failed": "Failed",
     "showingFirst10": "Showing first 10 of",
     "results": "results"
+  },
+  "folderSelector": {
+    "title": "Select Folder",
+    "quickAccess": "Quick Access",
+    "root": "Root Directory",
+    "userDirectory": "User Directory",
+    "home": "home",
+    "currentPath": "Current Path",
+    "parentDirectory": "Go Up",
+    "directories": "Folders",
+    "noDirectories": "No subdirectories",
+    "mediaFiles": "Media Files",
+    "currentDirectory": "Current Directory",
+    "selectedPath": "Selected Path",
+    "mediaCount": "Media Files",
+    "totalSize": "Total Size",
+    "filePreview": "File Preview",
+    "selectThisFolder": "Select This Folder",
+    "loading": "Loading...",
+    "close": "Close",
+    "browse": "Browse Folder",
+    "files": "files"
   }
 }

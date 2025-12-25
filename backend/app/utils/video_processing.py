@@ -166,9 +166,7 @@ def extract_audio_from_video(video_path: str, output_path: Optional[str] = None)
         raise
 
 
-def convert_audio_format(
-    input_path: str, output_path: str, sample_rate: int = 16000, channels: int = 1
-) -> str:
+def convert_audio_format(input_path: str, output_path: str, sample_rate: int = 16000, channels: int = 1) -> str:
     """
     Convert audio file to standard format for ASR processing
 
@@ -242,14 +240,10 @@ def prepare_media_for_asr(media_path: str, output_dir: str) -> Tuple[str, str]:
 
         if media_type == "video":
             # Extract audio from video
-            processed_audio_path = extract_audio_from_video(
-                media_path, processed_audio_path
-            )
+            processed_audio_path = extract_audio_from_video(media_path, processed_audio_path)
         elif media_type == "audio":
             # Convert audio to standard format
-            processed_audio_path = convert_audio_format(
-                media_path, processed_audio_path
-            )
+            processed_audio_path = convert_audio_format(media_path, processed_audio_path)
         else:
             raise ValueError(f"Unsupported media type: {media_type}")
 

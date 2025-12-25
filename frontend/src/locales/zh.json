@@ -122,5 +122,27 @@
     "failed": "失败",
     "showingFirst10": "显示前10个，共",
     "results": "个结果"
+  },
+  "folderSelector": {
+    "title": "选择文件夹",
+    "quickAccess": "快捷访问",
+    "root": "根目录",
+    "userDirectory": "用户目录",
+    "home": "home",
+    "currentPath": "当前路径",
+    "parentDirectory": "返回上级",
+    "directories": "文件夹",
+    "noDirectories": "没有子文件夹",
+    "mediaFiles": "媒体文件",
+    "currentDirectory": "当前目录",
+    "selectedPath": "已选择路径",
+    "mediaCount": "媒体文件数",
+    "totalSize": "总大小",
+    "filePreview": "文件预览",
+    "selectThisFolder": "选择此文件夹",
+    "loading": "加载中...",
+    "close": "关闭",
+    "browse": "浏览文件夹",
+    "files": "个文件"
   }
 }

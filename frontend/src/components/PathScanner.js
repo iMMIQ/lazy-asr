@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { startScan, getScanStatus, getScanResult, cancelScan, getScanConfig } from '../services/api';
 import ConfigPanel from './ConfigPanel';
+import FolderSelector from './FolderSelector';
 import { DEFAULT_OUTPUT_FORMATS, DEFAULT_MIN_SPEECH_DURATION, DEFAULT_MIN_SILENCE_DURATION } from '../constants/config';
 
 const PathScanner = () => {
@@ -9,6 +10,7 @@ const PathScanner = () => {
 
   // State management
   const [scanPath, setScanPath] = useState('');
+  const [showFolderSelector, setShowFolderSelector] = useState(false);
   const [recursive, setRecursive] = useState(true);
   const [asrMethod, setAsrMethod] = useState('local-whisper');
   const [outputFormats, setOutputFormats] = useState(DEFAULT_OUTPUT_FORMATS);
@@ -200,6 +202,12 @@ const PathScanner = () => {
     setScanResult(null);
     setIsScanning(false);
     setError(null);
+    setShowFolderSelector(false);
+  };
+
+  const handlePathSelect = (path) => {
+    setScanPath(path);
+    setShowFolderSelector(false);
   };
 
   // Format progress bar
@@ -217,19 +225,41 @@ const PathScanner = () => {
         <form onSubmit={handleStartScan}>
           <div className="form-group">
             <label>{t('pathScanner.scanPath')}</label>
-            <input
-              type="text"
-              value={scanPath}
-              onChange={(e) => setScanPath(e.target.value)}
-              placeholder="/path/to/media/files"
-              disabled={isScanning}
-            />
+            <div className="path-input-group">
+              <input
+                type="text"
+                value={scanPath}
+                onChange={(e) => setScanPath(e.target.value)}
+                placeholder="/path/to/media/files"
+                disabled={isScanning}
+              />
+              <button
+                type="button"
+                className="browse-folder-btn"
+                onClick={() => setShowFolderSelector(!showFolderSelector)}
+                disabled={isScanning}
+                title={t('folderSelector.title')}
+              >
+                📁 {showFolderSelector ? t('folderSelector.close') : t('folderSelector.browse')}
+              </button>
+            </div>
             {scanConfig && scanConfig.scan_paths && scanConfig.scan_paths.length > 0 && (
               <p className="text-sm text-muted mt-1">
                 {t('pathScanner.suggestedPaths')}: {scanConfig.scan_paths.join(', ')}
               </p>
             )}
           </div>
+
+          {/* Folder Selector */}
+          {showFolderSelector && (
+            <div className="folder-selector-container">
+              <FolderSelector
+                onPathSelect={handlePathSelect}
+                selectedPath={scanPath}
+                disabled={isScanning}
+              />
+            </div>
+          )}
 
           {/* Configuration Panel */}
           <ConfigPanel

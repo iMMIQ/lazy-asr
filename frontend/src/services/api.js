@@ -147,4 +147,30 @@ export const getScanConfig = async () => {
   }
 };
 
+/**
+ * Browse a directory to get subdirectories and media files
+ */
+export const browseDirectory = async (path = '/') => {
+  try {
+    const response = await apiClient.get('/asr/scan/browse', { params: { path } });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to browse directory:', error);
+    throw new Error(error.response?.data?.detail || 'Failed to browse directory');
+  }
+};
+
+/**
+ * Get detailed information about a specific path
+ */
+export const getPathInfo = async (path) => {
+  try {
+    const response = await apiClient.get('/asr/scan/path-info', { params: { path } });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to get path info:', error);
+    throw new Error(error.response?.data?.detail || 'Failed to get path info');
+  }
+};
+
 export default apiClient;
