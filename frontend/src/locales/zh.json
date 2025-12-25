@@ -86,8 +86,8 @@
     "english": "English"
   },
   "tabs": {
-    "fileUpload": "文件上传",
-    "pathScan": "路径扫描"
+    "upload": "文件上传",
+    "scan": "路径扫描"
   },
   "pathScanner": {
     "title": "📁 路径扫描器 - NAS媒体处理",

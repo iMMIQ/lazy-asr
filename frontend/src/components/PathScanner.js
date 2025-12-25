@@ -1,29 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useConfig } from '../context/ConfigContext';
 import { startScan, getScanStatus, getScanResult, cancelScan, getScanConfig } from '../services/api';
 import ConfigPanel from './ConfigPanel';
 import FolderSelector from './FolderSelector';
-import { DEFAULT_OUTPUT_FORMATS, DEFAULT_MIN_SPEECH_DURATION, DEFAULT_MIN_SILENCE_DURATION } from '../constants/config';
+import './PathScanner.css';
 
+/**
+ * Path Scanner Component
+ * Handles scanning directories for media files and batch ASR processing
+ */
 const PathScanner = () => {
   const { t } = useTranslation();
+  const { state, actions } = useConfig();
 
-  // State management
+  // Local state for scanner-specific features
   const [scanPath, setScanPath] = useState('');
   const [showFolderSelector, setShowFolderSelector] = useState(false);
-  const [recursive, setRecursive] = useState(true);
-  const [asrMethod, setAsrMethod] = useState('local-whisper');
-  const [outputFormats, setOutputFormats] = useState(DEFAULT_OUTPUT_FORMATS);
-  const [maxFiles, setMaxFiles] = useState(100);
-
-  // VAD and ASR configuration states
-  const [minSpeechDuration, setMinSpeechDuration] = useState(DEFAULT_MIN_SPEECH_DURATION);
-  const [minSilenceDuration, setMinSilenceDuration] = useState(DEFAULT_MIN_SILENCE_DURATION);
-  const [asrApiUrl, setAsrApiUrl] = useState('');
-  const [asrApiKey, setAsrApiKey] = useState('');
-  const [asrModel, setAsrModel] = useState('');
-  const [asrLanguage, setAsrLanguage] = useState('auto');
-
   const [activeScanId, setActiveScanId] = useState(null);
   const [scanStatus, setScanStatus] = useState(null);
   const [scanResult, setScanResult] = useState(null);
@@ -110,19 +103,20 @@ const PathScanner = () => {
     try {
       setError(null);
       setIsScanning(true);
+      actions.setProcessing(true);
 
       const scanRequest = {
         path: scanPath,
-        recursive: recursive,
-        asr_method: asrMethod,
-        output_formats: outputFormats,
-        max_files: maxFiles,
-        min_speech_duration: minSpeechDuration,
-        min_silence_duration: minSilenceDuration,
-        asr_api_url: asrApiUrl,
-        asr_api_key: asrApiKey,
-        asr_model: asrModel,
-        asr_language: asrLanguage
+        recursive: state.recursive,
+        asr_method: state.asrMethod,
+        output_formats: state.outputFormats,
+        max_files: state.maxFiles,
+        min_speech_duration: state.minSpeechDuration,
+        min_silence_duration: state.minSilenceDuration,
+        asr_api_url: state.asrApiUrl,
+        asr_api_key: state.asrApiKey,
+        asr_model: state.asrModel,
+        asr_language: state.asrLanguage
       };
 
       const response = await startScan(scanRequest);
@@ -140,6 +134,7 @@ const PathScanner = () => {
     } catch (err) {
       setError(err.message);
       setIsScanning(false);
+      actions.setProcessing(false);
     }
   };
 
@@ -149,6 +144,7 @@ const PathScanner = () => {
     try {
       await cancelScan(activeScanId);
       setIsScanning(false);
+      actions.setProcessing(false);
       setScanStatus(prev => ({
         ...prev,
         status: 'cancelled',
@@ -156,43 +152,6 @@ const PathScanner = () => {
       }));
     } catch (err) {
       setError(err.message);
-    }
-  };
-
-  const handleFormatChange = (format) => {
-    setOutputFormats(prev => {
-      if (prev.includes(format)) {
-        return prev.filter(f => f !== format);
-      } else {
-        return [...prev, format];
-      }
-    });
-  };
-
-  const handleVadConfigChange = (field, value) => {
-    if (field === 'minSpeechDuration') {
-      setMinSpeechDuration(value);
-    } else if (field === 'minSilenceDuration') {
-      setMinSilenceDuration(value);
-    }
-  };
-
-  const handleAsrConfigChange = (field, value) => {
-    switch (field) {
-      case 'asrApiUrl':
-        setAsrApiUrl(value);
-        break;
-      case 'asrApiKey':
-        setAsrApiKey(value);
-        break;
-      case 'asrModel':
-        setAsrModel(value);
-        break;
-      case 'asrLanguage':
-        setAsrLanguage(value);
-        break;
-      default:
-        break;
     }
   };
 
@@ -263,36 +222,51 @@ const PathScanner = () => {
 
           {/* Configuration Panel */}
           <ConfigPanel
-            // Configuration values
-            asrMethod={asrMethod}
-            availablePlugins={['local-whisper', 'faster-whisper', 'qwen-asr']}
-            outputFormats={outputFormats}
-            minSpeechDuration={minSpeechDuration}
-            minSilenceDuration={minSilenceDuration}
-            asrLanguage={asrLanguage}
-            asrApiUrl={asrApiUrl}
-            asrApiKey={asrApiKey}
-            asrModel={asrModel}
-
-            // Event handlers
-            onMethodChange={(e) => setAsrMethod(e.target.value)}
-            onFormatChange={handleFormatChange}
-            onVadConfigChange={handleVadConfigChange}
-            onAsrConfigChange={handleAsrConfigChange}
-
-            // Control options
+            asrMethod={state.asrMethod}
+            availablePlugins={state.availablePlugins}
+            outputFormats={state.outputFormats}
+            minSpeechDuration={state.minSpeechDuration}
+            minSilenceDuration={state.minSilenceDuration}
+            asrLanguage={state.asrLanguage}
+            asrApiUrl={state.asrApiUrl}
+            asrApiKey={state.asrApiKey}
+            asrModel={state.asrModel}
+            onMethodChange={(e) => actions.setAsrMethod(e.target.value)}
+            onFormatChange={actions.toggleOutputFormat}
+            onVadConfigChange={(field, value) => {
+              if (field === 'minSpeechDuration') {
+                actions.setMinSpeechDuration(value);
+              } else if (field === 'minSilenceDuration') {
+                actions.setMinSilenceDuration(value);
+              }
+            }}
+            onAsrConfigChange={(field, value) => {
+              switch (field) {
+                case 'asrApiUrl':
+                  actions.setAsrApiUrl(value);
+                  break;
+                case 'asrApiKey':
+                  actions.setAsrApiKey(value);
+                  break;
+                case 'asrModel':
+                  actions.setAsrModel(value);
+                  break;
+                case 'asrLanguage':
+                  actions.setAsrLanguage(value);
+                  break;
+                default:
+                  break;
+              }
+            }}
             showVadConfig={true}
             showAsrAdvancedConfig={true}
             isProcessing={isScanning}
-
-            // Additional options for path scanning
             showMaxFiles={true}
-            maxFiles={maxFiles}
-            onMaxFilesChange={(value) => setMaxFiles(value)}
-
+            maxFiles={state.maxFiles}
+            onMaxFilesChange={(value) => actions.setMaxFiles(value)}
             showRecursiveOption={true}
-            recursive={recursive}
-            onRecursiveChange={setRecursive}
+            recursive={state.recursive}
+            onRecursiveChange={actions.setRecursive}
           />
 
 

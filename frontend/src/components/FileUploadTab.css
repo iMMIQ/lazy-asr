@@ -1,0 +1,33 @@
+/* File Upload Tab Styling */
+.file-upload-tab {
+    width: 100%;
+}
+
+/* Processing Form Styling */
+.processing-form {
+    background: var(--card-bg);
+    padding: var(--space-2xl);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    margin-bottom: var(--space-2xl);
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-normal);
+}
+
+.processing-form:hover {
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .processing-form {
+        padding: var(--space-lg);
+    }
+}
+
+@media (max-width: 480px) {
+    .processing-form {
+        padding: var(--space-md);
+    }
+}

@@ -86,8 +86,8 @@
     "english": "English"
   },
   "tabs": {
-    "fileUpload": "File Upload",
-    "pathScan": "Path Scan"
+    "upload": "File Upload",
+    "scan": "Path Scan"
   },
   "pathScanner": {
     "title": "📁 Path Scanner - NAS Media Processing",
