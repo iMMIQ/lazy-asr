@@ -1335,3 +1335,98 @@ body {
     font-size: 1.5rem;
   }
 }
+
+/* Config Panel Styling */
+.config-panel {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  margin: var(--space-xl) 0;
+  transition: all var(--transition-fast);
+}
+
+.config-panel:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--text-muted);
+}
+
+.config-panel h3 {
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-md);
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  border-bottom: 2px solid var(--border-light);
+  padding-bottom: var(--space-sm);
+}
+
+.config-panel h3:first-child {
+  margin-top: 0;
+}
+
+.config-panel .form-group {
+  margin-bottom: var(--space-lg);
+}
+
+.config-panel .form-group:last-child {
+  margin-bottom: 0;
+}
+
+/* Recursive checkbox styling in config panel */
+.config-panel .recursive-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+  padding: var(--space-sm) 0;
+}
+
+.config-panel .recursive-checkbox input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #667eea;
+  cursor: pointer;
+}
+
+.config-panel .recursive-checkbox label {
+  font-size: 1rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  user-select: none;
+  margin: 0;
+  font-weight: normal;
+}
+
+/* ASR config section in config panel */
+.config-panel .asr-config-section {
+  margin-top: var(--space-lg);
+  padding: var(--space-lg);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+}
+
+.config-panel .asr-config-section .form-group {
+  margin-bottom: var(--space-md);
+}
+
+.config-panel .asr-config-section .form-group:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive design for config panel */
+@media (max-width: 768px) {
+  .config-panel {
+    padding: var(--space-lg);
+  }
+
+  .config-panel h3 {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .config-panel {
+    padding: var(--space-md);
+  }
+}

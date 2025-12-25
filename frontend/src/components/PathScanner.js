@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { startScan, getScanStatus, getScanResult, cancelScan, getScanConfig } from '../services/api';
-import { DEFAULT_OUTPUT_FORMATS } from '../constants/config';
+import ConfigPanel from './ConfigPanel';
+import { DEFAULT_OUTPUT_FORMATS, DEFAULT_MIN_SPEECH_DURATION, DEFAULT_MIN_SILENCE_DURATION } from '../constants/config';
 
 const PathScanner = () => {
   const { t } = useTranslation();
@@ -12,6 +13,14 @@ const PathScanner = () => {
   const [asrMethod, setAsrMethod] = useState('local-whisper');
   const [outputFormats, setOutputFormats] = useState(DEFAULT_OUTPUT_FORMATS);
   const [maxFiles, setMaxFiles] = useState(100);
+
+  // VAD and ASR configuration states
+  const [minSpeechDuration, setMinSpeechDuration] = useState(DEFAULT_MIN_SPEECH_DURATION);
+  const [minSilenceDuration, setMinSilenceDuration] = useState(DEFAULT_MIN_SILENCE_DURATION);
+  const [asrApiUrl, setAsrApiUrl] = useState('');
+  const [asrApiKey, setAsrApiKey] = useState('');
+  const [asrModel, setAsrModel] = useState('');
+  const [asrLanguage, setAsrLanguage] = useState('auto');
 
   const [activeScanId, setActiveScanId] = useState(null);
   const [scanStatus, setScanStatus] = useState(null);
@@ -105,7 +114,13 @@ const PathScanner = () => {
         recursive: recursive,
         asr_method: asrMethod,
         output_formats: outputFormats,
-        max_files: maxFiles
+        max_files: maxFiles,
+        min_speech_duration: minSpeechDuration,
+        min_silence_duration: minSilenceDuration,
+        asr_api_url: asrApiUrl,
+        asr_api_key: asrApiKey,
+        asr_model: asrModel,
+        asr_language: asrLanguage
       };
 
       const response = await startScan(scanRequest);
@@ -152,6 +167,33 @@ const PathScanner = () => {
     });
   };
 
+  const handleVadConfigChange = (field, value) => {
+    if (field === 'minSpeechDuration') {
+      setMinSpeechDuration(value);
+    } else if (field === 'minSilenceDuration') {
+      setMinSilenceDuration(value);
+    }
+  };
+
+  const handleAsrConfigChange = (field, value) => {
+    switch (field) {
+      case 'asrApiUrl':
+        setAsrApiUrl(value);
+        break;
+      case 'asrApiKey':
+        setAsrApiKey(value);
+        break;
+      case 'asrModel':
+        setAsrModel(value);
+        break;
+      case 'asrLanguage':
+        setAsrLanguage(value);
+        break;
+      default:
+        break;
+    }
+  };
+
   const resetScan = () => {
     setActiveScanId(null);
     setScanStatus(null);
@@ -189,64 +231,40 @@ const PathScanner = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div className="form-group">
-              <label>{t('pathScanner.asrMethod')}</label>
-              <select
-                value={asrMethod}
-                onChange={(e) => setAsrMethod(e.target.value)}
-                disabled={isScanning}
-              >
-                <option value="local-whisper">Local Whisper</option>
-                <option value="faster-whisper">Faster Whisper</option>
-                <option value="qwen-asr">Qwen ASR</option>
-              </select>
-            </div>
+          {/* Configuration Panel */}
+          <ConfigPanel
+            // Configuration values
+            asrMethod={asrMethod}
+            availablePlugins={['local-whisper', 'faster-whisper', 'qwen-asr']}
+            outputFormats={outputFormats}
+            minSpeechDuration={minSpeechDuration}
+            minSilenceDuration={minSilenceDuration}
+            asrLanguage={asrLanguage}
+            asrApiUrl={asrApiUrl}
+            asrApiKey={asrApiKey}
+            asrModel={asrModel}
 
-            <div className="form-group">
-              <label>{t('pathScanner.maxFiles')}</label>
-              <input
-                type="number"
-                value={maxFiles}
-                onChange={(e) => setMaxFiles(parseInt(e.target.value) || 100)}
-                min="1"
-                max="1000"
-                disabled={isScanning}
-              />
-            </div>
-          </div>
+            // Event handlers
+            onMethodChange={(e) => setAsrMethod(e.target.value)}
+            onFormatChange={handleFormatChange}
+            onVadConfigChange={handleVadConfigChange}
+            onAsrConfigChange={handleAsrConfigChange}
 
-          <div className="form-group">
-            <label>{t('pathScanner.outputFormats')}</label>
-            <div className="format-checkboxes">
-              {['srt', 'vtt', 'lrc', 'txt'].map(format => (
-                <label key={format} className="format-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={outputFormats.includes(format)}
-                    onChange={() => handleFormatChange(format)}
-                    disabled={isScanning}
-                  />
-                  <span className="format-label">{format.toUpperCase()}</span>
-                </label>
-              ))}
-            </div>
-          </div>
+            // Control options
+            showVadConfig={true}
+            showAsrAdvancedConfig={true}
+            isProcessing={isScanning}
 
-          <div className="form-group">
-            <div className="recursive-checkbox">
-              <input
-                type="checkbox"
-                id="recursive-scan"
-                checked={recursive}
-                onChange={(e) => setRecursive(e.target.checked)}
-                disabled={isScanning}
-              />
-              <label htmlFor="recursive-scan">
-                {t('pathScanner.recursiveScan')}
-              </label>
-            </div>
-          </div>
+            // Additional options for path scanning
+            showMaxFiles={true}
+            maxFiles={maxFiles}
+            onMaxFilesChange={(value) => setMaxFiles(value)}
+
+            showRecursiveOption={true}
+            recursive={recursive}
+            onRecursiveChange={setRecursive}
+          />
+
 
           {error && (
             <div className="scanner-error">

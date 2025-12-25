@@ -11,8 +11,7 @@ import {
 // Import components
 import Header from './components/Header';
 import FileUpload from './components/FileUpload';
-import ASRConfig from './components/ASRConfig';
-import AdvancedOptions from './components/AdvancedOptions';
+import ConfigPanel from './components/ConfigPanel';
 import SubmitButtons from './components/SubmitButtons';
 import ProcessingIndicator from './components/ProcessingIndicator';
 import ResultDisplay from './components/ResultDisplay';
@@ -31,14 +30,13 @@ function App() {
   const [asrMethod, setAsrMethod] = useState('');
   const [availablePlugins, setAvailablePlugins] = useState([]);
   const [outputFormats, setOutputFormats] = useState(DEFAULT_OUTPUT_FORMATS);
-  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [minSpeechDuration, setMinSpeechDuration] = useState(DEFAULT_MIN_SPEECH_DURATION);
   const [minSilenceDuration, setMinSilenceDuration] = useState(DEFAULT_MIN_SILENCE_DURATION);
   const [asrApiUrl, setAsrApiUrl] = useState('');
   const [asrApiKey, setAsrApiKey] = useState('');
   const [asrModel, setAsrModel] = useState('');
   const [asrLanguage, setAsrLanguage] = useState('auto');
-  
+
   // Determine output mode based on active tab
   const outputMode = activeTab === 'upload' ? 'task' : 'source';
 
@@ -145,7 +143,6 @@ function App() {
       asrMethod,
       outputFormats,
       outputMode,
-      showAdvancedOptions,
       minSpeechDuration,
       minSilenceDuration,
       asrApiUrl,
@@ -170,7 +167,6 @@ function App() {
       asrMethod,
       outputFormats,
       outputMode,
-      showAdvancedOptions,
       minSpeechDuration,
       minSilenceDuration,
       asrApiUrl,
@@ -225,27 +221,27 @@ function App() {
                 isProcessing={isProcessing}
               />
 
-              <ASRConfig
+              <ConfigPanel
+                // Configuration values
                 asrMethod={asrMethod}
                 availablePlugins={availablePlugins}
                 outputFormats={outputFormats}
-                onMethodChange={handleMethodChange}
-                onFormatChange={handleFormatChange}
-                isProcessing={isProcessing}
-              />
-
-              <AdvancedOptions
-                showAdvancedOptions={showAdvancedOptions}
-                onToggleAdvancedOptions={() => setShowAdvancedOptions(!showAdvancedOptions)}
                 minSpeechDuration={minSpeechDuration}
                 minSilenceDuration={minSilenceDuration}
                 asrLanguage={asrLanguage}
                 asrApiUrl={asrApiUrl}
                 asrApiKey={asrApiKey}
                 asrModel={asrModel}
-                asrMethod={asrMethod}
+
+                // Event handlers
+                onMethodChange={handleMethodChange}
+                onFormatChange={handleFormatChange}
                 onVadConfigChange={handleVadConfigChange}
                 onAsrConfigChange={handleAsrConfigChange}
+
+                // Control options
+                showVadConfig={true}
+                showAsrAdvancedConfig={true}
                 isProcessing={isProcessing}
               />
 
