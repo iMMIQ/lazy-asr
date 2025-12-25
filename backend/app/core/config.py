@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     # Faster Whisper settings
     FASTER_WHISPER_API_URL: str = "https://funasr-ai.immiqtop.heiyu.space/v1/audio/transcriptions"
     FASTER_WHISPER_API_KEY: Optional[str] = None
-    FASTER_WHISPER_MODEL: str = "sensevoice-small"
+    FASTER_WHISPER_MODEL: str = "fun-asr-nano"
 
     # Qwen ASR settings
     QWEN_ASR_API_KEY: Optional[str] = None

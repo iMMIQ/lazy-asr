@@ -196,9 +196,9 @@ def validate_media_file(file_path: str) -> Tuple[bool, str]:
         if file_size == 0:
             return False, "File is empty"
 
-        # Check if file is too large (500MB limit)
-        if file_size > 500 * 1024 * 1024:
-            return False, "File too large (max 500MB)"
+        # Check if file is too large (10GB limit)
+        if file_size > 10 * 1024 * 1024 * 1024:
+            return False, "File too large (max 10GB)"
 
         # Try to probe the file
         probe = ffmpeg.probe(file_path)
