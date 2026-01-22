@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { fetchPlugins } from './services/api';
 import { ConfigProvider, useConfig } from './context/ConfigContext';
+import type { TabType } from './types';
 
 // Import components
 import Header from './components/Header';
@@ -12,16 +13,23 @@ import MonitorManager from './components/MonitorManager';
 
 import './App.css';
 
+/** AppContent component props */
+interface AppContentProps {
+  activeTab: TabType;
+  onTabChange: (tab: TabType) => void;
+  onLanguageChange: (language: string) => void;
+}
+
 /**
  * Main App Component
  * Provides the overall application structure and manages top-level state
  */
-function App() {
+function App(): React.ReactElement {
   const { t, i18n } = useTranslation();
-  const [activeTab, setActiveTab] = useState('upload');
+  const [activeTab, setActiveTab] = useState<TabType>('upload');
 
   // Language switcher function
-  const changeLanguage = (lng) => {
+  const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
   };
 
@@ -40,7 +48,7 @@ function App() {
  * AppContent Component
  * Contains the actual UI elements wrapped by ConfigProvider
  */
-function AppContent({ activeTab, onTabChange, onLanguageChange }) {
+function AppContent({ activeTab, onTabChange, onLanguageChange }: AppContentProps): React.ReactElement {
   const { t, i18n } = useTranslation();
   const { actions } = useConfig();
 
@@ -50,16 +58,16 @@ function AppContent({ activeTab, onTabChange, onLanguageChange }) {
       try {
         const response = await fetchPlugins();
         const plugins = response.plugins;
-        const defaultMethod = response.default_method;
+        const defaultMethod = (response as { default_method?: string }).default_method;
 
         actions.setAvailablePlugins(plugins);
 
         // Set the default method from backend configuration
-        if (defaultMethod && plugins.includes(defaultMethod)) {
+        if (defaultMethod && plugins.some(p => p.name === defaultMethod)) {
           actions.setAsrMethod(defaultMethod);
         } else if (plugins.length > 0) {
           // Fallback to first plugin if default is not available
-          actions.setAsrMethod(plugins[0]);
+          actions.setAsrMethod(plugins[0].name);
         }
       } catch (err) {
         console.error('Failed to fetch plugins:', err);
