@@ -1,33 +1,41 @@
-/* File Upload Tab Styling */
+/* ============================================
+   File Upload Tab Component
+   Modern Design System
+   ============================================ */
+
 .file-upload-tab {
-    width: 100%;
+  width: 100%;
 }
 
-/* Processing Form Styling */
 .processing-form {
-    background: var(--card-bg);
-    padding: var(--space-2xl);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
-    margin-bottom: var(--space-2xl);
-    border: 1px solid var(--border-color);
-    transition: all var(--transition-normal);
+  background: var(--gradient-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: var(--space-8);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-lg);
+  margin-bottom: var(--space-8);
+  border: var(--border-subtle);
+  transition: all var(--duration-slow) var(--ease-default);
 }
 
 .processing-form:hover {
-    box-shadow: var(--shadow-xl);
-    transform: translateY(-2px);
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-2px);
+  border-color: var(--border-default);
 }
 
-/* Responsive Design */
+/* ============================================
+   Responsive Design
+   ============================================ */
 @media (max-width: 768px) {
-    .processing-form {
-        padding: var(--space-lg);
-    }
+  .processing-form {
+    padding: var(--space-5);
+  }
 }
 
 @media (max-width: 480px) {
-    .processing-form {
-        padding: var(--space-md);
-    }
+  .processing-form {
+    padding: var(--space-4);
+  }
 }

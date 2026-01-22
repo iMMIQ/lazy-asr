@@ -1,77 +1,82 @@
-/* Tab Navigation Styling */
+/* ============================================
+   Tab Navigation Component
+   Modern Glassmorphism Design
+   ============================================ */
+
 .tab-navigation {
-    background: var(--card-bg);
-    border-radius: var(--radius-xl);
-    padding: var(--space-md);
-    margin-bottom: var(--space-2xl);
-    box-shadow: var(--shadow-md);
-    border: 1px solid var(--border-color);
+  background: var(--gradient-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-1);
+  margin-bottom: var(--space-8);
+  box-shadow: var(--shadow-md);
+  border: var(--border-subtle);
 }
 
 .tab-nav {
-    display: flex;
-    gap: var(--space-sm);
-    border-bottom: none;
+  display: flex;
+  gap: var(--space-1);
 }
 
 .tab-button {
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px solid transparent;
-    color: var(--text-secondary);
-    padding: var(--space-md) var(--space-xl);
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: var(--radius-lg);
-    cursor: pointer;
-    transition: all var(--transition-normal);
-    flex: 1;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-default);
+  flex: 1;
+  text-align: center;
+  position: relative;
+  font-family: var(--font-sans);
 }
 
 .tab-button:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--text-primary);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
+  background: var(--glass-shine);
+  color: var(--text-primary);
 }
 
 .tab-button.active {
-    background: var(--primary-gradient);
-    color: white;
-    border-color: rgba(102, 126, 234, 0.3);
-    box-shadow: var(--shadow-md);
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: var(--shadow-md), var(--shadow-glow);
 }
 
+/* Shimmer effect for active tab */
 .tab-button.active::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    animation: shimmer 2s infinite;
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  animation: shimmer 3s infinite;
 }
 
 @keyframes shimmer {
-    0% {
-        left: -100%;
-    }
-
-    100% {
-        left: 100%;
-    }
+  0% { left: -100%; }
+  100% { left: 100%; }
 }
 
-/* Responsive Design */
+/* ============================================
+   Responsive Design
+   ============================================ */
 @media (max-width: 768px) {
-    .tab-nav {
-        flex-direction: column;
-    }
+  .tab-nav {
+    flex-direction: column;
+  }
 
-    .tab-button {
-        width: 100%;
-    }
+  .tab-button {
+    width: 100%;
+  }
 }

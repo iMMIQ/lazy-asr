@@ -3,6 +3,7 @@ import tempfile
 from typing import Tuple, Optional, List
 import ffmpeg
 from app.core.logger import get_logger
+import filetype
 
 logger = get_logger(__name__)
 
@@ -43,88 +44,22 @@ def get_supported_formats() -> dict:
     """
     Get list of supported media formats
 
+    Note: This function returns common formats. Actual file type detection
+    is performed by the filetype library based on file content.
+    
     Returns:
         Dictionary with supported video and audio formats
     """
+    # Return common formats for reference
+    # Actual detection uses filetype library based on file content
     return {
         "video": [
-            "mp4",
-            "avi",
-            "mov",
-            "mkv",
-            "webm",
-            "flv",
-            "wmv",
-            "m4v",
-            "3gp",
-            "mpg",
-            "mpeg",
-            "ts",
-            "mts",
-            "m2ts",
-            "rm",
-            "rmvb",
-            "asf",
-            "mxf",
-            "dv",
-            "f4v",
-            "qt",
-            "divx",
-            "xvid",
-            "mp4v",
-            "m4p",
-            "m4b",
-            "vob",
-            "evo",
-            "ogv",
-            "drc",
-            "mng",
-            "qt",
-            "yuv",
-            "rm",
-            "rmvb",
-            "svi",
-            "amv",
-            "viv",
-            "3g2",
+            "mp4", "avi", "mov", "mkv", "webm", "flv",
+            "wmv", "m4v", "3gp", "3g2", "ts", "m2ts"
         ],
         "audio": [
-            "mp3",
-            "wav",
-            "flac",
-            "aac",
-            "ogg",
-            "m4a",
-            "wma",
-            "opus",
-            "aiff",
-            "amr",
-            "ac3",
-            "dts",
-            "ra",
-            "au",
-            "gsm",
-            "m4b",
-            "m4p",
-            "dsd",
-            "caf",
-            "adts",
-            "alac",
-            "mka",
-            "ape",
-            "tak",
-            "wv",
-            "tta",
-            "speex",
-            "spx",
-            "mid",
-            "midi",
-            "rmi",
-            "kar",
-            "mod",
-            "it",
-            "s3m",
-            "xm",
+            "mp3", "wav", "flac", "aac", "ogg", "m4a",
+            "wma", "opus", "aiff", "amr"
         ],
     }
 

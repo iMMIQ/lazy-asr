@@ -14,6 +14,7 @@ from app.models.schemas import ScanRequest, ScanStatus, ASRResponse
 from app.repositories.scan_repository import ScanRepository, MediaFileRepository
 from app.services.asr_service import ASRService
 from app.models.database import ScanTask, MediaFile, MonitorConfig
+from app.utils.file_type import get_file_type, is_media_file
 
 logger = get_logger(__name__)
 
@@ -130,18 +131,17 @@ class PersistentScanService:
         return False
 
     def _determine_file_type(self, file_path: str) -> str:
-        """Determine if file is audio or video"""
-        audio_extensions = [".mp3", ".wav", ".flac", ".m4a", ".aac", ".ogg", ".opus"]
-        video_extensions = [".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm"]
-
-        file_ext = os.path.splitext(file_path)[1].lower()
-
-        if file_ext in audio_extensions:
-            return "audio"
-        elif file_ext in video_extensions:
-            return "video"
-        else:
-            return "unknown"
+        """
+        Determine if file is audio or video using filetype library
+        
+        Args:
+            file_path: Path to the file
+            
+        Returns:
+            'audio', 'video', or 'unknown'
+        """
+        file_type, _ = get_file_type(file_path)
+        return file_type if file_type else 'unknown'
 
     async def _perform_scan(self, scan_id: str, scan_request: ScanRequest):
         """Perform the actual scan and processing"""
@@ -335,7 +335,7 @@ class PersistentScanService:
 
     def _find_media_files(self, path: str, recursive: bool = True, max_files: int = 100) -> List[str]:
         """
-        Find media files in the specified path
+        Find media files in the specified path using filetype library
 
         Args:
             path: Directory path to scan
@@ -346,7 +346,6 @@ class PersistentScanService:
             List of media file paths
         """
         media_files = []
-        extensions = set(ext.lower() for ext in settings.SCAN_FILE_EXTENSIONS)
 
         try:
             if recursive:
@@ -355,9 +354,10 @@ class PersistentScanService:
                         if len(media_files) >= max_files:
                             return media_files
 
-                        file_ext = os.path.splitext(file)[1].lower()
-                        if file_ext in extensions:
-                            media_files.append(os.path.join(root, file))
+                        file_path = os.path.join(root, file)
+                        # Use filetype library to detect if it's a media file
+                        if is_media_file(file_path):
+                            media_files.append(file_path)
             else:
                 for item in os.listdir(path):
                     if len(media_files) >= max_files:
@@ -365,8 +365,8 @@ class PersistentScanService:
 
                     item_path = os.path.join(path, item)
                     if os.path.isfile(item_path):
-                        file_ext = os.path.splitext(item)[1].lower()
-                        if file_ext in extensions:
+                        # Use filetype library to detect if it's a media file
+                        if is_media_file(item_path):
                             media_files.append(item_path)
 
         except Exception as e:

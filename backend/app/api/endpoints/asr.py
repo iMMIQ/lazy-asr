@@ -23,6 +23,7 @@ from app.models.schemas import (
 from app.core.config import settings
 from app.core.database import init_database, close_database
 from app.core.logger import get_logger
+from app.utils.file_type import get_file_type, is_media_file
 
 logger = get_logger(__name__)
 
@@ -500,29 +501,16 @@ async def browse_directory(path: str = "/"):
                     # Only list subdirectories, don't count media files inside them
                     directories.append({"name": entry, "path": entry_path})
                 else:
-                    # Check if it's a media file in the current directory
-                    if any(entry.lower().endswith(ext) for ext in settings.SCAN_FILE_EXTENSIONS):
+                    # Check if it's a media file using filetype library
+                    if is_media_file(entry_path):
                         try:
                             file_size = os.path.getsize(entry_path)
                             file_size_mb = round(file_size / (1024 * 1024), 2)
 
-                            # Determine file type
-                            file_type = (
-                                "audio"
-                                if any(
-                                    entry.lower().endswith(ext)
-                                    for ext in [
-                                        ".mp3",
-                                        ".wav",
-                                        ".flac",
-                                        ".m4a",
-                                        ".aac",
-                                        ".ogg",
-                                        ".opus",
-                                    ]
-                                )
-                                else "video"
-                            )
+                            # Determine file type using filetype library
+                            file_type, _ = get_file_type(entry_path)
+                            if not file_type:
+                                file_type = "video"  # Default to video if unknown
 
                             media_files_in_current_dir.append(
                                 {
@@ -607,30 +595,18 @@ async def get_path_info(path: str):
         try:
             for root, dirs, files in os.walk(abs_path):
                 for file in files:
-                    if any(file.lower().endswith(ext) for ext in settings.SCAN_FILE_EXTENSIONS):
+                    file_path = os.path.join(root, file)
+                    # Use filetype library to detect if it's a media file
+                    if is_media_file(file_path):
                         media_count += 1
                         try:
-                            file_path = os.path.join(root, file)
                             file_size = os.path.getsize(file_path)
                             total_size += file_size
 
-                            # Determine file type
-                            file_type = (
-                                "audio"
-                                if any(
-                                    file.lower().endswith(ext)
-                                    for ext in [
-                                        ".mp3",
-                                        ".wav",
-                                        ".flac",
-                                        ".m4a",
-                                        ".aac",
-                                        ".ogg",
-                                        ".opus",
-                                    ]
-                                )
-                                else "video"
-                            )
+                            # Determine file type using filetype library
+                            file_type, _ = get_file_type(file_path)
+                            if not file_type:
+                                file_type = "video"  # Default to video if unknown
 
                             # Only collect first 20 files for preview
                             if len(media_files) < 20:
