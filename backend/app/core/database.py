@@ -1,87 +1,31 @@
 """
 Database initialization and session management
+
+DEPRECATED: This module is deprecated. Use app.db.session instead.
+This file is kept for backward compatibility and will be removed in future versions.
 """
+import warnings
 
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.orm import declarative_base
+# Re-export from new location for backward compatibility
+from app.db.session import db_manager, get_db, init_database, close_database, DatabaseManager
+from sqlalchemy.ext.asyncio import AsyncSession
 from contextlib import asynccontextmanager
-import os
-from app.models.database import Base
-from app.core.logger import get_logger
-from app.core.config import settings
-
-logger = get_logger(__name__)
-
-# Database file path
-DATABASE_DIR = "data"
-DATABASE_FILE = "asr_service.db"
-DATABASE_PATH = os.path.join(DATABASE_DIR, DATABASE_FILE)
-DATABASE_URL = f"sqlite+aiosqlite:///{DATABASE_PATH}"
-
-# Create async engine
-engine = create_async_engine(
-    DATABASE_URL,
-    echo=False,  # Set to True for SQL query logging
-    connect_args={"check_same_thread": False},  # For SQLite
-)
-
-# Create async session maker
-AsyncSessionLocal = async_sessionmaker(
-    engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
-    autocommit=False,
-    autoflush=False,
-)
 
 
-async def init_database():
-    """Initialize database tables"""
-    try:
-        # Ensure data directory exists
-        os.makedirs(DATABASE_DIR, exist_ok=True)
-
-        # Create all tables
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-
-        logger.info(f"Database initialized successfully at: {DATABASE_PATH}")
-    except Exception as e:
-        logger.error(f"Failed to initialize database: {e}")
-        raise
-
-
-async def get_db():
-    """Get database session (dependency injection)"""
-    async with AsyncSessionLocal() as session:
-        try:
-            yield session
-            await session.commit()
-        except Exception:
-            await session.rollback()
-            raise
-        finally:
-            await session.close()
-
-
+# For backward compatibility, recreate get_db_context
 @asynccontextmanager
 async def get_db_context():
-    """Get database session as context manager"""
-    async with AsyncSessionLocal() as session:
-        try:
-            yield session
-            await session.commit()
-        except Exception:
-            await session.rollback()
-            raise
-        finally:
-            await session.close()
+    """Get database session as context manager (backward compatibility wrapper)"""
+    async with db_manager.get_session() as session:
+        yield session
 
 
-async def close_database():
-    """Close database connections"""
-    try:
-        await engine.dispose()
-        logger.info("Database connections closed")
-    except Exception as e:
-        logger.error(f"Error closing database: {e}")
+__all__ = [
+    "db_manager",
+    "get_db",
+    "get_db_context",
+    "init_database",
+    "close_database",
+    "DatabaseManager",
+    "AsyncSession",
+]

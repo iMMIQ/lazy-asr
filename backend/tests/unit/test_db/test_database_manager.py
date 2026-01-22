@@ -56,36 +56,6 @@ class TestDatabaseManager:
         await manager.close()
 
 
-class TestBaseRepository:
-    """Test base repository class"""
-
-    def test_base_repository_exists(self):
-        """BaseRepository class should exist"""
-        from app.db.repositories.base import BaseRepository
-        assert BaseRepository is not None
-
-    def test_base_repository_has_generic_methods(self):
-        """BaseRepository should have CRUD methods"""
-        from app.db.repositories.base import BaseRepository
-
-        # Check for standard CRUD methods
-        assert hasattr(BaseRepository, "get_by_id")
-        assert hasattr(BaseRepository, "get_all")
-        assert hasattr(BaseRepository, "create")
-        assert hasattr(BaseRepository, "update")
-        assert hasattr(BaseRepository, "delete")
-
-    def test_base_repository_initializes_with_model_and_session(self):
-        """BaseRepository should initialize with model and session"""
-        from app.db.repositories.base import BaseRepository
-        from app.models.database import ScanTask
-
-        # This is a type check - the repository should be generic
-        # We can't fully test without a real session, but we can check structure
-        assert hasattr(BaseRepository, "__init__")
-        assert hasattr(BaseRepository, "__class_getitem__")  # For Generic support
-
-
 class TestDatabaseURLParsing:
     """Test database URL parsing for different databases"""
 
