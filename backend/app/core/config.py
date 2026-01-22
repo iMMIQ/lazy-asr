@@ -44,6 +44,19 @@ class Settings(BaseSettings):
     SCAN_RECURSIVE: bool = True  # Whether to scan recursively
     SCAN_MAX_FILES: int = 100  # Maximum number of files to process in one scan
 
+    # Security settings
+    # CORS allowed origins - In production, specify exact origins
+    # Can be a comma-separated string: "http://localhost:3000,https://example.com"
+    ALLOWED_ORIGINS: list = ["http://localhost:3000"]
+    CORS_ALLOW_CREDENTIALS: bool = True
+    CORS_ALLOW_METHODS: list = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    CORS_ALLOW_HEADERS: list = ["Content-Type", "Authorization", "X-Request-ID"]
+
+    # Database settings
+    DATABASE_URL: str = "sqlite+aiosqlite:///data/asr_service.db"
+    DATABASE_POOL_SIZE: int = 5
+    DATABASE_MAX_OVERFLOW: int = 10
+
     class Config:
         env_file = ".env"
 
