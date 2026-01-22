@@ -2,12 +2,13 @@
   "name": "lazy-asr-frontend",
   "version": "1.0.0",
   "description": "Frontend for Lazy ASR Service",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext js,jsx",
+    "test": "vitest"
   },
   "dependencies": {
     "axios": "^1.12.2",
@@ -16,22 +17,11 @@
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-i18next": "^16.0.0",
-    "react-scripts": "5.0.1"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "react-i18next": "^16.0.0"
   },
   "devDependencies": {
-    "typescript": "^4.9.5"
+    "@vitejs/plugin-react-swc": "^4.2.2",
+    "typescript": "^4.9.5",
+    "vite": "^7.3.1"
   }
 }
