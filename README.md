@@ -30,9 +30,9 @@
 │   ├── plugins/             # ASR插件
 │   ├── requirements.txt     # Python依赖
 │   └── Dockerfile           # 后端Docker配置
-├── frontend/                # 前端应用
+├── frontend/                # 前端应用 (React + TypeScript + Vite)
 │   ├── public/              # 静态资源
-│   ├── src/                 # React源码
+│   ├── src/                 # React源码 (TypeScript)
 │   ├── package.json         # Node.js依赖
 │   └── Dockerfile           # 前端Docker配置
 ├── uploads/                 # 上传文件目录
@@ -99,9 +99,19 @@
    npm install
    ```
 
-2. 运行前端服务:
+2. 运行前端开发服务器:
    ```bash
-   npm start
+   npm run dev
+   ```
+
+3. 运行测试:
+   ```bash
+   npm run test
+   ```
+
+4. 构建生产版本:
+   ```bash
+   npm run build
    ```
 
 ## API接口
