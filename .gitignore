@@ -7,3 +7,4 @@ output/
 uploads/
 build/
 *.db
+docs/plans/
