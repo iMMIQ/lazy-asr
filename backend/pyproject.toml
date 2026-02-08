@@ -39,3 +39,24 @@ dev = [
 where = ["."]
 include = ["app*"]
 exclude = ["tests*", "plugins*", "data*", "models*", "output*", "uploads*"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = false
+warn_unused_configs = false
+disallow_untyped_defs = false
+disallow_any_unimported = false
+ignore_missing_imports = true
+check_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = [
+    "filetype.*",
+    "ffmpeg.*",
+    "soundfile.*",
+    "silero_vad.*",
+    "whisper.*",
+    "dashscope.*",
+    "tqdm.*",
+]
+ignore_missing_imports = true
