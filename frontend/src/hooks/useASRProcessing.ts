@@ -1,10 +1,12 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { processSingleFile, processMultipleFiles } from '../services/api';
 import {
   DEFAULT_MIN_SPEECH_DURATION,
   DEFAULT_MIN_SILENCE_DURATION
 } from '../constants/config';
 import type { ProcessResult, LanguageCode, OutputFormat } from '../types';
+import { useWebSocket } from './useWebSocket';
+import type { WSMessage, WSStatusData } from '../types';
 
 /** Form data options for ASR processing */
 export interface ASRProcessingOptions {
@@ -22,7 +24,7 @@ export interface ASRProcessingOptions {
   isMultiple?: boolean;
 }
 
-/** Return type for useASRProcessing hook */
+/** Extended return type for useASRProcessing hook with WebSocket support */
 export interface UseASRProcessingReturn {
   isProcessing: boolean;
   error: string | null;
@@ -32,10 +34,27 @@ export interface UseASRProcessingReturn {
   handleSingleSubmit: (formData: FormData) => Promise<void>;
   handleMultipleSubmit: (formData: FormData) => Promise<void>;
   buildFormData: (options: ASRProcessingOptions) => FormData;
+  // WebSocket progress state
+  progress: number;
+  currentStage: string;
+  progressMessage: string;
+  connected: boolean;
 }
 
+/** Processing stage types */
+type ProcessingStage =
+  | 'idle'
+  | 'preparing'
+  | 'vad_segmentation'
+  | 'loading_plugin'
+  | 'exporting_segments'
+  | 'transcription'
+  | 'generating_subtitles'
+  | 'completed'
+  | 'error';
+
 /**
- * Custom hook for ASR processing logic
+ * Custom hook for ASR processing logic with WebSocket real-time updates
  */
 export function useASRProcessing(): UseASRProcessingReturn {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -43,21 +62,71 @@ export function useASRProcessing(): UseASRProcessingReturn {
   const [result, setResult] = useState<ProcessResult[] | null>(null);
   const [multiFileResult, setMultiFileResult] = useState<ProcessResult[] | null>(null);
 
+  // WebSocket progress state
+  const [progress, setProgress] = useState(0);
+  const [currentStage, setCurrentStage] = useState<ProcessingStage>('idle');
+  const [progressMessage, setProgressMessage] = useState('');
+
+  // Track the current task ID for WebSocket subscription
+  const taskIdRef = useRef<string | null>(null);
+
+  // Setup WebSocket connection for task updates
+  const { connected, lastStatus } = useWebSocket(taskIdRef.current);
+
+  // Handle WebSocket status updates
+  useEffect(() => {
+    if (lastStatus && lastStatus.task_id === taskIdRef.current) {
+      // Update progress from WebSocket
+      if (typeof lastStatus.progress === 'number') {
+        setProgress(lastStatus.progress);
+      }
+      if (lastStatus.status) {
+        setCurrentStage(lastStatus.status as ProcessingStage);
+      }
+      if (lastStatus.message) {
+        setProgressMessage(lastStatus.message);
+      }
+
+      // Check for completion
+      if (lastStatus.status === 'completed' || lastStatus.status === 'error') {
+        setIsProcessing(false);
+      }
+    }
+  }, [lastStatus]);
+
   const resetResults = useCallback(() => {
     setError(null);
     setResult(null);
     setMultiFileResult(null);
+    setProgress(0);
+    setCurrentStage('idle');
+    setProgressMessage('');
+    taskIdRef.current = null;
   }, []);
 
   const handleSingleSubmit = useCallback(async (formData: FormData) => {
     setIsProcessing(true);
     resetResults();
+    setProgress(10);
+    setCurrentStage('preparing');
+    setProgressMessage('Starting ASR processing...');
 
     try {
       const response = await processSingleFile(formData);
+
+      // Extract task_id from response for WebSocket subscription
+      if (response && response.length > 0 && response[0].taskId) {
+        taskIdRef.current = response[0].taskId;
+      }
+
       setResult(response);
+      setProgress(100);
+      setCurrentStage('completed');
+      setProgressMessage('Processing completed successfully');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
+      setCurrentStage('error');
+      setProgressMessage(err instanceof Error ? err.message : 'Processing failed');
     } finally {
       setIsProcessing(false);
     }
@@ -66,12 +135,26 @@ export function useASRProcessing(): UseASRProcessingReturn {
   const handleMultipleSubmit = useCallback(async (formData: FormData) => {
     setIsProcessing(true);
     resetResults();
+    setProgress(10);
+    setCurrentStage('preparing');
+    setProgressMessage('Starting batch processing...');
 
     try {
       const response = await processMultipleFiles(formData);
+
+      // Extract task_id from first result for WebSocket subscription
+      if (response && response.length > 0 && response[0].taskId) {
+        taskIdRef.current = response[0].taskId;
+      }
+
       setMultiFileResult(response);
+      setProgress(100);
+      setCurrentStage('completed');
+      setProgressMessage('Batch processing completed');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
+      setCurrentStage('error');
+      setProgressMessage(err instanceof Error ? err.message : 'Batch processing failed');
     } finally {
       setIsProcessing(false);
     }
@@ -131,7 +214,11 @@ export function useASRProcessing(): UseASRProcessingReturn {
     resetResults,
     handleSingleSubmit,
     handleMultipleSubmit,
-    buildFormData
+    buildFormData,
+    progress,
+    currentStage,
+    progressMessage,
+    connected,
   };
 }
 
