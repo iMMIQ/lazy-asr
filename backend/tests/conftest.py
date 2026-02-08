@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import aiosqlite
 import pytest
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -37,7 +37,8 @@ def temp_dir() -> Generator[str, None, None]:
 @pytest.fixture
 async def client() -> AsyncGenerator[AsyncClient, None]:
     """Create async test client"""
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
 
 
