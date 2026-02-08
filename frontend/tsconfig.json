@@ -7,7 +7,7 @@
     "skipLibCheck": true,
 
     /* Bundler mode */
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
@@ -28,6 +28,6 @@
     /* Allow JS for gradual migration */
     "allowJs": true
   },
-  "include": ["src", "tests"],
+  "include": ["src", "tests", "src/vitest.d.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

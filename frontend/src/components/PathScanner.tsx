@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../context/ConfigContext';
 import { startScan, getScanStatus, getScanResult, cancelScan, getScanConfig } from '../services/api';
-import type { ScanRequest, ScanStatusResponse, ScanResult } from '../types';
+import type { ScanRequest, ScanStatusResponse, ScanResult, LanguageCode } from '../types';
 import ConfigPanel from './ConfigPanel';
 import FolderSelector from './FolderSelector';
 import './PathScanner.css';
@@ -10,12 +10,13 @@ import './PathScanner.css';
 /** Scan configuration from API */
 interface ScanConfig {
   scan_paths?: string[];
-  [key: string]: unknown;
+  [key: string]: string | string[] | undefined;
 }
 
 /** Extended scan status with message */
-interface ExtendedScanStatus extends ScanStatusResponse {
+interface ExtendedScanStatus extends Omit<ScanStatusResponse, 'failed_files'> {
   message?: string;
+  failed_files?: number;
 }
 
 /**
@@ -61,11 +62,12 @@ export function PathScanner(): React.ReactElement {
   const fetchScanConfig = async () => {
     try {
       const config = await getScanConfig();
-      setScanConfig(config as ScanConfig);
+      const scanConfig = config as ScanConfig;
+      setScanConfig(scanConfig);
 
       // Set default path if available
-      if (config.scan_paths && config.scan_paths.length > 0) {
-        setScanPath(config.scan_paths[0]);
+      if (scanConfig.scan_paths && scanConfig.scan_paths.length > 0) {
+        setScanPath(scanConfig.scan_paths[0]);
       }
     } catch (err) {
       console.error('Failed to fetch scan config:', err);
@@ -128,12 +130,12 @@ export function PathScanner(): React.ReactElement {
       setActiveScanId(response.scan_id);
       setScanStatus({
         scan_id: response.scan_id,
-        status: 'pending',
+        status: 'idle',
         total_files: 0,
         processed_files: 0,
-        failed_files: 0,
         progress: 0,
-        message: 'Starting scan...'
+        message: 'Starting scan...',
+        failed_files: 0
       });
 
     } catch (err) {
@@ -257,7 +259,7 @@ export function PathScanner(): React.ReactElement {
                   actions.setAsrModel(value);
                   break;
                 case 'asrLanguage':
-                  actions.setAsrLanguage(value);
+                  actions.setAsrLanguage(value as LanguageCode);
                   break;
                 default:
                   break;

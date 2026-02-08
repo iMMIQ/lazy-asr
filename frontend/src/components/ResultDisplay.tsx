@@ -181,7 +181,7 @@ export function ResultDisplay({
           {/* Backward compatibility: show SRT download button if output_files is not available */}
           {!result.output_files && result.srt_file_path && (
             <button
-              onClick={() => handleDownload(result.srt_file_path)}
+              onClick={() => handleDownload(result.srt_file_path!)}
               className="download-button"
             >
               <Download size={18} />

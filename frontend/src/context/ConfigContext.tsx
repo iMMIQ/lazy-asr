@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useReducer, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useReducer, useCallback, type ReactNode } from 'react';
 import {
   DEFAULT_OUTPUT_FORMATS,
   DEFAULT_MIN_SPEECH_DURATION,
   DEFAULT_MIN_SILENCE_DURATION
 } from '../constants/config';
-import type { ConfigState, ConfigActions, ConfigContextValue, OutputFormat, ASRPlugin, LanguageCode } from '../types';
+import type { ConfigState, ConfigContextValue, OutputFormat, ASRPlugin, LanguageCode } from '../types';
 
 // Initial state
 const initialState: ConfigState = {

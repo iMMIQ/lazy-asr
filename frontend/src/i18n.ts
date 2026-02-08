@@ -2,6 +2,8 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
+/// <reference types="vite/client" />
+
 // Import translation files
 import zhTranslation from './locales/zh.json';
 import enTranslation from './locales/en.json';
@@ -20,7 +22,7 @@ i18n
       }
     },
     fallbackLng: 'zh', // Use Chinese as fallback language
-    debug: import.meta.env.DEV, // Enable debug mode in development
+    debug: (import.meta as any).env?.DEV ?? false, // Enable debug mode in development
     interpolation: {
       escapeValue: false, // React already safes from xss
     },

@@ -107,7 +107,7 @@ export function AdvancedOptions({
                 onChange={(e) => handleAsrConfigChange('asrModel', e.target.value)}
                 disabled={isProcessing}
               >
-                {config.model.options.map(option => (
+                {config.model.options.map((option: { value: string; label: string }) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>

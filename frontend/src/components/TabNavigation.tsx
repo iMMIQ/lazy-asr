@@ -2,8 +2,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import './TabNavigation.css';
 
-/** Tab type for navigation */
-export type TabType = 'upload' | 'scan' | 'monitor';
+/** Tab type for navigation - re-exported from types */
+export type TabType = 'upload' | 'scanner' | 'monitor';
 
 /** Tab Navigation component props */
 export interface TabNavigationProps {
@@ -19,7 +19,7 @@ export interface TabNavigationProps {
 export function TabNavigation({
   activeTab,
   onTabChange,
-  tabs = ['upload', 'scan']
+  tabs = ['upload', 'scanner']
 }: TabNavigationProps): React.ReactElement {
   const { t } = useTranslation();
 

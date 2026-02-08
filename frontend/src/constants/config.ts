@@ -1,5 +1,5 @@
 // Application constants and configuration
-import type { OutputFormat, LanguageCode } from '../types';
+import type { OutputFormat, LanguageCode, ASRMethodConfig } from '../types';
 
 export const API_BASE_URL = 'http://localhost:8000/api/v1';
 
@@ -32,21 +32,6 @@ export const LANGUAGE_OPTIONS: LanguageOption[] = [
 // File upload limits
 export const MAX_FILES = 10;
 
-// ASR method field configuration
-export interface ASRFieldConfig {
-  placeholder?: string;
-  value?: string;
-  readOnly?: boolean;
-  description: string;
-  options?: Array<{ value: string; label: string }>;
-}
-
-// ASR method configuration
-export interface ASRMethodConfig {
-  apiUrl?: ASRFieldConfig;
-  apiKey?: ASRFieldConfig;
-  model?: ASRFieldConfig;
-}
 
 // ASR method specific configurations
 export const ASR_METHOD_CONFIGS: Record<string, ASRMethodConfig> = {

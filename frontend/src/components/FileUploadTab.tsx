@@ -1,6 +1,7 @@
 import React from 'react';
 import { useConfig } from '../context/ConfigContext';
 import useASRProcessing from '../hooks/useASRProcessing';
+import type { LanguageCode } from '../types';
 import FileUpload from './FileUpload';
 import ConfigPanel from './ConfigPanel';
 import SubmitButtons from './SubmitButtons';
@@ -52,6 +53,7 @@ export function FileUploadTab(): React.ReactElement {
         audioFiles,
         asrMethod: state.asrMethod,
         outputFormats: state.outputFormats,
+        showAdvancedOptions: true,
         outputMode: 'task',
         minSpeechDuration: state.minSpeechDuration,
         minSilenceDuration: state.minSilenceDuration,
@@ -82,6 +84,7 @@ export function FileUploadTab(): React.ReactElement {
         audioFiles,
         asrMethod: state.asrMethod,
         outputFormats: state.outputFormats,
+        showAdvancedOptions: true,
         outputMode: 'task',
         minSpeechDuration: state.minSpeechDuration,
         minSilenceDuration: state.minSilenceDuration,
@@ -139,7 +142,7 @@ export function FileUploadTab(): React.ReactElement {
                 actions.setAsrModel(value);
                 break;
               case 'asrLanguage':
-                actions.setAsrLanguage(value);
+                actions.setAsrLanguage(value as LanguageCode);
                 break;
               default:
                 break;
@@ -153,8 +156,8 @@ export function FileUploadTab(): React.ReactElement {
         <SubmitButtons
           audioFiles={audioFiles}
           isProcessing={isProcessing}
-          onSingleSubmit={handleSingleSubmit}
-          onMultipleSubmit={handleMultipleSubmit}
+          onSingleSubmit={(e?: React.FormEvent) => { if (e) e.preventDefault(); handleSingleSubmit(e as React.FormEvent); }}
+          onMultipleSubmit={(e?: React.FormEvent) => { if (e) e.preventDefault(); handleMultipleSubmit(e as React.FormEvent); }}
         />
       </div>
 
@@ -164,8 +167,8 @@ export function FileUploadTab(): React.ReactElement {
       />
 
       <ResultDisplay
-        result={result}
-        multiFileResult={multiFileResult}
+        result={result as any}
+        multiFileResult={multiFileResult as any}
       />
     </div>
   );

@@ -1,7 +1,7 @@
 // src/types/index.ts
 
 /** Supported output formats for subtitle/text generation */
-export type OutputFormat = 'srt' | 'vtt' | 'txt' | 'json' | 'ass';
+export type OutputFormat = 'srt' | 'vtt' | 'txt' | 'json' | 'ass' | 'lrc';
 
 /** Supported language codes */
 export type LanguageCode = 'auto' | 'zh' | 'en' | 'ja' | 'ko' | 'yue';
@@ -217,3 +217,19 @@ export interface ConfigContextValue {
 
 /** Tab type for navigation */
 export type TabType = 'upload' | 'scanner' | 'monitor';
+
+/** ASR method field configuration */
+export interface ASRFieldConfig {
+  placeholder?: string;
+  value?: string;
+  readOnly?: boolean;
+  description: string;
+  options?: Array<{ value: string; label: string }>;
+}
+
+/** ASR method configuration */
+export interface ASRMethodConfig {
+  apiUrl?: ASRFieldConfig;
+  apiKey?: ASRFieldConfig;
+  model?: ASRFieldConfig;
+}

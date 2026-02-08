@@ -11,9 +11,7 @@ import type {
   MonitorConfig,
   MonitorListResponse,
   MonitorServiceStatus,
-  DatabaseStatus,
-  LanguageCode,
-  OutputFormat
+  DatabaseStatus
 } from '../types';
 
 // Use relative path for Vite proxy compatibility

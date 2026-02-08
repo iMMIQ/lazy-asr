@@ -25,7 +25,7 @@ export interface FolderSelectorProps {
 }
 
 /** Directory data with additional info */
-interface ExtendedDirectoryBrowseResult extends DirectoryBrowseResult {
+interface ExtendedDirectoryBrowseResult extends Omit<DirectoryBrowseResult, 'media_files'> {
   current_path?: string;
   parent_path?: string;
   directories?: DirectoryItem[];
@@ -37,7 +37,6 @@ interface ExtendedDirectoryBrowseResult extends DirectoryBrowseResult {
  */
 export function FolderSelector({
   onPathSelect,
-  selectedPath,
   disabled = false
 }: FolderSelectorProps): React.ReactElement {
   const { t } = useTranslation();
@@ -66,8 +65,12 @@ export function FolderSelector({
       setLoading(true);
       setError(null);
       const data = await browseDirectory(path);
-      setDirectoryData(data as ExtendedDirectoryBrowseResult);
-      setCurrentPath((data as ExtendedDirectoryBrowseResult).current_path || path);
+      const extendedData: ExtendedDirectoryBrowseResult = {
+        ...data,
+        media_files: data.media_files.map(f => ({ ...f, type: 'unknown' as string }))
+      };
+      setDirectoryData(extendedData);
+      setCurrentPath(extendedData.current_path || path);
       setSelectedFolder(null);
       setPathInfo(null);
     } catch (err) {

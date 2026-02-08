@@ -1,16 +1,17 @@
-# Use Node 22 alpine image
+# Use Node 22 alpine image with bun
 FROM node:22-alpine
 
 # Set working directory
 WORKDIR /app
 
-RUN npm config set registry https://registry.npmmirror.com/
+# Install bun
+RUN npm install -g bun
 
 # Copy package files
-COPY package*.json ./
+COPY package.json bun.lock ./
 
 # Install dependencies
-RUN npm install
+RUN bun install --frozen-lockfile
 
 # Copy project files
 COPY . .
@@ -19,4 +20,4 @@ COPY . .
 EXPOSE 3000
 
 # Run the application
-CMD ["npm", "start"]
+CMD ["bun", "run", "dev"]

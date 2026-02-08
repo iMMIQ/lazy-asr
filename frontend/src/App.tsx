@@ -25,7 +25,7 @@ interface AppContentProps {
  * Provides the overall application structure and manages top-level state
  */
 function App(): React.ReactElement {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabType>('upload');
 
   // Language switcher function
@@ -49,7 +49,7 @@ function App(): React.ReactElement {
  * Contains the actual UI elements wrapped by ConfigProvider
  */
 function AppContent({ activeTab, onTabChange, onLanguageChange }: AppContentProps): React.ReactElement {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const { actions } = useConfig();
 
   // Fetch available plugins and set default method
@@ -89,13 +89,13 @@ function AppContent({ activeTab, onTabChange, onLanguageChange }: AppContentProp
         <TabNavigation
           activeTab={activeTab}
           onTabChange={onTabChange}
-          tabs={['upload', 'scan', 'monitor']}
+          tabs={['upload', 'scanner', 'monitor']}
         />
 
         {/* Tab Content */}
         {activeTab === 'upload' ? (
           <FileUploadTab />
-        ) : activeTab === 'scan' ? (
+        ) : activeTab === 'scanner' ? (
           <PathScanner />
         ) : (
           <MonitorManager />

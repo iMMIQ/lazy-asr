@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { OUTPUT_FORMATS, LANGUAGE_OPTIONS, ASR_METHOD_CONFIGS } from '../constants/config';
-import type { OutputFormat, LanguageCode, ASRFieldConfig, ASRMethodConfig, ASRPlugin } from '../types';
+import type { OutputFormat, LanguageCode, ASRMethodConfig, ASRPlugin } from '../types';
 
 /** Config panel event handlers */
 export interface ConfigPanelHandlers {
@@ -152,7 +152,7 @@ export function ConfigPanel({
                 onChange={(e) => handleAsrConfigChange('asrModel', e.target.value)}
                 disabled={isProcessing}
               >
-                {config.model.options.map(option => (
+                {config.model.options.map((option: { value: string; label: string }) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>

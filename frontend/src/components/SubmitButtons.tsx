@@ -6,8 +6,8 @@ import { Play, Layers, Loader2 } from 'lucide-react';
 export interface SubmitButtonsProps {
   audioFiles: File[];
   isProcessing: boolean;
-  onSingleSubmit: () => void;
-  onMultipleSubmit: () => void;
+  onSingleSubmit: (e?: React.FormEvent) => void | Promise<void>;
+  onMultipleSubmit: (e?: React.FormEvent) => void | Promise<void>;
 }
 
 /**

@@ -1,3 +1,5 @@
+/// <reference types="vitest/globals" />
+
 /**
  * Test utility functions for React Testing Library
  *
@@ -6,6 +8,7 @@
  */
 import type { ReactElement } from 'react'
 import { render, RenderOptions } from '@testing-library/react'
+import { vi } from 'vitest'
 
 // Custom render function that wraps with necessary providers
 type CustomRenderOptions = Omit<RenderOptions, 'wrapper'> & {
