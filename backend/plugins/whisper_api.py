@@ -26,24 +26,21 @@ class WhisperAPIPlugin(ASRPlugin):
         # For now, we don't have specific validation requirements
         return True
 
-    def _get_language_prompt(self, language: str) -> str:
+    def _get_language_code(self, language: str) -> Optional[str]:
         """
-        Get language-specific prompt for Whisper API
+        Get language code for Whisper API
 
         Args:
             language: Language code
 
         Returns:
-            Language-specific prompt text
+            Language code for API or None for auto detect
         """
-        language_prompts = {
-            "auto": "",  # Default prompt for auto detect
-            "ja": "よろしくお願いします.",  # Japanese
-            "zh": "请转录这段音频。",  # Chinese
-            "en": "Please transcribe this audio.",  # English
-        }
-
-        return language_prompts.get(language, language_prompts["auto"])
+        # Map language codes to API format
+        # Return None for auto detection
+        if language == "auto":
+            return None
+        return language
 
     async def transcribe_segment(
         self, segment_file: str, segment_info: Dict[str, Any], language: str = "auto"
@@ -69,13 +66,14 @@ class WhisperAPIPlugin(ASRPlugin):
                 audio_content = audio_file.read()
                 form_data.add_field('file', audio_content, filename=filename, content_type='audio/wav')
 
-            # Add language-specific prompt
-            prompt_text = self._get_language_prompt(language)
+            # Add language field (None for auto detection)
+            language_code = self._get_language_code(language)
+            if language_code:
+                form_data.add_field('language', language_code)
 
             # Add other form fields
             form_data.add_field('stream', 'false')
             form_data.add_field('timestamp_granularities', 'segment')
-            form_data.add_field('prompt', prompt_text)
             form_data.add_field('batch_size', '1')
             form_data.add_field('model', self.model)
             form_data.add_field('temperature', '0')
