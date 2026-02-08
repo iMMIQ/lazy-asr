@@ -1,8 +1,18 @@
 # WebSocket API Documentation
 
+> **⚠️ DEPRECATION NOTICE:** HTTP polling endpoints (`/scan/status/{scan_id}`) are **deprecated** for real-time updates.
+> All clients must use WebSocket connections for receiving scan status updates and ASR processing progress.
+> The HTTP polling endpoints will be removed in a future release.
+
 ## Overview
 
 This document describes the WebSocket API for real-time updates in the Lazy ASR service. The WebSocket API enables clients to receive live progress updates for ASR (Automatic Speech Recognition) processing and path scanning operations.
+
+## Important
+
+WebSocket is the exclusive real-time communication method for this application.
+All clients must use WebSocket for receiving scan status updates and ASR processing progress.
+HTTP polling endpoints (`/scan/status/{scan_id}`) are deprecated and should not be used for real-time updates.
 
 ## Base URL
 
