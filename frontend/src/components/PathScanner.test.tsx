@@ -5,6 +5,7 @@ import { I18nextProvider } from 'react-i18next'
 import i18n from '../i18n'
 import { PathScanner } from './PathScanner'
 import * as api from '../services/api'
+import type { OutputFormat } from '../types'
 
 // Mock the API module
 vi.mock('../services/api', () => ({
@@ -50,7 +51,7 @@ describe('PathScanner - WebSocket Integration', () => {
   const defaultConfigState = {
     asrMethod: 'whisper-api',
     availablePlugins: [],
-    outputFormats: ['srt'],
+    outputFormats: ['srt'] as OutputFormat[],
     minSpeechDuration: 0.1,
     minSilenceDuration: 0.3,
     asrLanguage: 'auto' as const,
@@ -87,7 +88,7 @@ describe('PathScanner - WebSocket Integration', () => {
 
   it('should render without crashing', async () => {
     render(
-      <ConfigProvider defaultState={defaultConfigState}>
+      <ConfigProvider initialState={defaultConfigState}>
         <TestWrapper>
           <PathScanner />
         </TestWrapper>
@@ -115,7 +116,7 @@ describe('PathScanner - WebSocket Integration', () => {
     vi.mocked(api.startScan).mockResolvedValue({ scan_id: 'test-scan-123' })
 
     render(
-      <ConfigProvider defaultState={defaultConfigState}>
+      <ConfigProvider initialState={defaultConfigState}>
         <TestWrapper>
           <PathScanner />
         </TestWrapper>
@@ -158,7 +159,7 @@ describe('PathScanner - WebSocket Integration', () => {
     })
 
     render(
-      <ConfigProvider defaultState={defaultConfigState}>
+      <ConfigProvider initialState={defaultConfigState}>
         <TestWrapper>
           <PathScanner />
         </TestWrapper>
@@ -181,7 +182,7 @@ describe('PathScanner - WebSocket Integration', () => {
     vi.mocked(api.startScan).mockResolvedValue({ scan_id: 'test-scan-789' })
 
     render(
-      <ConfigProvider defaultState={defaultConfigState}>
+      <ConfigProvider initialState={defaultConfigState}>
         <TestWrapper>
           <PathScanner />
         </TestWrapper>
@@ -211,7 +212,7 @@ describe('PathScanner - WebSocket Integration', () => {
     })
 
     render(
-      <ConfigProvider defaultState={defaultConfigState}>
+      <ConfigProvider initialState={defaultConfigState}>
         <TestWrapper>
           <PathScanner />
         </TestWrapper>
@@ -242,7 +243,7 @@ describe('PathScanner - WebSocket Integration', () => {
     })
 
     const { rerender } = render(
-      <ConfigProvider defaultState={defaultConfigState}>
+      <ConfigProvider initialState={defaultConfigState}>
         <TestWrapper>
           <PathScanner />
         </TestWrapper>
@@ -268,7 +269,7 @@ describe('PathScanner - WebSocket Integration', () => {
     })
 
     rerender(
-      <ConfigProvider defaultState={defaultConfigState}>
+      <ConfigProvider initialState={defaultConfigState}>
         <TestWrapper>
           <PathScanner />
         </TestWrapper>
@@ -291,7 +292,7 @@ describe('PathScanner - Basic Functionality', () => {
   const defaultConfigState = {
     asrMethod: 'whisper-api',
     availablePlugins: [],
-    outputFormats: ['srt'],
+    outputFormats: ['srt'] as OutputFormat[],
     minSpeechDuration: 0.1,
     minSilenceDuration: 0.3,
     asrLanguage: 'auto' as const,
@@ -323,7 +324,7 @@ describe('PathScanner - Basic Functionality', () => {
     vi.mocked(api.getScanConfig).mockResolvedValue({})
 
     render(
-      <ConfigProvider defaultState={defaultConfigState}>
+      <ConfigProvider initialState={defaultConfigState}>
         <TestWrapper>
           <PathScanner />
         </TestWrapper>
@@ -343,7 +344,7 @@ describe('PathScanner - Basic Functionality', () => {
     vi.mocked(api.startScan).mockResolvedValue({ scan_id: 'new-scan-123' })
 
     render(
-      <ConfigProvider defaultState={defaultConfigState}>
+      <ConfigProvider initialState={defaultConfigState}>
         <TestWrapper>
           <PathScanner />
         </TestWrapper>

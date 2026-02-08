@@ -236,23 +236,21 @@ export interface ASRMethodConfig {
   model?: ASRFieldConfig;
 }
 
-/** WebSocket message types */
-export type WSMessageType = 'status' | 'error' | 'ping' | 'pong';
-
-/** Base WebSocket message */
-export interface WSMessage {
-  type: WSMessageType;
-  data?: unknown;
-  message?: string;
-}
-
-/** WebSocket status message data */
-export interface WSStatusData {
-  scan_id: string;
-  status: ScanStatus;
-  progress: number;
-  total_files: number;
-  processed_files: number;
-  current_file?: string;
-  error?: string;
-}
+// Re-export all WebSocket types from websocket.ts
+// This includes WSMessage, WSMessageType, WSMessageData, etc.
+export type {
+  WSMessage,
+  WSMessageType,
+  WSMessageData,
+  WSConnectionStatus,
+  ASRProgressData,
+  ASRProcessingStage,
+  ScanProgressData,
+  TaskProgressData,
+  TaskStatus,
+  ErrorMessageData,
+  PingMessageData,
+  ASRProcessingStats,
+  FailedSegmentDetail,
+  WSConnectionState,
+} from './websocket';

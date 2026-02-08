@@ -4,6 +4,7 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { vi, beforeEach, afterEach, describe, it, expect } from 'vitest';
 import { useASRProcessing } from './useASRProcessing';
+import type { OutputFormat } from '../types';
 
 // Mock the WebSocket connection
 vi.mock('./useWebSocket', () => ({
@@ -97,7 +98,7 @@ describe('useASRProcessing with WebSocket', () => {
     const options = {
       audioFiles: [new File(['audio'], 'test.wav', { type: 'audio/wav' })] as File[],
       asrMethod: 'whisper-api',
-      outputFormats: ['srt', 'vtt'] as const,
+      outputFormats: ['srt', 'vtt'] as OutputFormat[],
       showAdvancedOptions: true,
       minSpeechDuration: 250,
       minSilenceDuration: 100,
@@ -132,7 +133,7 @@ describe('useASRProcessing with WebSocket', () => {
         new File(['audio2'], 'test2.wav', { type: 'audio/wav' }),
       ] as File[],
       asrMethod: 'faster-whisper',
-      outputFormats: ['txt'] as const,
+      outputFormats: ['txt'] as OutputFormat[],
       showAdvancedOptions: false,
       minSpeechDuration: 250,
       minSilenceDuration: 100,

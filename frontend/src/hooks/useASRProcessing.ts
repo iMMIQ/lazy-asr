@@ -6,7 +6,7 @@ import {
 } from '../constants/config';
 import type { ProcessResult, LanguageCode, OutputFormat } from '../types';
 import { useWebSocket } from './useWebSocket';
-import type { WSMessage, WSStatusData } from '../types';
+import type { ASRProgressData, TaskProgressData } from '../types';
 
 /** Form data options for ASR processing */
 export interface ASRProcessingOptions {
@@ -75,20 +75,37 @@ export function useASRProcessing(): UseASRProcessingReturn {
 
   // Handle WebSocket status updates
   useEffect(() => {
-    if (lastStatus && lastStatus.task_id === taskIdRef.current) {
+    if (!lastStatus) return;
+
+    // Handle ASR progress data
+    if ('task_id' in lastStatus && lastStatus.task_id === taskIdRef.current) {
+      const asrData = lastStatus as ASRProgressData;
       // Update progress from WebSocket
-      if (typeof lastStatus.progress === 'number') {
-        setProgress(lastStatus.progress);
+      if (typeof asrData.progress === 'number') {
+        setProgress(asrData.progress);
       }
-      if (lastStatus.status) {
-        setCurrentStage(lastStatus.status as ProcessingStage);
+      if (asrData.stage) {
+        setCurrentStage(asrData.stage as ProcessingStage);
       }
-      if (lastStatus.message) {
-        setProgressMessage(lastStatus.message);
+      if (asrData.message) {
+        setProgressMessage(asrData.message);
       }
 
       // Check for completion
-      if (lastStatus.status === 'completed' || lastStatus.status === 'error') {
+      if (asrData.stage === 'completed' || asrData.stage === 'error') {
+        setIsProcessing(false);
+      }
+    }
+    // Handle task progress data
+    else if ('task_id' in lastStatus && lastStatus.task_id === taskIdRef.current) {
+      const taskData = lastStatus as TaskProgressData;
+      if (typeof taskData.progress === 'number') {
+        setProgress(taskData.progress);
+      }
+      if (taskData.message) {
+        setProgressMessage(taskData.message);
+      }
+      if (taskData.status === 'completed' || taskData.status === 'failed') {
         setIsProcessing(false);
       }
     }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import type { WSMessage, WSStatusData } from '../types';
+import type { WSMessage, WSMessageData } from '../types';
 
 /**
  * WebSocket connection status
@@ -36,8 +36,8 @@ export interface UseWebSocketReturn {
   connected: boolean;
   /** Last received message */
   lastMessage: WSMessage | null;
-  /** Last received status data */
-  lastStatus: WSStatusData | null;
+  /** Last received status data (union of all possible status data types) */
+  lastStatus: WSMessageData | null;
   /** Connection error if any */
   error: string | null;
   /** Function to send a message through the WebSocket */
@@ -92,7 +92,7 @@ export function useWebSocket(
 
   const [status, setStatus] = useState<WSConnectionStatus>('disconnected');
   const [lastMessage, setLastMessage] = useState<WSMessage | null>(null);
-  const [lastStatus, setLastStatus] = useState<WSStatusData | null>(null);
+  const [lastStatus, setLastStatus] = useState<WSMessageData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const wsRef = useRef<WebSocket | null>(null);
@@ -164,7 +164,7 @@ export function useWebSocket(
 
           // Parse status messages
           if (message.type === 'status' && message.data) {
-            setLastStatus(message.data as WSStatusData);
+            setLastStatus(message.data as WSMessageData);
           }
         } catch (err) {
           console.error('Failed to parse WebSocket message:', err);

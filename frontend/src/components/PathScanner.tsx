@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../context/ConfigContext';
 import { startScan, getScanResult, cancelScan, getScanConfig } from '../services/api';
-import type { ScanRequest, ScanStatusResponse, ScanResult, LanguageCode } from '../types';
+import type { ScanRequest, ScanStatusResponse, ScanResult, LanguageCode, ScanProgressData } from '../types';
 import { useWebSocket } from '../hooks/useWebSocket';
+import { isScanProgressData } from '../types/websocket';
 import ConfigPanel from './ConfigPanel';
 import FolderSelector from './FolderSelector';
 import './PathScanner.css';
@@ -57,23 +58,24 @@ export function PathScanner(): React.ReactElement {
 
   // Update scan status from WebSocket messages
   useEffect(() => {
-    if (wsLastStatus && wsConnected) {
+    if (wsLastStatus && wsConnected && isScanProgressData(wsLastStatus)) {
+      const scanData: ScanProgressData = wsLastStatus;
       setScanStatus({
-        scan_id: wsLastStatus.scan_id,
-        status: wsLastStatus.status,
-        progress: wsLastStatus.progress,
-        total_files: wsLastStatus.total_files,
-        processed_files: wsLastStatus.processed_files,
-        current_file: wsLastStatus.current_file,
-        message: wsLastStatus.error || 'Processing...',
+        scan_id: scanData.scan_id,
+        status: scanData.status,
+        progress: scanData.progress,
+        total_files: scanData.total_files,
+        processed_files: scanData.processed_files,
+        current_file: scanData.current_file,
+        message: scanData.error || 'Processing...',
         failed_files: 0,
       });
 
       // Update scanning state based on WebSocket status
-      if (wsLastStatus.status === 'completed' || wsLastStatus.status === 'failed' || wsLastStatus.status === 'cancelled') {
+      if (scanData.status === 'completed' || scanData.status === 'failed' || scanData.status === 'cancelled') {
         setIsScanning(false);
-        if (wsLastStatus.status === 'completed') {
-          fetchScanResult(wsLastStatus.scan_id);
+        if (scanData.status === 'completed') {
+          fetchScanResult(scanData.scan_id);
         }
       }
     }

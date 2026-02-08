@@ -123,10 +123,14 @@ const ConfigContext = createContext<ConfigContextValue | undefined>(undefined);
 // Provider Component
 interface ConfigProviderProps {
   children: ReactNode;
+  initialState?: Partial<ConfigState>;
 }
 
-export function ConfigProvider({ children }: ConfigProviderProps) {
-  const [state, dispatch] = useReducer(configReducer, initialState);
+export function ConfigProvider({ children, initialState: providedInitialState }: ConfigProviderProps) {
+  const [state, dispatch] = useReducer(configReducer, {
+    ...initialState,
+    ...providedInitialState
+  });
 
   // Action creators
   const setAsrMethod = useCallback((method: string) => {

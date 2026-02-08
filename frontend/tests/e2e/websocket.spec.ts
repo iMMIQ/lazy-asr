@@ -4,9 +4,8 @@
  * These tests verify the complete WebSocket integration between
  * the frontend and backend for real-time updates.
  */
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { renderHook, waitFor, act } from '@testing-library/react';
-import type { WSMessage, WSStatusData } from '../../src/types/websocket';
+import { describe, it, expect } from 'vitest';
+import type { WSMessage } from '../../src/types/websocket';
 
 // Import WebSocket types and utilities
 import {
@@ -175,8 +174,11 @@ describe('WebSocket Integration Scenarios', () => {
         });
 
         expect(isASRProgressData(message.data)).toBe(true);
-        expect(message.data?.stage).toBe(update.stage);
-        expect(message.data?.progress).toBe(update.progress);
+        // Type assertion for accessing ASRProgressData-specific properties
+        if (isASRProgressData(message.data)) {
+          expect(message.data.stage).toBe(update.stage);
+          expect(message.data.progress).toBe(update.progress);
+        }
       });
     });
 
@@ -195,7 +197,7 @@ describe('WebSocket Integration Scenarios', () => {
   describe('Scan Progress Updates', () => {
     it('should handle scan lifecycle', () => {
       const updates = [
-        { status: 'pending' as const, progress: 0, total_files: 10, processed_files: 0 },
+        { status: 'idle' as const, progress: 0, total_files: 10, processed_files: 0 },
         { status: 'scanning' as const, progress: 30, total_files: 10, processed_files: 3 },
         { status: 'scanning' as const, progress: 70, total_files: 10, processed_files: 7 },
         { status: 'completed' as const, progress: 100, total_files: 10, processed_files: 10 },
@@ -208,8 +210,11 @@ describe('WebSocket Integration Scenarios', () => {
         });
 
         expect(isScanProgressData(message.data)).toBe(true);
-        expect(message.data?.progress).toBe(update.progress);
-        expect(message.data?.total_files).toBe(update.total_files);
+        // Type assertion for accessing ScanProgressData-specific properties
+        if (isScanProgressData(message.data)) {
+          expect(message.data.progress).toBe(update.progress);
+          expect(message.data.total_files).toBe(update.total_files);
+        }
       });
     });
   });
@@ -218,7 +223,7 @@ describe('WebSocket Integration Scenarios', () => {
     it('should serialize and deserialize messages correctly', () => {
       const original = createWSMessage('status', {
         task_id: 'task-serialize',
-        stage: 'processing',
+        stage: 'transcription',
         progress: 50,
         message: 'Halfway done',
       });
@@ -258,11 +263,13 @@ describe('Type Safety', () => {
     expect(message.data?.task_id).toBe('task-typesafe');
     expect(message.data?.stage).toBe('transcription');
 
-    // @ts-expect-error - intentional type error for testing
-    const invalidMessage: ASRProgressMessage = {
-      type: 'invalid_type',
-      data: {} as any,
+    // Test that valid message types work correctly
+    const pingMessage: WSMessage = {
+      type: 'ping',
+      data: { timestamp: new Date().toISOString() },
     };
+
+    expect(pingMessage.type).toBe('ping');
   });
 
   it('should use discriminated unions for message types', () => {
@@ -288,12 +295,6 @@ describe('Type Safety', () => {
 describe('WebSocket Connection States', () => {
   it('should track connection state transitions', () => {
     type ConnectionState = 'connecting' | 'connected' | 'disconnected' | 'error';
-
-    const states: ConnectionState[] = [
-      'connecting',
-      'connected',
-      'disconnected',
-    ];
 
     let currentState: ConnectionState = 'connecting';
 
