@@ -11,8 +11,9 @@ logger = get_logger(__name__)
 class ASRPlugin(ABC):
     """Base class for ASR plugins"""
 
-    def __init__(self, name: str, description: str):
+    def __init__(self, name: str, display_name: str, description: str):
         self.name = name
+        self.display_name = display_name
         self.description = description
 
     @abstractmethod

@@ -73,11 +73,11 @@ async def process_media(
     """
     try:
         # Validate ASR method
-        available_plugins = plugin_manager.get_available_plugins()
-        if asr_method not in available_plugins:
+        available_plugin_names = plugin_manager.get_plugin_names()
+        if asr_method not in available_plugin_names:
             raise HTTPException(
                 status_code=400,
-                detail=f"Unsupported ASR method: {asr_method}. Available methods: {available_plugins}",
+                detail=f"Unsupported ASR method: {asr_method}. Available methods: {available_plugin_names}",
             )
 
         # Parse options
@@ -167,11 +167,11 @@ async def process_multiple_audio(
     """
     try:
         # Validate ASR method
-        available_plugins = plugin_manager.get_available_plugins()
-        if asr_method not in available_plugins:
+        available_plugin_names = plugin_manager.get_plugin_names()
+        if asr_method not in available_plugin_names:
             raise HTTPException(
                 status_code=400,
-                detail=f"Unsupported ASR method: {asr_method}. Available methods: {available_plugins}",
+                detail=f"Unsupported ASR method: {asr_method}. Available methods: {available_plugin_names}",
             )
 
         # Validate files

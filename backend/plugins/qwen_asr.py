@@ -10,7 +10,11 @@ class QwenASRPlugin(ASRPlugin):
     """Qwen ASR plugin"""
 
     def __init__(self):
-        super().__init__(name="qwen-asr", description="Qwen ASR service")
+        super().__init__(
+            name="qwen-asr",
+            display_name="Qwen ASR",
+            description="Qwen ASR service"
+        )
         self.api_key = settings.QWEN_ASR_API_KEY
         self.model = settings.QWEN_ASR_MODEL
         self.api_url = settings.QWEN_ASR_API_URL

@@ -228,7 +228,7 @@ export function PathScanner(): React.ReactElement {
           {/* Configuration Panel */}
           <ConfigPanel
             asrMethod={state.asrMethod}
-            availablePlugins={state.availablePlugins.map(p => p.name)}
+            availablePlugins={state.availablePlugins}
             outputFormats={state.outputFormats}
             minSpeechDuration={state.minSpeechDuration}
             minSilenceDuration={state.minSilenceDuration}

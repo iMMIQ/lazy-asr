@@ -1,12 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { OUTPUT_FORMATS } from '../constants/config';
-import type { OutputFormat } from '../types';
+import type { OutputFormat, ASRPlugin } from '../types';
 
 /** ASR configuration component props */
 export interface ASRConfigProps {
   asrMethod: string;
-  availablePlugins: string[];
+  availablePlugins: ASRPlugin[];
   outputFormats: OutputFormat[];
   onMethodChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   onFormatChange: (format: OutputFormat) => void;
@@ -41,8 +41,8 @@ export function ASRConfig({
           disabled={isProcessing}
         >
           {availablePlugins.map((plugin) => (
-            <option key={plugin} value={plugin}>
-              {plugin}
+            <option key={plugin.name} value={plugin.name}>
+              {plugin.display_name}
             </option>
           ))}
         </select>

@@ -12,7 +12,11 @@ class LocalWhisperPlugin(ASRPlugin):
     """Local Whisper ASR plugin using OpenAI Whisper"""
 
     def __init__(self):
-        super().__init__(name="local-whisper", description="Local Whisper ASR with tiny model")
+        super().__init__(
+            name="local-whisper",
+            display_name="Local Whisper",
+            description="Local Whisper ASR with tiny model"
+        )
         self.model_name = getattr(settings, 'LOCAL_WHISPER_MODEL', 'tiny')
         self.device = getattr(settings, 'LOCAL_WHISPER_DEVICE', 'auto')
         self.model_cache_dir = getattr(settings, 'LOCAL_WHISPER_MODEL_CACHE_DIR', 'models')

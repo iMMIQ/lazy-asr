@@ -12,7 +12,11 @@ class FasterWhisperPlugin(ASRPlugin):
     """Faster Whisper ASR plugin"""
 
     def __init__(self):
-        super().__init__(name="faster-whisper", description="Faster Whisper ASR service")
+        super().__init__(
+            name="faster-whisper",
+            display_name="Faster Whisper",
+            description="Faster Whisper ASR service"
+        )
         self.api_url = settings.FASTER_WHISPER_API_URL
         self.api_key = settings.FASTER_WHISPER_API_KEY
         self.model = settings.FASTER_WHISPER_MODEL

@@ -8,3 +8,5 @@ uploads/
 build/
 *.db
 docs/plans/
+.coverage
+coverage.xml

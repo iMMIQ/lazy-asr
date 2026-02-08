@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from plugins.base import ASRPlugin
 from plugins.faster_whisper import FasterWhisperPlugin
 from plugins.qwen_asr import QwenASRPlugin
@@ -30,7 +30,22 @@ class PluginManager:
         """Get a plugin by name"""
         return self.plugins.get(name)
 
-    def get_available_plugins(self) -> List[str]:
+    def get_available_plugins(self) -> List[Dict[str, Any]]:
+        """Get list of available plugins with their info"""
+        return [
+            {
+                "name": plugin.name,
+                "display_name": plugin.display_name,
+                "description": plugin.description,
+                "supported_languages": ["auto", "zh", "en", "ja", "ko", "yue"],
+                "requires_api_key": hasattr(plugin, "api_key"),
+                "requires_api_url": hasattr(plugin, "api_url"),
+                "model_parameter": hasattr(plugin, "model"),
+            }
+            for plugin in self.plugins.values()
+        ]
+
+    def get_plugin_names(self) -> List[str]:
         """Get list of available plugin names"""
         return list(self.plugins.keys())
 

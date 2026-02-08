@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { OUTPUT_FORMATS, LANGUAGE_OPTIONS, ASR_METHOD_CONFIGS } from '../constants/config';
-import type { OutputFormat, LanguageCode, ASRFieldConfig, ASRMethodConfig } from '../types';
+import type { OutputFormat, LanguageCode, ASRFieldConfig, ASRMethodConfig, ASRPlugin } from '../types';
 
 /** Config panel event handlers */
 export interface ConfigPanelHandlers {
@@ -17,7 +17,7 @@ export interface ConfigPanelHandlers {
 export interface ConfigPanelProps {
   // Configuration values
   asrMethod: string;
-  availablePlugins: string[];
+  availablePlugins: ASRPlugin[];
   outputFormats?: OutputFormat[];
   minSpeechDuration?: number;
   minSilenceDuration?: number;
@@ -187,8 +187,8 @@ export function ConfigPanel({
           disabled={isProcessing}
         >
           {availablePlugins.map((plugin) => (
-            <option key={plugin} value={plugin}>
-              {plugin}
+            <option key={plugin.name} value={plugin.name}>
+              {plugin.display_name}
             </option>
           ))}
         </select>
