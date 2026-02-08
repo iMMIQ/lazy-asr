@@ -60,7 +60,7 @@ describe('PathScanner - WebSocket Integration', () => {
     asrModel: '',
     maxFiles: 100,
     recursive: true,
-    processing: false,
+    isProcessing: false,
   }
 
   beforeEach(() => {
@@ -301,7 +301,7 @@ describe('PathScanner - Basic Functionality', () => {
     asrModel: '',
     maxFiles: 100,
     recursive: true,
-    processing: false,
+    isProcessing: false,
   }
 
   beforeEach(() => {
