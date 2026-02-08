@@ -34,7 +34,8 @@
     "selectFiles": "请选择媒体文件",
     "maxFilesExceeded": "一次最多处理10个文件",
     "processingFailed": "处理失败",
-    "batchProcessingFailed": "批量处理失败"
+    "batchProcessingFailed": "批量处理失败",
+    "failed": "失败"
   },
   "results": {
     "title": "处理结果",
@@ -88,7 +89,7 @@
   },
   "tabs": {
     "upload": "文件上传",
-    "scan": "路径扫描",
+    "scanner": "路径扫描",
     "monitor": "监控管理"
   },
   "pathScanner": {

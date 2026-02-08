@@ -34,7 +34,8 @@
     "selectFiles": "Please select media files",
     "maxFilesExceeded": "Maximum 10 files per batch",
     "processingFailed": "Processing failed",
-    "batchProcessingFailed": "Batch processing failed"
+    "batchProcessingFailed": "Batch processing failed",
+    "failed": "Failed"
   },
   "results": {
     "title": "Processing Result",
@@ -88,7 +89,7 @@
   },
   "tabs": {
     "upload": "File Upload",
-    "scan": "Path Scan",
+    "scanner": "Path Scan",
     "monitor": "Monitor Management"
   },
   "pathScanner": {
