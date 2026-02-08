@@ -1,5 +1,5 @@
 import os
-import whisper
+from faster_whisper import WhisperModel
 from typing import List, Dict, Any, Optional
 from plugins.base import ASRPlugin
 from app.core.config import settings
@@ -9,16 +9,15 @@ logger = get_logger(__name__)
 
 
 class LocalWhisperPlugin(ASRPlugin):
-    """Local Whisper ASR plugin using OpenAI Whisper"""
+    """Local Whisper ASR plugin using faster-whisper (CPU-only)"""
 
     def __init__(self):
         super().__init__(
             name="local-whisper",
             display_name="Local Whisper",
-            description="Local Whisper ASR with tiny model"
+            description="Local Whisper ASR with tiny model (CPU-only)"
         )
         self.model_name = getattr(settings, 'LOCAL_WHISPER_MODEL', 'tiny')
-        self.device = getattr(settings, 'LOCAL_WHISPER_DEVICE', 'auto')
         self.model_cache_dir = getattr(settings, 'LOCAL_WHISPER_MODEL_CACHE_DIR', 'models')
 
         # Initialize model (will be loaded on first use)
@@ -33,49 +32,31 @@ class LocalWhisperPlugin(ASRPlugin):
         """Load Whisper model if not already loaded"""
         if self.model is None:
             try:
-                logger.info(f"Loading Whisper model: {self.model_name}")
-                # Force CPU usage to avoid PyTorch compatibility issues
-                self.model = whisper.load_model(
+                logger.info(f"Loading faster-whisper model: {self.model_name}")
+                # Use CPU-only inference
+                self.model = WhisperModel(
                     self.model_name,
-                    device="cpu",  # Force CPU to avoid compatibility issues
+                    device="cpu",
+                    compute_type="int8",  # Use int8 for CPU efficiency
                     download_root=self.model_cache_dir,
                 )
-                logger.info(f"Whisper model {self.model_name} loaded successfully on CPU")
+                logger.info(f"faster-whisper model {self.model_name} loaded successfully on CPU")
             except Exception as e:
-                logger.error(f"Failed to load Whisper model: {e}")
-                # Try alternative approach if initial load fails
-                try:
-                    logger.info("Trying alternative model loading approach...")
-                    import torch
-
-                    # Clear any cached models and try again
-                    if torch.cuda.is_available():
-                        torch.cuda.empty_cache()
-                    self.model = whisper.load_model(self.model_name, device="cpu", download_root=self.model_cache_dir)
-                    logger.info(f"Whisper model {self.model_name} loaded successfully with alternative approach")
-                except Exception as e2:
-                    logger.error(f"Alternative loading also failed: {e2}")
-                    raise
+                logger.error(f"Failed to load faster-whisper model: {e}")
+                raise
 
     def validate_config(self, config: Dict[str, Any]) -> bool:
         """Validate Local Whisper configuration"""
         # Check if model name is valid
-        valid_models = ['tiny', 'base', 'small', 'medium', 'large']
+        valid_models = ['tiny', 'base', 'small', 'medium', 'large-v1', 'large-v2', 'large-v3']
         model_name = config.get('model', self.model_name)
         if model_name not in valid_models:
             logger.error(f"Invalid Whisper model: {model_name}. Valid models: {valid_models}")
             return False
 
-        # Check if device is valid
-        valid_devices = ['auto', 'cpu', 'cuda']
-        device = config.get('device', self.device)
-        if device not in valid_devices:
-            logger.error(f"Invalid device: {device}. Valid devices: {valid_devices}")
-            return False
-
         return True
 
-    def _get_language_code(self, language: str) -> str:
+    def _get_language_code(self, language: str) -> Optional[str]:
         """
         Get language code for Whisper
 
@@ -83,7 +64,7 @@ class LocalWhisperPlugin(ASRPlugin):
             language: Language code
 
         Returns:
-            Whisper language code
+            Whisper language code or None for auto-detect
         """
         language_mapping = {
             "auto": None,  # Auto detect
@@ -97,13 +78,13 @@ class LocalWhisperPlugin(ASRPlugin):
             "ko": "ko",  # Korean
         }
 
-        return language_mapping.get(language, None)
+        return language_mapping.get(language)
 
     async def transcribe_segment(
         self, segment_file: str, segment_info: Dict[str, Any], language: str = "auto"
     ) -> Optional[List[str]]:
         """
-        Transcribe a single audio segment using local Whisper
+        Transcribe a single audio segment using faster-whisper
 
         Args:
             segment_file: Path to the audio segment file
@@ -120,31 +101,30 @@ class LocalWhisperPlugin(ASRPlugin):
             # Get language code for Whisper
             whisper_language = self._get_language_code(language)
 
-            # Transcribe audio using Whisper
-            result = self.model.transcribe(
+            # Transcribe audio using faster-whisper
+            segments, info = self.model.transcribe(
                 segment_file,
                 language=whisper_language,  # None for auto detect
-                fp16=False,  # Use fp32 for better compatibility
-                verbose=False,  # Disable verbose output
+                beam_size=5,  # Default beam size for better accuracy
+                vad_filter=False,  # VAD is already applied in the pipeline
             )
 
             # Extract text segments
-            segments = []
-            if result and 'text' in result:
-                text = result['text'].strip()
+            result_segments = []
+            for segment in segments:
+                text = segment.text.strip()
                 if text:
-                    segments.append(text)
+                    result_segments.append(text)
 
-            # If no segments found in text field, check segments field
-            if not segments and 'segments' in result:
-                for segment in result['segments']:
-                    if 'text' in segment and segment['text'].strip():
-                        segments.append(segment['text'].strip())
+            logger.debug(
+                f"Transcribed segment {segment_info.get('index', 'unknown')}: "
+                f"detected language={info.language}, language_probability={info.language_probability:.2f}, "
+                f"{len(result_segments)} segments found"
+            )
 
-            logger.debug(f"Transcribed segment {segment_info.get('index', 'unknown')}: {len(segments)} segments found")
-            return segments if segments else None
+            return result_segments if result_segments else None
 
         except Exception as e:
-            error_msg = f"Local Whisper transcription failed: {str(e)}"
+            error_msg = f"Local Whisper (faster-whisper) transcription failed: {str(e)}"
             logger.error(f"  {error_msg}")
             raise Exception(error_msg)

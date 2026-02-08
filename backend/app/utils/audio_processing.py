@@ -1,7 +1,7 @@
 import os
 import soundfile as sf
 from typing import List, Tuple, Dict, Any
-from silero_vad import load_silero_vad, read_audio, get_speech_timestamps
+from app.utils.vad import load_silero_vad, read_audio, get_speech_timestamps
 from app.core.logger import get_logger
 
 logger = get_logger(__name__)

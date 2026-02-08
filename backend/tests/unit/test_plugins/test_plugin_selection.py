@@ -180,22 +180,17 @@ class TestPluginConfigUpdate:
         assert plugin.api_key != initial_key
 
     def test_local_whisper_config_update(self):
-        """LocalWhisperPlugin should update device via update_config"""
+        """LocalWhisperPlugin should update model_name via update_config"""
         plugin = LocalWhisperPlugin()
 
         # Initial values
-        initial_device = plugin.device
         initial_model_name = plugin.model_name
 
-        # Update config
-        # Note: 'model' key sets self.model (not model_name) - this is a potential bug
+        # Update config - faster-whisper is CPU-only, no device config
         plugin.update_config({
-            'device': 'cpu'
+            'model_name': 'base'
         })
 
-        # Verify device updated
-        assert plugin.device == 'cpu'
-        assert plugin.device != initial_device
-
-        # model_name should NOT change (demonstrating current behavior)
-        assert plugin.model_name == initial_model_name
+        # Verify model_name updated
+        assert plugin.model_name == 'base'
+        assert plugin.model_name != initial_model_name

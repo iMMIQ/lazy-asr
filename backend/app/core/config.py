@@ -30,9 +30,8 @@ class Settings(BaseSettings):
     )
     QWEN_ASR_AVAILABLE_MODELS: list = ["qwen3-asr-flash"]  # Alibaba Cloud available model list
 
-    # Local Whisper settings
-    LOCAL_WHISPER_MODEL: str = "tiny"  # tiny, base, small, medium, large
-    LOCAL_WHISPER_DEVICE: str = "auto"  # auto, cpu, cuda
+    # Local Whisper settings (faster-whisper, CPU-only)
+    LOCAL_WHISPER_MODEL: str = "tiny"  # tiny, base, small, medium, large-v1, large-v2, large-v3
     LOCAL_WHISPER_MODEL_CACHE_DIR: str = "models"  # Model cache directory
 
     # Concurrency settings
