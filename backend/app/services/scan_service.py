@@ -7,6 +7,7 @@ from app.core.config import settings
 from app.core.logger import get_logger
 from app.models.schemas import ScanRequest, ScanStatus, ScanResult, ASRResponse
 from app.utils.file_type import is_media_file
+from app.core.websocket import connection_manager
 from .asr_service import ASRService
 
 logger = get_logger(__name__)
@@ -19,6 +20,15 @@ class ScanService:
         self.asr_service = ASRService()
         self.active_scans: Dict[str, ScanStatus] = {}
         self.scan_results: Dict[str, ScanResult] = {}
+
+    async def _broadcast_status(self, scan_id: str):
+        """Broadcast current status to all WebSocket subscribers"""
+        scan_status = self.active_scans.get(scan_id)
+        if scan_status:
+            await connection_manager.broadcast_to_scan(scan_id, {
+                "type": "status",
+                "data": scan_status.dict()
+            })
 
     async def scan_path(self, scan_request: ScanRequest) -> str:
         """
@@ -89,6 +99,7 @@ class ScanService:
             scan_status = self.active_scans[scan_id]
             scan_status.status = "scanning"
             scan_status.message = "Scanning for media files..."
+            await self._broadcast_status(scan_id)
 
             # Find media files
             media_files = self._find_media_files(
@@ -100,6 +111,7 @@ class ScanService:
                 scan_status.message = "No media files found in the specified path"
                 scan_status.end_time = datetime.now()
                 scan_status.progress = 100
+                await self._broadcast_status(scan_id)
                 return
 
             # Filter out files that already have subtitles
@@ -116,6 +128,7 @@ class ScanService:
             scan_status.total_files = len(media_files)  # Original total including skipped
             scan_status.status = "processing"
             scan_status.message = f"Found {len(media_files)} media files, {skipped_files} already have subtitles, processing {len(filtered_media_files)} files..."
+            await self._broadcast_status(scan_id)
 
             # Process each file
             processed_count = 0
@@ -152,6 +165,9 @@ class ScanService:
                         failed_count += 1
                         logger.error(f"Failed to process: {file_path} - {result.message}")
 
+                    # Broadcast status after each file
+                    await self._broadcast_status(scan_id)
+
                 except Exception as e:
                     failed_count += 1
                     logger.error(f"Error processing file {file_path}: {e}")
@@ -168,6 +184,7 @@ class ScanService:
             scan_status.message = f"Scan completed. Total: {len(media_files)}, Skipped (existing subtitles): {skipped_files}, Processed: {processed_count}, Failed: {failed_count}"
             scan_status.end_time = datetime.now()
             scan_status.results = results
+            await self._broadcast_status(scan_id)
 
             # Create final result
             duration = (scan_status.end_time - scan_status.start_time).total_seconds()
@@ -199,6 +216,7 @@ class ScanService:
                 scan_status.status = "failed"
                 scan_status.message = f"Scan failed: {str(e)}"
                 scan_status.end_time = datetime.now()
+                await self._broadcast_status(scan_id)
 
     def _find_media_files(self, path: str, recursive: bool = True, max_files: int = 100) -> List[str]:
         """
