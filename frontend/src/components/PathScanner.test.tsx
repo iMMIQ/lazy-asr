@@ -139,7 +139,7 @@ describe('PathScanner - WebSocket Integration', () => {
       expect(api.startScan).toHaveBeenCalled()
     })
 
-    // Verify connection status is initially showing as polling (disconnected)
+    // Verify connection status is initially showing as disconnected
     const statusIndicator = screen.getByTestId(/connection-status/i)
     expect(statusIndicator).toHaveClass('disconnected')
   })
@@ -173,63 +173,6 @@ describe('PathScanner - WebSocket Integration', () => {
     const statusIndicator = screen.getByTestId(/connection-status/i)
     expect(statusIndicator).toBeInTheDocument()
     expect(statusIndicator).toHaveClass('connected')
-  })
-
-  it('should fall back to polling when WebSocket is disconnected', async () => {
-    // Mock WebSocket as disconnected
-    vi.mocked(useWebSocket).mockReturnValue({
-      status: 'disconnected',
-      connected: false,
-      lastMessage: null,
-      lastStatus: null,
-      error: null,
-      sendMessage: vi.fn(),
-      disconnect: vi.fn(),
-      reconnect: vi.fn(),
-    })
-
-    const mockScanStatus = {
-      scan_id: 'test-scan-456',
-      status: 'processing' as const,
-      progress: 25,
-      total_files: 50,
-      processed_files: 12,
-    }
-
-    vi.mocked(api.startScan).mockResolvedValue({ scan_id: 'test-scan-456' })
-    vi.mocked(api.getScanStatus).mockResolvedValue(mockScanStatus)
-
-    render(
-      <ConfigProvider defaultState={defaultConfigState}>
-        <TestWrapper>
-          <PathScanner />
-        </TestWrapper>
-      </ConfigProvider>
-    )
-
-    await waitFor(() => {
-      expect(screen.getByText(/path scanner/i)).toBeInTheDocument()
-    })
-
-    // Start a scan
-    const user = userEvent.setup()
-    const pathInput = screen.getByPlaceholderText(/\/path\/to\/media\/files/i)
-    await user.type(pathInput, '/media/videos')
-
-    const startButton = screen.getByText(/Start Scan/i)
-    await user.click(startButton)
-
-    await waitFor(() => {
-      expect(api.startScan).toHaveBeenCalled()
-    })
-
-    // Verify polling fallback is used (getScanStatus called)
-    await waitFor(
-      () => {
-        expect(api.getScanStatus).toHaveBeenCalledWith('test-scan-456')
-      },
-      { timeout: 3000 }
-    )
   })
 
   it('should update scan status from WebSocket messages', async () => {

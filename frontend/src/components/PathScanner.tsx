@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../context/ConfigContext';
-import { startScan, getScanStatus, getScanResult, cancelScan, getScanConfig } from '../services/api';
+import { startScan, getScanResult, cancelScan, getScanConfig } from '../services/api';
 import type { ScanRequest, ScanStatusResponse, ScanResult, LanguageCode } from '../types';
 import { useWebSocket } from '../hooks/useWebSocket';
 import ConfigPanel from './ConfigPanel';
@@ -37,7 +37,6 @@ export function PathScanner(): React.ReactElement {
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scanConfig, setScanConfig] = useState<ScanConfig | null>(null);
-  const [useWebsocket, setUseWebSocket] = useState(true);
 
   // Fetch scan configuration on component mount
   useEffect(() => {
@@ -80,26 +79,6 @@ export function PathScanner(): React.ReactElement {
     }
   }, [wsLastStatus, wsConnected]);
 
-  // Poll scan status if there's an active scan and WebSocket is not connected
-  useEffect(() => {
-    let intervalId: ReturnType<typeof setInterval> | null = null;
-
-    // Only use polling if WebSocket is not connected or not enabled
-    const shouldUsePolling = activeScanId && isScanning && (!useWebsocket || !wsConnected);
-
-    if (shouldUsePolling) {
-      intervalId = setInterval(() => {
-        fetchScanStatus(activeScanId);
-      }, 2000); // Poll every 2 seconds
-    }
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [activeScanId, isScanning, wsConnected, useWebsocket]);
-
   const fetchScanConfig = async () => {
     try {
       const config = await getScanConfig();
@@ -112,29 +91,6 @@ export function PathScanner(): React.ReactElement {
       }
     } catch (err) {
       console.error('Failed to fetch scan config:', err);
-    }
-  };
-
-  const fetchScanStatus = async (scanId: string) => {
-    try {
-      const status = await getScanStatus(scanId);
-      setScanStatus(status as ExtendedScanStatus);
-
-      // Update scanning state
-      if (status.status === 'completed' || status.status === 'failed' || status.status === 'cancelled') {
-        setIsScanning(false);
-
-        // Fetch result if completed
-        if (status.status === 'completed') {
-          fetchScanResult(scanId);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to fetch scan status:', err);
-      if (err instanceof Error && err.message.includes('Scan not found')) {
-        setIsScanning(false);
-        setActiveScanId(null);
-      }
     }
   };
 
@@ -233,11 +189,11 @@ export function PathScanner(): React.ReactElement {
         <div
           data-testid="connection-status"
           className={`connection-status ${wsConnected ? 'connected' : 'disconnected'}`}
-          title={`WebSocket: ${wsStatus}${wsError ? ` - ${wsError}` : ''}`}
+          title={`Connection: ${wsStatus}${wsError ? ` - ${wsError}` : ''}`}
         >
           <span className="status-dot"></span>
           <span className="status-text">
-            {wsConnected ? 'Live' : wsStatus === 'connecting' ? 'Connecting...' : 'Polling'}
+            {wsConnected ? 'Live' : wsStatus === 'connecting' ? 'Connecting...' : 'Disconnected'}
           </span>
         </div>
       </div>
