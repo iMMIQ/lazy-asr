@@ -14,7 +14,7 @@ export interface UseWebSocketOptions {
   baseUrl?: string;
   /** Enable automatic reconnection (default: true) */
   autoReconnect?: boolean;
-  /** Maximum number of reconnection attempts (default: 5) */
+  /** Maximum number of reconnection attempts (default: 10) */
   maxReconnectAttempts?: number;
   /** Delay between reconnection attempts in ms (default: 3000) */
   reconnectDelay?: number;
@@ -22,6 +22,8 @@ export interface UseWebSocketOptions {
   enableHeartbeat?: boolean;
   /** Interval for sending ping messages in ms (default: 30000) */
   heartbeatInterval?: number;
+  /** Enable infinite reconnection attempts (default: false) */
+  infiniteReconnect?: boolean;
 }
 
 /**
@@ -66,7 +68,7 @@ const DEFAULT_WS_URL = 'ws://localhost:8000/api/v1/ws';
  * ```tsx
  * const { connected, lastStatus, status } = useWebSocket('scan-123', {
  *   autoReconnect: true,
- *   maxReconnectAttempts: 5
+ *   maxReconnectAttempts: 10
  * });
  *
  * if (connected) {
@@ -81,10 +83,11 @@ export function useWebSocket(
   const {
     baseUrl = DEFAULT_WS_URL,
     autoReconnect = true,
-    maxReconnectAttempts = 5,
+    maxReconnectAttempts = 10,
     reconnectDelay = 3000,
     enableHeartbeat = true,
     heartbeatInterval = 30000,
+    infiniteReconnect = false,
   } = options;
 
   const [status, setStatus] = useState<WSConnectionStatus>('disconnected');
@@ -179,7 +182,7 @@ export function useWebSocket(
         cleanup();
 
         // Attempt reconnection if enabled and not intentionally closed
-        if (autoReconnect && !event.wasClean && reconnectAttemptsRef.current < maxReconnectAttempts) {
+        if (autoReconnect && !event.wasClean && (infiniteReconnect || reconnectAttemptsRef.current < maxReconnectAttempts)) {
           reconnectAttemptsRef.current++;
           const delay = reconnectDelay * reconnectAttemptsRef.current; // Exponential backoff
 
@@ -192,7 +195,7 @@ export function useWebSocket(
       setStatus('error');
       setError(err instanceof Error ? err.message : 'Failed to create WebSocket connection');
     }
-  }, [scanId, baseUrl, autoReconnect, maxReconnectAttempts, reconnectDelay, enableHeartbeat, heartbeatInterval, cleanup]);
+  }, [scanId, baseUrl, autoReconnect, maxReconnectAttempts, reconnectDelay, enableHeartbeat, heartbeatInterval, infiniteReconnect, cleanup]);
 
   const sendMessage = useCallback((message: Record<string, unknown>) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {

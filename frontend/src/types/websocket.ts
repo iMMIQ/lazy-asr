@@ -167,6 +167,8 @@ export interface WSConnectionOptions {
   enableHeartbeat?: boolean;
   /** Interval for sending ping messages in ms */
   heartbeatInterval?: number;
+  /** Enable infinite reconnection attempts (default: false) */
+  infiniteReconnect?: boolean;
 }
 
 /**
