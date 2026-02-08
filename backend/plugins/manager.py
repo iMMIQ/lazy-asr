@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional, Any
 from plugins.base import ASRPlugin
-from plugins.faster_whisper import FasterWhisperPlugin
+from plugins.whisper_api import WhisperAPIPlugin
 from plugins.qwen_asr import QwenASRPlugin
 from plugins.local_whisper import LocalWhisperPlugin
 
@@ -14,9 +14,9 @@ class PluginManager:
 
     def _load_plugins(self):
         """Load all available plugins"""
-        # Load Faster Whisper plugin
-        faster_whisper_plugin = FasterWhisperPlugin()
-        self.plugins[faster_whisper_plugin.name] = faster_whisper_plugin
+        # Load Whisper API plugin
+        whisper_api_plugin = WhisperAPIPlugin()
+        self.plugins[whisper_api_plugin.name] = whisper_api_plugin
 
         # Load Qwen ASR plugin
         qwen_asr_plugin = QwenASRPlugin()

@@ -8,27 +8,27 @@ from app.core.logger import get_logger
 logger = get_logger(__name__)
 
 
-class FasterWhisperPlugin(ASRPlugin):
-    """Faster Whisper ASR plugin"""
+class WhisperAPIPlugin(ASRPlugin):
+    """Whisper API ASR plugin"""
 
     def __init__(self):
         super().__init__(
-            name="faster-whisper",
-            display_name="Faster Whisper",
-            description="Faster Whisper ASR service"
+            name="whisper-api",
+            display_name="Whisper API",
+            description="Whisper API ASR service"
         )
-        self.api_url = settings.FASTER_WHISPER_API_URL
-        self.api_key = settings.FASTER_WHISPER_API_KEY
-        self.model = settings.FASTER_WHISPER_MODEL
+        self.api_url = settings.WHISPER_API_URL
+        self.api_key = settings.WHISPER_API_KEY
+        self.model = settings.WHISPER_API_MODEL
 
     def validate_config(self, config: Dict[str, Any]) -> bool:
-        """Validate Faster Whisper configuration"""
+        """Validate Whisper API configuration"""
         # For now, we don't have specific validation requirements
         return True
 
     def _get_language_prompt(self, language: str) -> str:
         """
-        Get language-specific prompt for Faster Whisper
+        Get language-specific prompt for Whisper API
 
         Args:
             language: Language code
@@ -49,7 +49,7 @@ class FasterWhisperPlugin(ASRPlugin):
         self, segment_file: str, segment_info: Dict[str, Any], language: str = "auto"
     ) -> Optional[List[str]]:
         """
-        Transcribe a single audio segment using Faster Whisper
+        Transcribe a single audio segment using Whisper API
 
         Args:
             segment_file: Path to the audio segment file
@@ -103,10 +103,10 @@ class FasterWhisperPlugin(ASRPlugin):
                     return [text] if text else None
 
         except asyncio.TimeoutError:
-            error_msg = f"Faster Whisper transcription timed out for segment {segment_info.get('index', 'unknown')}"
+            error_msg = f"Whisper API transcription timed out for segment {segment_info.get('index', 'unknown')}"
             logger.error(f"  {error_msg}")
             raise Exception(error_msg)
         except Exception as e:
-            error_msg = f"Faster Whisper transcription failed: {str(e)}"
+            error_msg = f"Whisper API transcription failed: {str(e)}"
             logger.error(f"  {error_msg}")
             raise Exception(error_msg)

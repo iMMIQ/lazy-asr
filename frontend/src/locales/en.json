@@ -66,9 +66,9 @@
     "chinese": "Chinese",
     "english": "English",
     "japanese": "Japanese",
-    "faster-whisper": {
+    "whisper-api": {
       "apiUrl": "API URL:",
-      "apiUrlDescription": "Faster Whisper API service address",
+      "apiUrlDescription": "Whisper API service address",
       "apiKey": "API Key (optional):",
       "apiKeyDescription": "If API requires authentication, enter API key",
       "model": "Model Name:",

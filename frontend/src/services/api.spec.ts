@@ -34,7 +34,7 @@ const mockServer = setupServer(
   http.get('/api/v1/asr/plugins', () => {
     return HttpResponse.json({
       plugins: [
-        { name: 'faster-whisper', display_name: 'Faster Whisper', requires_api_key: true }
+        { name: 'whisper-api', display_name: 'Whisper API', requires_api_key: true }
       ]
     })
   }),
@@ -234,7 +234,7 @@ describe('API Service', () => {
         watch_path: '/test',
         recursive: true,
         file_patterns: ['*.mp3'],
-        asr_method: 'faster-whisper',
+        asr_method: 'whisper-api',
         language: 'en',
         output_formats: ['srt'],
         is_active: true

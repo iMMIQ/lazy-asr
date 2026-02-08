@@ -19,7 +19,7 @@ function TestWrapper({ children }: { children: React.ReactNode }) {
 /**
  * Bug fix verification: ASR service list shows display_name instead of plugin name
  *
- * Previously: availablePlugins was passed as string array (e.g., ['faster-whisper']),
+ * Previously: availablePlugins was passed as string array (e.g., ['whisper-api']),
  * causing the component to display raw plugin names.
  *
  * After fix: availablePlugins is passed as ASRPlugin[] array, and the component
@@ -28,8 +28,8 @@ function TestWrapper({ children }: { children: React.ReactNode }) {
 describe('ASRConfig - Service list display', () => {
   const mockPlugins: ASRPlugin[] = [
     {
-      name: 'faster-whisper',
-      display_name: 'Faster Whisper',
+      name: 'whisper-api',
+      display_name: 'Whisper API',
       description: 'Fast and accurate speech recognition',
       supported_languages: ['auto', 'zh', 'en'],
       requires_api_key: false,
@@ -53,7 +53,7 @@ describe('ASRConfig - Service list display', () => {
     render(
       <TestWrapper>
         <ASRConfig
-          asrMethod="faster-whisper"
+          asrMethod="whisper-api"
           availablePlugins={mockPlugins}
           outputFormats={['srt']}
           onMethodChange={handleChange}
@@ -63,12 +63,12 @@ describe('ASRConfig - Service list display', () => {
       </TestWrapper>
     )
 
-    // Should show "Faster Whisper" not "faster-whisper"
-    expect(screen.getByText('Faster Whisper')).toBeInTheDocument()
+    // Should show "Whisper API" not "whisper-api"
+    expect(screen.getByText('Whisper API')).toBeInTheDocument()
     expect(screen.getByText('Qwen ASR')).toBeInTheDocument()
 
     // Should NOT show raw plugin names
-    expect(screen.queryByText('faster-whisper')).not.toBeInTheDocument()
+    expect(screen.queryByText('whisper-api')).not.toBeInTheDocument()
     expect(screen.queryByText('qwen-asr')).not.toBeInTheDocument()
   })
 
@@ -78,7 +78,7 @@ describe('ASRConfig - Service list display', () => {
     render(
       <TestWrapper>
         <ASRConfig
-          asrMethod="faster-whisper"
+          asrMethod="whisper-api"
           availablePlugins={mockPlugins}
           outputFormats={['srt']}
           onMethodChange={handleChange}
@@ -90,12 +90,12 @@ describe('ASRConfig - Service list display', () => {
 
     // Check that select element has the correct value (plugin.name, not display_name)
     const selectElement = screen.getByLabelText(/select asr service/i) as HTMLSelectElement
-    expect(selectElement.value).toBe('faster-whisper')
+    expect(selectElement.value).toBe('whisper-api')
 
     // Check that options have correct values
     const options = selectElement.querySelectorAll('option')
-    expect(options[0].value).toBe('faster-whisper')
-    expect(options[0].textContent).toBe('Faster Whisper')
+    expect(options[0].value).toBe('whisper-api')
+    expect(options[0].textContent).toBe('Whisper API')
     expect(options[1].value).toBe('qwen-asr')
     expect(options[1].textContent).toBe('Qwen ASR')
   })

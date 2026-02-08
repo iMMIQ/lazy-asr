@@ -15,12 +15,12 @@ class Settings(BaseSettings):
 
     # ASR settings
     DEFAULT_ASR_METHOD: str = "local-whisper"
-    AVAILABLE_ASR_METHODS: list = ["local-whisper", "faster-whisper", "qwen-asr"]
+    AVAILABLE_ASR_METHODS: list = ["local-whisper", "whisper-api", "qwen-asr"]
 
-    # Faster Whisper settings
-    FASTER_WHISPER_API_URL: str = "https://funasr-ai.immiqtop.heiyu.space/v1/audio/transcriptions"
-    FASTER_WHISPER_API_KEY: Optional[str] = None
-    FASTER_WHISPER_MODEL: str = "fun-asr-nano"
+    # Whisper API settings
+    WHISPER_API_URL: str = "https://funasr-ai.immiqtop.heiyu.space/v1/audio/transcriptions"
+    WHISPER_API_KEY: Optional[str] = None
+    WHISPER_API_MODEL: str = "fun-asr-nano"
 
     # Qwen ASR settings
     QWEN_ASR_API_KEY: Optional[str] = None

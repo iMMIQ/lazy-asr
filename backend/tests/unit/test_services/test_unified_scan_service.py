@@ -43,7 +43,7 @@ class TestScanPathValidation:
         scan_request = ScanRequest(
             path="/nonexistent/path/that/does/not/exist",
             recursive=True,
-            asr_method="faster-whisper",
+            asr_method="whisper-api",
             output_formats=["srt"]
         )
 
@@ -59,7 +59,7 @@ class TestScanPathValidation:
             scan_request = ScanRequest(
                 path="/path/to/file.txt",
                 recursive=True,
-                asr_method="faster-whisper",
+                asr_method="whisper-api",
                 output_formats=["srt"]
             )
 
@@ -76,7 +76,7 @@ class TestScanPathValidation:
             scan_request = ScanRequest(
                 path="/valid/path",
                 recursive=True,
-                asr_method="faster-whisper",
+                asr_method="whisper-api",
                 output_formats=["srt"]
             )
 
@@ -202,7 +202,7 @@ class TestBackwardCompatibility:
         request = ScanRequest(
             path="/test/path",
             recursive=True,
-            asr_method="faster-whisper",
+            asr_method="whisper-api",
             output_formats=["srt"]
         )
 

@@ -1,0 +1,31 @@
+Metadata-Version: 2.4
+Name: lazy-asr
+Version: 0.1.0
+Summary: Add your description here
+Requires-Python: >=3.12
+Requires-Dist: fastapi>=0.68.0
+Requires-Dist: uvicorn>=0.15.0
+Requires-Dist: aiohttp>=3.8.0
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: pydantic-settings>=2.0.0
+Requires-Dist: soundfile>=0.13.1
+Requires-Dist: silero-vad>=6.0.0
+Requires-Dist: dashscope>=1.24.6
+Requires-Dist: requests>=2.32.5
+Requires-Dist: python-multipart>=0.0.9
+Requires-Dist: tqdm>=4.67.1
+Requires-Dist: structlog>=23.0.0
+Requires-Dist: openai-whisper>=20231117
+Requires-Dist: ffmpeg-python>=0.2.0
+Requires-Dist: aiosqlite>=0.22.1
+Requires-Dist: sqlalchemy>=2.0.45
+Requires-Dist: asyncio>=4.0.0
+Requires-Dist: filetype>=1.2.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.24.0; extra == "dev"
+Requires-Dist: pytest-cov>=6.0.0; extra == "dev"
+Requires-Dist: pytest-mock>=3.14.0; extra == "dev"
+Requires-Dist: httpx>=0.28.0; extra == "dev"
+Requires-Dist: mypy>=1.13.0; extra == "dev"
+Requires-Dist: ruff>=0.9.0; extra == "dev"

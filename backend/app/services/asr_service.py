@@ -33,7 +33,7 @@ class ASRService:
     async def process_media(
         self,
         media_path: str,
-        asr_method: str = "faster-whisper",
+        asr_method: str = "whisper-api",
         vad_options: Optional[Dict[str, Any]] = None,
         asr_options: Optional[Dict[str, Any]] = None,
         asr_api_url: Optional[str] = None,
@@ -332,7 +332,7 @@ class ASRService:
     async def process_audio(
         self,
         audio_path: str,
-        asr_method: str = "faster-whisper",
+        asr_method: str = "whisper-api",
         vad_options: Optional[Dict[str, Any]] = None,
         asr_options: Optional[Dict[str, Any]] = None,
         asr_api_url: Optional[str] = None,

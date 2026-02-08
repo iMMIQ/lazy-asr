@@ -33,18 +33,18 @@ export const MAX_FILES = 10;
 
 // ASR method specific configurations
 export const ASR_METHOD_CONFIGS: Record<string, ASRMethodConfig> = {
-  'faster-whisper': {
+  'whisper-api': {
     apiUrl: {
       placeholder: 'https://funasr-ai.immiqtop.heiyu.space/v1/audio/transcriptions',
-      description: 'Faster Whisper API URL'
+      description: 'Whisper API URL'
     },
     apiKey: {
       placeholder: 'API Key',
-      description: 'Faster Whisper API Key'
+      description: 'Whisper API Key'
     },
     model: {
       placeholder: 'fun-asr-nano',
-      description: 'Model name for Faster Whisper'
+      description: 'Model name for Whisper API'
     }
   },
   'qwen-asr': {

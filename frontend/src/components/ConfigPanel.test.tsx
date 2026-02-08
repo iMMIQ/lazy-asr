@@ -19,8 +19,8 @@ function TestWrapper({ children }: { children: React.ReactNode }) {
 describe('ConfigPanel - Language options display', () => {
   const mockPlugins: ASRPlugin[] = [
     {
-      name: 'faster-whisper',
-      display_name: 'Faster Whisper',
+      name: 'whisper-api',
+      display_name: 'Whisper API',
       description: 'Fast and accurate speech recognition',
       supported_languages: ['auto', 'zh', 'en', 'ja'],
       requires_api_key: false,
@@ -35,7 +35,7 @@ describe('ConfigPanel - Language options display', () => {
     render(
       <TestWrapper>
         <ConfigPanel
-          asrMethod="faster-whisper"
+          asrMethod="whisper-api"
           availablePlugins={mockPlugins}
           outputFormats={['srt']}
           onMethodChange={handleChange}
@@ -72,7 +72,7 @@ describe('ConfigPanel - Language options display', () => {
     render(
       <TestWrapper>
         <ConfigPanel
-          asrMethod="faster-whisper"
+          asrMethod="whisper-api"
           availablePlugins={mockPlugins}
           outputFormats={['srt']}
           onMethodChange={handleChange}
