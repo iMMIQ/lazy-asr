@@ -1,6 +1,6 @@
 import os
 import uuid
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Callable, Awaitable
 from app.core.config import settings
 from app.core.logger import get_logger
 from app.utils.audio_processing import (
@@ -30,6 +30,36 @@ class ASRService:
         os.makedirs(self.upload_dir, exist_ok=True)
         os.makedirs(self.output_dir, exist_ok=True)
 
+    async def _report_progress(
+        self,
+        task_id: str,
+        stage: str,
+        progress: float,
+        message: str,
+        progress_callback: Optional[Callable[[Dict[str, Any]], Awaitable[None]]] = None,
+        **extra_data
+    ):
+        """
+        Report processing progress via callback if provided
+
+        Args:
+            task_id: The task ID
+            stage: Current processing stage (e.g., 'preparing', 'transcription')
+            progress: Progress percentage (0-100)
+            message: Human-readable progress message
+            progress_callback: Optional async callback for progress updates
+            **extra_data: Additional data to include in progress report
+        """
+        if progress_callback:
+            progress_data = {
+                'task_id': task_id,
+                'stage': stage,
+                'progress': progress,
+                'message': message,
+                **extra_data
+            }
+            await progress_callback(progress_data)
+
     async def process_media(
         self,
         media_path: str,
@@ -42,6 +72,7 @@ class ASRService:
         language: Optional[str] = "auto",  # Default to auto detect
         output_formats: List[str] = None,
         output_mode: str = "task",  # "task": 输出到任务目录, "source": 输出到源文件目录
+        progress_callback: Optional[Callable[[Dict[str, Any]], Awaitable[None]]] = None,
     ) -> ASRResponse:
         """
         Process media file (audio or video) through the complete ASR pipeline
@@ -81,6 +112,16 @@ class ASRService:
             task_output_dir = os.path.join(self.output_dir, task_id)
             os.makedirs(task_output_dir, exist_ok=True)
 
+            # Report preparing stage
+            await self._report_progress(
+                task_id=task_id,
+                stage="preparing",
+                progress=5,
+                message="Preparing media for ASR processing",
+                progress_callback=progress_callback,
+                media_path=os.path.basename(media_path)
+            )
+
             # Prepare media for ASR processing (extract audio from video if needed)
             logger.info("Preparing media for ASR processing...")
             processed_audio_path, media_type = prepare_media_for_asr(media_path, task_output_dir)
@@ -88,31 +129,88 @@ class ASRService:
             logger.info(f"Processed audio path: {processed_audio_path}")
 
             # 1. Silero VAD segmentation
+            await self._report_progress(
+                task_id=task_id,
+                stage="vad_segmentation",
+                progress=10,
+                message="Performing Voice Activity Detection",
+                progress_callback=progress_callback
+            )
+
             try:
                 speech_timestamps, audio_data, sample_rate = silero_vad_segmentation(
                     processed_audio_path, vad_options or {}
                 )
             except Exception as e:
                 logger.error(f"Silero VAD detection failed: {e}")
+                await self._report_progress(
+                    task_id=task_id,
+                    stage="error",
+                    progress=0,
+                    message=f"VAD detection failed: {e}",
+                    progress_callback=progress_callback,
+                    error=str(e)
+                )
                 return ASRResponse(success=False, message=f"Silero VAD detection failed: {e}")
 
             if not speech_timestamps:
                 logger.error("No speech segments detected")
+                await self._report_progress(
+                    task_id=task_id,
+                    stage="error",
+                    progress=0,
+                    message="No speech segments detected",
+                    progress_callback=progress_callback,
+                    error="no_speech_detected"
+                )
                 return ASRResponse(success=False, message="No speech segments detected")
 
             # 2. Export segment audio
+            await self._report_progress(
+                task_id=task_id,
+                stage="exporting_segments",
+                progress=20,
+                message=f"Exporting {len(speech_timestamps)} speech segments",
+                progress_callback=progress_callback,
+                segment_count=len(speech_timestamps)
+            )
             logger.info("Exporting speech segment files...")
             segments_output_dir = os.path.join(task_output_dir, "silero_segments")
             exported_segments = export_silero_segments(speech_timestamps, audio_data, sample_rate, segments_output_dir)
 
             if not exported_segments:
                 logger.error("No speech segments available for export")
+                await self._report_progress(
+                    task_id=task_id,
+                    stage="error",
+                    progress=0,
+                    message="No speech segments available for export",
+                    progress_callback=progress_callback,
+                    error="no_segments_available"
+                )
                 return ASRResponse(success=False, message="No speech segments available for export")
 
             # 3. Get ASR plugin
+            await self._report_progress(
+                task_id=task_id,
+                stage="loading_plugin",
+                progress=30,
+                message=f"Loading ASR plugin: {asr_method}",
+                progress_callback=progress_callback,
+                asr_method=asr_method
+            )
             plugin = plugin_manager.get_plugin(asr_method)
             if not plugin:
                 logger.error(f"Unsupported ASR method: {asr_method}")
+                await self._report_progress(
+                    task_id=task_id,
+                    stage="error",
+                    progress=0,
+                    message=f"Unsupported ASR method: {asr_method}",
+                    progress_callback=progress_callback,
+                    error="unsupported_method",
+                    asr_method=asr_method
+                )
                 return ASRResponse(success=False, message=f"Unsupported ASR method: {asr_method}")
 
             # Update plugin configuration
@@ -129,6 +227,14 @@ class ASRService:
                 logger.info(f"Updated plugin configuration: {plugin_config}")
 
             # 4. Concurrent transcription
+            await self._report_progress(
+                task_id=task_id,
+                stage="transcription",
+                progress=40,
+                message=f"Transcribing {len(exported_segments)} segments",
+                progress_callback=progress_callback,
+                total_segments=len(exported_segments)
+            )
             logger.info("Starting concurrent transcription...")
             all_subtitles = []
             successful_transcriptions = 0
@@ -140,6 +246,17 @@ class ASRService:
             transcription_results = await plugin.transcribe_segments(exported_segments, language)
 
             for i, result in enumerate(transcription_results):
+                # Report progress for each segment
+                segment_progress = 40 + (i / len(transcription_results)) * 40  # 40-80%
+                await self._report_progress(
+                    task_id=task_id,
+                    stage="transcription",
+                    progress=segment_progress,
+                    message=f"Processing segment {i+1}/{len(transcription_results)}",
+                    progress_callback=progress_callback,
+                    current_segment=i+1,
+                    total_segments=len(transcription_results)
+                )
                 # Use segment_info from result to get correct segment information
                 segment_info = result.get('segment_info')
                 if not segment_info:
@@ -207,6 +324,15 @@ class ASRService:
 
             # 5. Generate subtitle files
             if all_subtitles:
+                await self._report_progress(
+                    task_id=task_id,
+                    stage="generating_subtitles",
+                    progress=85,
+                    message=f"Generating {len(output_formats) if output_formats else 1} subtitle file(s)",
+                    progress_callback=progress_callback,
+                    total_subtitles=len(all_subtitles),
+                    output_formats=output_formats or ['srt']
+                )
                 # Sort subtitles by time
                 all_subtitles.sort(key=lambda x: time_string_to_seconds(x['start'].replace(',', '.')))
 
@@ -287,6 +413,17 @@ class ASRService:
                 if task_id and media_path:
                     file_manager.cleanup_by_media_path(media_path, task_id, keep_output=True)
 
+                # Report completion
+                await self._report_progress(
+                    task_id=task_id,
+                    stage="completed",
+                    progress=100,
+                    message="ASR processing completed successfully",
+                    progress_callback=progress_callback,
+                    stats=stats,
+                    output_files=output_files
+                )
+
                 return ASRResponse(
                     success=True,
                     message=f"Processing completed! Generated {len(output_files)} format subtitle files",
@@ -300,6 +437,14 @@ class ASRService:
             else:
                 error_msg = "No subtitles generated"
                 logger.error(error_msg)
+                await self._report_progress(
+                    task_id=task_id,
+                    stage="error",
+                    progress=0,
+                    message=error_msg,
+                    progress_callback=progress_callback,
+                    error="no_subtitles_generated"
+                )
 
                 # Display failed segment details
                 if failed_segments_details:
@@ -327,6 +472,17 @@ class ASRService:
             # Clean up temporary files in case of exception
             if task_id and media_path:
                 file_manager.cleanup_by_media_path(media_path, task_id, keep_output=False)
+            # Report error via callback
+            if task_id and progress_callback:
+                await self._report_progress(
+                    task_id=task_id,
+                    stage="error",
+                    progress=0,
+                    message=f"Error occurred during processing: {e}",
+                    progress_callback=progress_callback,
+                    error=str(e),
+                    error_type=type(e).__name__
+                )
             return ASRResponse(success=False, message=f"Error occurred during processing: {e}")
 
     async def process_audio(
@@ -341,6 +497,7 @@ class ASRService:
         language: Optional[str] = "auto",  # Default to auto detect
         output_formats: List[str] = None,
         output_mode: str = "task",  # "task": 输出到任务目录, "source": 输出到源文件目录
+        progress_callback: Optional[Callable[[Dict[str, Any]], Awaitable[None]]] = None,
     ) -> ASRResponse:
         """
         Process audio file through the complete ASR pipeline (backward compatibility)
@@ -350,6 +507,7 @@ class ASRService:
             asr_method: ASR method to use
             vad_options: VAD options
             asr_options: ASR options
+            progress_callback: Optional async callback for progress updates
 
         Returns:
             ASRResponse with results
@@ -366,4 +524,5 @@ class ASRService:
             language=language,
             output_formats=output_formats,
             output_mode=output_mode,
+            progress_callback=progress_callback,
         )
