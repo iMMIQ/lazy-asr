@@ -21,6 +21,7 @@ from app.models.schemas import (
     ScanResult,
 )
 from app.core.config import settings
+from app.core.websocket import connection_manager
 from app.core.database import init_database, close_database
 from app.core.logger import get_logger
 from app.utils.file_type import get_file_type, is_media_file
@@ -120,7 +121,18 @@ async def process_media(
             # Support comma-separated formats: "srt,vtt,lrc" or single format: "srt"
             parsed_output_formats = [fmt.strip() for fmt in output_formats.split(",")]
 
-        # Process audio
+        # Create progress callback that broadcasts via WebSocket
+        async def progress_callback(progress_data: dict):
+            """Broadcast ASR processing progress via WebSocket"""
+            # Use task_id as the channel identifier
+            channel_id = progress_data.get('task_id', task_id)
+            message = {
+                "type": "status",
+                "data": progress_data
+            }
+            await connection_manager.broadcast_to_scan(channel_id, message)
+
+        # Process audio with progress callback
         result = await asr_service.process_audio(
             audio_path=file_path,
             asr_method=asr_method,
@@ -132,6 +144,7 @@ async def process_media(
             language=language,
             output_formats=parsed_output_formats,
             output_mode=output_mode,
+            progress_callback=progress_callback,
         )
 
         return result
