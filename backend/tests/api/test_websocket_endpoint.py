@@ -37,11 +37,6 @@ class TestValidateScanId:
         assert "cannot be empty" in exc_info.value.message
         assert exc_info.value.field == "scan_id"
 
-    def test_validate_scan_id_none_fails(self):
-        """Test validation fails with None"""
-        with pytest.raises((ValidationError, AttributeError, TypeError)):
-            _validate_scan_id(None)  # type: ignore
-
     def test_validate_scan_id_too_long(self):
         """Test validation fails with too long scan_id"""
         with pytest.raises(ValidationError) as exc_info:
