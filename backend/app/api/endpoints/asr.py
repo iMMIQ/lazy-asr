@@ -2,7 +2,7 @@ import os
 import uuid
 import zipfile
 import io
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Response
 from fastapi.responses import FileResponse, StreamingResponse
 from typing import Optional, List
 from pydantic import BaseModel
@@ -412,13 +412,19 @@ async def start_scan(scan_request: ScanRequest):
 
 
 @router.get("/scan/status/{scan_id}", response_model=ScanStatus)
-async def get_scan_status(scan_id: str):
+async def get_scan_status(scan_id: str, response: Response):
     """
     Get the status of a scan operation
+
+    ⚠️ DEPRECATED: This endpoint is deprecated for real-time updates.
+    Use WebSocket connection at /api/v1/ws/scan/{scan_id} instead.
 
     Args:
         scan_id: Scan ID to check status for
     """
+    response.headers["X-Deprecation"] = "Use WebSocket endpoint /api/v1/ws/scan/{scan_id} for real-time updates"
+    response.headers["Sunset"] = "2026-06-01"  # Deprecation date
+
     scan_status = scan_service.get_scan_status(scan_id)
     if not scan_status:
         raise HTTPException(status_code=404, detail="Scan not found")
