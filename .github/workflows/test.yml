@@ -30,11 +30,11 @@ jobs:
 
       - name: Run unit tests
         run: |
-          pytest -m unit -v --cov=app --cov-report=xml --cov-report=term-missing
+          pytest tests/unit -v --cov=app --cov-report=xml --cov-report=term-missing
 
       - name: Run integration tests
         run: |
-          pytest -m integration -v
+          pytest tests/integration -v
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
