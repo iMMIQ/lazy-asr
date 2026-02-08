@@ -6,6 +6,7 @@ from typing import List, Dict, Any, Optional
 from app.core.config import settings
 from app.core.logger import get_logger
 from app.models.schemas import ScanRequest, ScanStatus, ScanResult, ASRResponse
+from app.utils.file_type import is_media_file
 from .asr_service import ASRService
 
 logger = get_logger(__name__)
@@ -203,6 +204,9 @@ class ScanService:
         """
         Find media files in the specified path
 
+        Uses filetype library to detect media files by content (magic bytes),
+        not by file extension. This is consistent with /scan/browse and /scan/path-info APIs.
+
         Args:
             path: Directory path to scan
             recursive: Whether to scan recursively
@@ -212,7 +216,6 @@ class ScanService:
             List of media file paths
         """
         media_files = []
-        extensions = set(ext.lower() for ext in settings.SCAN_FILE_EXTENSIONS)
 
         try:
             if recursive:
@@ -221,9 +224,9 @@ class ScanService:
                         if len(media_files) >= max_files:
                             return media_files
 
-                        file_ext = os.path.splitext(file)[1].lower()
-                        if file_ext in extensions:
-                            media_files.append(os.path.join(root, file))
+                        file_path = os.path.join(root, file)
+                        if is_media_file(file_path):
+                            media_files.append(file_path)
             else:
                 for item in os.listdir(path):
                     if len(media_files) >= max_files:
@@ -231,8 +234,7 @@ class ScanService:
 
                     item_path = os.path.join(path, item)
                     if os.path.isfile(item_path):
-                        file_ext = os.path.splitext(item)[1].lower()
-                        if file_ext in extensions:
+                        if is_media_file(item_path):
                             media_files.append(item_path)
 
         except Exception as e:
