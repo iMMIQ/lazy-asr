@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useConfig } from '../context/ConfigContext';
 import { startScan, getScanStatus, getScanResult, cancelScan, getScanConfig } from '../services/api';
 import type { ScanRequest, ScanStatusResponse, ScanResult, LanguageCode } from '../types';
+import { useWebSocket } from '../hooks/useWebSocket';
 import ConfigPanel from './ConfigPanel';
 import FolderSelector from './FolderSelector';
 import './PathScanner.css';
@@ -36,17 +37,57 @@ export function PathScanner(): React.ReactElement {
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scanConfig, setScanConfig] = useState<ScanConfig | null>(null);
+  const [useWebsocket, setUseWebSocket] = useState(true);
 
   // Fetch scan configuration on component mount
   useEffect(() => {
     fetchScanConfig();
   }, []);
 
-  // Poll scan status if there's an active scan
+  // WebSocket connection for real-time updates
+  const {
+    status: wsStatus,
+    connected: wsConnected,
+    lastStatus: wsLastStatus,
+    error: wsError,
+  } = useWebSocket(activeScanId, {
+    autoReconnect: true,
+    maxReconnectAttempts: 5,
+    reconnectDelay: 3000,
+  });
+
+  // Update scan status from WebSocket messages
+  useEffect(() => {
+    if (wsLastStatus && wsConnected) {
+      setScanStatus({
+        scan_id: wsLastStatus.scan_id,
+        status: wsLastStatus.status,
+        progress: wsLastStatus.progress,
+        total_files: wsLastStatus.total_files,
+        processed_files: wsLastStatus.processed_files,
+        current_file: wsLastStatus.current_file,
+        message: wsLastStatus.error || 'Processing...',
+        failed_files: 0,
+      });
+
+      // Update scanning state based on WebSocket status
+      if (wsLastStatus.status === 'completed' || wsLastStatus.status === 'failed' || wsLastStatus.status === 'cancelled') {
+        setIsScanning(false);
+        if (wsLastStatus.status === 'completed') {
+          fetchScanResult(wsLastStatus.scan_id);
+        }
+      }
+    }
+  }, [wsLastStatus, wsConnected]);
+
+  // Poll scan status if there's an active scan and WebSocket is not connected
   useEffect(() => {
     let intervalId: ReturnType<typeof setInterval> | null = null;
 
-    if (activeScanId && isScanning) {
+    // Only use polling if WebSocket is not connected or not enabled
+    const shouldUsePolling = activeScanId && isScanning && (!useWebsocket || !wsConnected);
+
+    if (shouldUsePolling) {
       intervalId = setInterval(() => {
         fetchScanStatus(activeScanId);
       }, 2000); // Poll every 2 seconds
@@ -57,7 +98,7 @@ export function PathScanner(): React.ReactElement {
         clearInterval(intervalId);
       }
     };
-  }, [activeScanId, isScanning]);
+  }, [activeScanId, isScanning, wsConnected, useWebsocket]);
 
   const fetchScanConfig = async () => {
     try {
@@ -186,7 +227,20 @@ export function PathScanner(): React.ReactElement {
 
   return (
     <div className="path-scanner">
-      <h2>{t('pathScanner.title')}</h2>
+      <div className="header-row">
+        <h2>{t('pathScanner.title')}</h2>
+        {/* Connection Status Indicator */}
+        <div
+          data-testid="connection-status"
+          className={`connection-status ${wsConnected ? 'connected' : 'disconnected'}`}
+          title={`WebSocket: ${wsStatus}${wsError ? ` - ${wsError}` : ''}`}
+        >
+          <span className="status-dot"></span>
+          <span className="status-text">
+            {wsConnected ? 'Live' : wsStatus === 'connecting' ? 'Connecting...' : 'Polling'}
+          </span>
+        </div>
+      </div>
 
       {/* Scan Configuration Form */}
       <div className="scan-status-card">
