@@ -64,6 +64,8 @@ export interface ScanRequest {
   max_files?: number;
   recursive?: boolean;
   file_patterns?: string[];
+  asr_method?: string;
+  output_formats?: string[];
 }
 
 /** Scan result response */

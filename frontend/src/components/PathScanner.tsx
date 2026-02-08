@@ -123,7 +123,9 @@ export function PathScanner(): React.ReactElement {
         path: scanPath,
         recursive: state.recursive,
         max_files: state.maxFiles,
-        file_patterns: []
+        file_patterns: [],
+        ...(state.asrMethod && { asr_method: state.asrMethod }),
+        output_formats: state.outputFormats
       };
 
       const response = await startScan(scanRequest);
