@@ -5,6 +5,7 @@
   },
   "form": {
     "uploadAudio": "Upload Media Files:",
+    "uploadHint": "Click or drag files here",
     "selectASR": "Select ASR Service:",
     "selectOutputFormats": "Select Output Formats:",
     "outputFormatsDescription": "Select subtitle file formats to generate",

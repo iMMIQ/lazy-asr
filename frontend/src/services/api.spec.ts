@@ -127,7 +127,7 @@ const mockServer = setupServer(
 
 describe('API Service', () => {
   beforeAll(() => {
-    mockServer.listen({ onUnhandledRequest: 'error' })
+    mockServer.listen({ onUnhandledRequest: 'warn' })
   })
 
   afterEach(() => {

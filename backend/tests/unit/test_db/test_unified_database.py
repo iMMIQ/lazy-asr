@@ -57,13 +57,9 @@ class TestUnifiedDatabase:
         manager = DatabaseManager()
         manager.init("sqlite+aiosqlite:///:memory:")
 
-        # get_session is an async generator - iterate to get session
-        session_gen = manager.get_session()
-        session = await session_gen.__anext__()
-        assert isinstance(session, AsyncSession)
-
-        # Cleanup
-        await session_gen.aclose()
+        # get_session returns an async context manager
+        async with manager.get_session() as session:
+            assert isinstance(session, AsyncSession)
         await manager.close()
 
     @pytest.mark.asyncio

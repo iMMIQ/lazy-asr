@@ -17,7 +17,7 @@ export default defineConfig({
     open: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://localhost:8000',
         changeOrigin: true
       }
     }
@@ -29,7 +29,24 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: './tests/setup.ts',
-    css: true
+    setupFiles: ['./tests/setup.ts', './tests/mocks/setup.ts'],
+    css: true,
+    include: ['src/**/*.{test,spec}.{ts,tsx}', 'tests/**/*.{test,spec}.{ts,tsx}'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'json', 'lcov'],
+      exclude: [
+        'node_modules/',
+        'tests/',
+        '**/*.d.ts',
+        '**/*.config.*',
+        '**/mockData.ts',
+        'src/main.tsx'
+      ],
+      statements: 70,
+      branches: 70,
+      functions: 70,
+      lines: 70
+    }
   }
 })

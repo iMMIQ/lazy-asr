@@ -8,9 +8,17 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext js,jsx",
-    "test": "vitest"
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:install": "playwright install"
   },
   "dependencies": {
+    "@testing-library/dom": "^10.4.1",
     "axios": "^1.12.2",
     "i18next": "^25.5.3",
     "i18next-browser-languagedetector": "^8.2.0",
@@ -20,16 +28,19 @@
     "react-i18next": "^16.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.50.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react-swc": "^4.2.2",
+    "@vitest/coverage-v8": "^4.0.17",
     "@vitest/ui": "^4.0.17",
     "happy-dom": "^20.3.4",
     "jsdom": "^27.4.0",
     "msw": "^2.12.7",
+    "playwright": "^1.50.0",
     "typescript": "^4.9.5",
     "vite": "^7.3.1",
     "vitest": "^4.0.17"

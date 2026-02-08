@@ -5,6 +5,7 @@
   },
   "form": {
     "uploadAudio": "上传媒体文件:",
+    "uploadHint": "点击或拖拽文件到此处",
     "selectASR": "选择ASR服务:",
     "selectOutputFormats": "选择输出格式:",
     "outputFormatsDescription": "选择要生成的字幕文件格式",

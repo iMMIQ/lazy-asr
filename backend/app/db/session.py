@@ -2,6 +2,7 @@
 Database session management with support for SQLite and PostgreSQL
 """
 from typing import AsyncGenerator
+from contextlib import asynccontextmanager
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
@@ -55,6 +56,7 @@ class DatabaseManager:
             expire_on_commit=False,
         )
 
+    @asynccontextmanager
     async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
         """
         Get a database session with automatic transaction management
