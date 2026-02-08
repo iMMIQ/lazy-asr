@@ -24,9 +24,7 @@ export const LANGUAGE_OPTIONS: LanguageOption[] = [
   { value: 'auto', label: 'Auto Detect' },
   { value: 'zh', label: 'Chinese' },
   { value: 'en', label: 'English' },
-  { value: 'ja', label: 'Japanese' },
-  { value: 'ko', label: 'Korean' },
-  { value: 'yue', label: 'Cantonese' }
+  { value: 'ja', label: 'Japanese' }
 ];
 
 // File upload limits
