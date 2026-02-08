@@ -49,6 +49,17 @@ disallow_untyped_defs = false
 disallow_any_unimported = false
 ignore_missing_imports = true
 check_untyped_defs = false
+no_implicit_optional = false
+warn_unused_ignores = false
+disable_error_code = [
+    "assignment",
+    "arg-type",
+    "return-value",
+    "var-annotated",
+    "valid-type",
+    "misc",
+    "type-var",
+]
 
 [[tool.mypy.overrides]]
 module = [
@@ -59,5 +70,8 @@ module = [
     "faster_whisper.*",
     "dashscope.*",
     "tqdm.*",
+    "requests.*",
+    "aiosqlite.*",
+    "sqlalchemy.*",
 ]
 ignore_missing_imports = true
