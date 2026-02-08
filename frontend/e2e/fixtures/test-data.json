@@ -1,0 +1,20 @@
+{
+  "audioFiles": {
+    "validWav": "e2e/fixtures/samples/test-audio.wav",
+    "validMp3": "e2e/fixtures/samples/test-audio.mp3",
+    "invalid": "e2e/fixtures/samples/test.txt"
+  },
+  "mockTasks": [
+    {
+      "id": "task-1",
+      "status": "completed",
+      "progress": 100,
+      "text": "Sample transcribed text"
+    },
+    {
+      "id": "task-2",
+      "status": "pending",
+      "progress": 0
+    }
+  ]
+}
