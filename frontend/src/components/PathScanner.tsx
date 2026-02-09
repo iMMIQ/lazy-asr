@@ -16,9 +16,8 @@ interface ScanConfig {
 }
 
 /** Extended scan status with message */
-interface ExtendedScanStatus extends Omit<ScanStatusResponse, 'failed_files'> {
+interface ExtendedScanStatus extends ScanStatusResponse {
   message?: string;
-  failed_files?: number;
 }
 
 /**
@@ -66,9 +65,9 @@ export function PathScanner(): React.ReactElement {
         progress: scanData.progress,
         total_files: scanData.total_files,
         processed_files: scanData.processed_files,
+        failed_files: scanData.failed_files,
         current_file: scanData.current_file,
         message: scanData.error || 'Processing...',
-        failed_files: 0,
       });
 
       // Update scanning state based on WebSocket status

@@ -86,6 +86,7 @@ export interface ScanStatusResponse {
   progress: number;
   total_files: number;
   processed_files: number;
+  failed_files: number;
   current_file?: string;
   error?: string;
 }
