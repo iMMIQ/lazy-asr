@@ -23,6 +23,7 @@ dependencies = [
     "sqlalchemy>=2.0.45",
     "asyncio>=4.0.0",
     "filetype>=1.2.0",
+    "websockets>=16.0",
 ]
 
 [project.optional-dependencies]
