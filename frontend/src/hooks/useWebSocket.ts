@@ -48,7 +48,17 @@ export interface UseWebSocketReturn {
   reconnect: () => void;
 }
 
-const DEFAULT_WS_URL = 'ws://localhost:8000/api/v1/ws';
+// Determine WebSocket URL based on environment
+const getWebSocketBaseUrl = (): string => {
+  // In development, connect directly to backend
+  if (import.meta.env.DEV) {
+    return 'ws://localhost:8000/api/v1/ws';
+  }
+  // In production, use relative path (same origin)
+  return '/api/v1/ws';
+};
+
+const DEFAULT_WS_URL = getWebSocketBaseUrl();
 
 /**
  * Custom hook for managing WebSocket connections
@@ -139,6 +149,7 @@ export function useWebSocket(
 
     try {
       const wsUrl = `${baseUrl}/scan/${scanId}`;
+      console.log('[WebSocket] Connecting to:', wsUrl);
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
