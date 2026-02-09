@@ -27,7 +27,7 @@ class ScanService:
         if scan_status:
             await connection_manager.broadcast_to_scan(scan_id, {
                 "type": "status",
-                "data": scan_status.dict()
+                "data": scan_status.model_dump(mode='json')
             })
 
     async def scan_path(self, scan_request: ScanRequest) -> str:

@@ -65,7 +65,7 @@ async def _handle_scan_websocket(websocket: WebSocket, scan_id: str) -> None:
         if initial_status:
             await websocket.send_json({
                 "type": WS_MSG_TYPE_STATUS,
-                "data": initial_status.dict()
+                "data": initial_status.model_dump(mode='json')
             })
         else:
             await websocket.send_json({
