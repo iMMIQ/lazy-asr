@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { fetchPlugins } from './services/api';
+import { fetchPlugins, fetchVADProviders } from './services/api';
 import { ConfigProvider, useConfig } from './context/ConfigContext';
 import type { TabType } from './types';
 
@@ -50,7 +50,7 @@ function App(): React.ReactElement {
  */
 function AppContent({ activeTab, onTabChange, onLanguageChange }: AppContentProps): React.ReactElement {
   const { i18n } = useTranslation();
-  const { actions } = useConfig();
+  const { actions, state } = useConfig();
 
   // Fetch available plugins and set default method
   useEffect(() => {
@@ -76,6 +76,23 @@ function AppContent({ activeTab, onTabChange, onLanguageChange }: AppContentProp
 
     initializeConfig();
   }, []);
+
+  // Fetch VAD providers on mount
+  useEffect(() => {
+    const loadVADProviders = async () => {
+      try {
+        const response = await fetchVADProviders();
+        actions.setAvailableVADProviders(response.providers);
+        // Set default VAD method from backend
+        if (response.default && !state.vadMethod) {
+          actions.setVadMethod(response.default);
+        }
+      } catch (error) {
+        console.error('Failed to load VAD providers:', error);
+      }
+    };
+    loadVADProviders();
+  }, [actions]);
 
   return (
     <div className="App">
