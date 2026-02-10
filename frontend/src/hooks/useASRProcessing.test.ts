@@ -106,6 +106,7 @@ describe('useASRProcessing with WebSocket', () => {
       asrApiKey: 'test-key',
       asrModel: 'large',
       asrLanguage: 'en' as const,
+      vadMethod: 'silero',
       outputMode: 'task' as const,
       isMultiple: false,
     };
@@ -141,6 +142,7 @@ describe('useASRProcessing with WebSocket', () => {
       asrApiKey: '',
       asrModel: '',
       asrLanguage: 'auto' as const,
+      vadMethod: '',
       isMultiple: true,
     };
 
@@ -152,6 +154,52 @@ describe('useASRProcessing with WebSocket', () => {
     // Check that multiple files are added
     const audioFiles = formData.getAll('audio_files');
     expect(audioFiles).toHaveLength(2);
+  });
+
+  it('should include vad_method in FormData when provided', () => {
+    const { result } = renderHook(() => useASRProcessing());
+
+    const options = {
+      audioFiles: [new File(['audio'], 'test.wav', { type: 'audio/wav' })] as File[],
+      asrMethod: 'whisper-api',
+      outputFormats: ['srt'] as OutputFormat[],
+      showAdvancedOptions: false,
+      minSpeechDuration: 250,
+      minSilenceDuration: 100,
+      asrApiUrl: '',
+      asrApiKey: '',
+      asrModel: '',
+      asrLanguage: 'auto' as const,
+      vadMethod: 'silero',
+      isMultiple: false,
+    };
+
+    const formData = result.current.buildFormData(options);
+
+    expect(formData.get('vad_method')).toBe('silero');
+  });
+
+  it('should not include vad_method in FormData when empty', () => {
+    const { result } = renderHook(() => useASRProcessing());
+
+    const options = {
+      audioFiles: [new File(['audio'], 'test.wav', { type: 'audio/wav' })] as File[],
+      asrMethod: 'whisper-api',
+      outputFormats: ['srt'] as OutputFormat[],
+      showAdvancedOptions: false,
+      minSpeechDuration: 250,
+      minSilenceDuration: 100,
+      asrApiUrl: '',
+      asrApiKey: '',
+      asrModel: '',
+      asrLanguage: 'auto' as const,
+      vadMethod: '',
+      isMultiple: false,
+    };
+
+    const formData = result.current.buildFormData(options);
+
+    expect(formData.get('vad_method')).toBe(null);
   });
 
   it('should reset results when resetResults is called', () => {
