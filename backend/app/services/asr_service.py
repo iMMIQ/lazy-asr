@@ -4,7 +4,6 @@ from typing import Dict, Any, Optional, List, Callable, Awaitable
 from app.core.config import settings
 from app.core.logger import get_logger
 from app.utils.audio_processing import (
-    silero_vad_segmentation,
     vad_segmentation_with_provider,
     export_silero_segments,
     parse_transcription_segments,
