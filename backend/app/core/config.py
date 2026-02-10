@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     LOCAL_WHISPER_MODEL_CACHE_DIR: str = "models"  # Model cache directory
 
     # VAD settings
-    DEFAULT_VAD_METHOD: str = "silero"
+    DEFAULT_VAD_METHOD: str = "ten"
     AVAILABLE_VAD_METHODS: List[str] = ["silero", "ten"]
 
     # Concurrency settings
