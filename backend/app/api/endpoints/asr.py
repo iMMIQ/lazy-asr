@@ -50,7 +50,7 @@ async def get_available_plugins():
 async def process_media(
     media_file: UploadFile = File(..., description="Media file to process (audio or video)"),
     asr_method: str = Form(settings.DEFAULT_ASR_METHOD),
-    vad_method: str = Form("silero"),  # VAD method to use
+    vad_method: str = Form(settings.DEFAULT_VAD_METHOD),  # VAD method to use
     vad_options: Optional[str] = Form(None),
     asr_options: Optional[str] = Form(None),
     min_speech_duration: Optional[int] = Form(None),
@@ -81,6 +81,13 @@ async def process_media(
             raise HTTPException(
                 status_code=400,
                 detail=f"Unsupported ASR method: {asr_method}. Available methods: {available_plugin_names}",
+            )
+
+        # Validate VAD method
+        if vad_method not in settings.AVAILABLE_VAD_METHODS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unsupported VAD method: {vad_method}. Available methods: {settings.AVAILABLE_VAD_METHODS}",
             )
 
         # Parse options
@@ -160,7 +167,7 @@ async def process_media(
 async def process_multiple_audio(
     audio_files: List[UploadFile] = File(...),
     asr_method: str = Form(settings.DEFAULT_ASR_METHOD),
-    vad_method: str = Form("silero"),  # VAD method to use
+    vad_method: str = Form(settings.DEFAULT_VAD_METHOD),  # VAD method to use
     vad_options: Optional[str] = Form(None),
     asr_options: Optional[str] = Form(None),
     min_speech_duration: Optional[int] = Form(None),
@@ -190,6 +197,13 @@ async def process_multiple_audio(
             raise HTTPException(
                 status_code=400,
                 detail=f"Unsupported ASR method: {asr_method}. Available methods: {available_plugin_names}",
+            )
+
+        # Validate VAD method
+        if vad_method not in settings.AVAILABLE_VAD_METHODS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unsupported VAD method: {vad_method}. Available methods: {settings.AVAILABLE_VAD_METHODS}",
             )
 
         # Validate files

@@ -8,6 +8,7 @@ from fastapi import APIRouter
 from typing import Dict, Any
 
 from app.vad.manager import vad_manager
+from app.core.config import settings
 
 router = APIRouter()
 
@@ -24,5 +25,5 @@ async def get_vad_providers() -> Dict[str, Any]:
     """
     return {
         "providers": vad_manager.get_available_providers(),
-        "default": "silero"
+        "default": settings.DEFAULT_VAD_METHOD
     }
