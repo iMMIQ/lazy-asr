@@ -251,8 +251,11 @@ export function PathScanner(): React.ReactElement {
             asrApiUrl={state.asrApiUrl}
             asrApiKey={state.asrApiKey}
             asrModel={state.asrModel}
+            vadMethod={state.vadMethod}
+            availableVADProviders={state.availableVADProviders}
             onMethodChange={(e) => actions.setAsrMethod(e.target.value)}
             onFormatChange={actions.toggleOutputFormat}
+            onVadMethodChange={(method) => actions.setVadMethod(method)}
             onVadConfigChange={(field, value) => {
               if (field === 'minSpeechDuration') {
                 actions.setMinSpeechDuration(value);
