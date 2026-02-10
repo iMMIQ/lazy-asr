@@ -1,6 +1,6 @@
 import os
 import soundfile as sf
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, Optional
 from app.utils.vad import load_silero_vad, read_audio, get_speech_timestamps
 from app.core.logger import get_logger
 
@@ -39,6 +39,54 @@ def silero_vad_segmentation(audio_path: str, vad_params: Dict[str, Any] = None) 
 
     # Use soundfile to read audio for subsequent processing
     audio_data, sample_rate = sf.read(audio_path)
+
+    return speech_timestamps, audio_data, sample_rate
+
+
+def vad_segmentation_with_provider(
+    audio_path: str,
+    provider_name: str = "silero",
+    vad_options: Optional[Dict[str, Any]] = None,
+) -> Tuple[List[Dict], Any, int]:
+    """
+    Perform speech activity detection using specified VAD provider.
+
+    Args:
+        audio_path: Path to the audio file to process
+        provider_name: Name of the VAD provider to use (default: "silero")
+        vad_options: Optional dictionary of VAD configuration options
+            - threshold: Speech probability threshold (default: 0.5)
+            - min_speech_duration_ms: Minimum speech duration in ms (default: 500)
+            - min_silence_duration_ms: Minimum silence duration in ms (default: 500)
+
+    Returns:
+        Tuple of (speech_timestamps, audio_data, sample_rate).
+        - speech_timestamps: List of speech segment dictionaries with 'start' and 'end' keys
+        - audio_data: Raw audio data as numpy array
+        - sample_rate: Sample rate in Hz
+
+    Raises:
+        ValueError: If the specified VAD provider is not found
+    """
+    from app.vad.manager import vad_manager
+
+    logger.info(f"Loading audio file for VAD processing with {provider_name}...")
+    audio_data, sample_rate = sf.read(audio_path)
+
+    provider = vad_manager.get_provider(provider_name)
+    if not provider:
+        raise ValueError(f"VAD provider '{provider_name}' not found")
+
+    options = vad_options or {}
+    threshold = options.get("threshold", 0.5)
+    min_speech_duration_ms = options.get("min_speech_duration_ms", 500)
+    min_silence_duration_ms = options.get("min_silence_duration_ms", 500)
+
+    speech_timestamps = provider.process_audio(
+        audio_path,
+        {"threshold": threshold, "min_speech_duration_ms": min_speech_duration_ms,
+         "min_silence_duration_ms": min_silence_duration_ms}
+    )
 
     return speech_timestamps, audio_data, sample_rate
 
