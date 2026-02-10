@@ -14,6 +14,8 @@
     "removeFile": "✕",
     "advancedOptions": "高级选项",
     "vadConfig": "VAD参数配置",
+    "vadMethod": "VAD方法:",
+    "vadMethodDescription": "选择语音活动检测方法",
     "asrConfig": "ASR服务配置",
     "minSpeechDuration": "最小语音时长 (毫秒):",
     "minSpeechDurationDescription": "设置语音段的最小持续时间，较短的语音段将被忽略",

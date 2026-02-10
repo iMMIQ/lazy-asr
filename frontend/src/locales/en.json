@@ -14,6 +14,8 @@
     "removeFile": "✕",
     "advancedOptions": "Advanced Options",
     "vadConfig": "VAD Parameter Configuration",
+    "vadMethod": "VAD Method:",
+    "vadMethodDescription": "Select voice activity detection method",
     "asrConfig": "ASR Service Configuration",
     "minSpeechDuration": "Minimum Speech Duration (ms):",
     "minSpeechDurationDescription": "Set minimum duration for speech segments, shorter segments will be ignored",
