@@ -15,6 +15,14 @@
 1. **Faster-Whisper**: 基于Whisper的高性能ASR引擎
 2. **Qwen-ASR**: 阿里通义千问ASR服务
 
+## VAD配置
+
+应用程序支持多种语音活动检测(VAD)方法:
+- **Silero VAD**: 传统的神经VAD
+- **Ten VAD**: 替代VAD实现
+
+您可以在VAD配置部分选择VAD方法。默认使用Ten VAD。
+
 ## 项目结构
 
 ```
