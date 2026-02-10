@@ -16,6 +16,7 @@ export interface ASRProcessingOptions {
   showAdvancedOptions: boolean;
   minSpeechDuration: number;
   minSilenceDuration: number;
+  vadMethod: string;
   asrApiUrl: string;
   asrApiKey: string;
   asrModel: string;
@@ -184,6 +185,7 @@ export function useASRProcessing(): UseASRProcessingReturn {
     showAdvancedOptions,
     minSpeechDuration,
     minSilenceDuration,
+    vadMethod,
     asrApiUrl,
     asrApiKey,
     asrModel,
@@ -206,6 +208,11 @@ export function useASRProcessing(): UseASRProcessingReturn {
     formData.append('asr_method', asrMethod);
     formData.append('output_formats', outputFormats.join(','));
     formData.append('output_mode', outputMode);  // Add output mode parameter
+
+    // Add VAD method
+    if (vadMethod) {
+      formData.append('vad_method', vadMethod);
+    }
 
     // Add VAD parameters
     if (showAdvancedOptions) {
