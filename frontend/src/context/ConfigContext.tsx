@@ -4,7 +4,7 @@ import {
   DEFAULT_MIN_SPEECH_DURATION,
   DEFAULT_MIN_SILENCE_DURATION
 } from '../constants/config';
-import type { ConfigState, ConfigContextValue, OutputFormat, ASRPlugin, LanguageCode } from '../types';
+import type { ConfigState, ConfigContextValue, OutputFormat, ASRPlugin, LanguageCode, VADProvider } from '../types';
 
 // Initial state
 const initialState: ConfigState = {
@@ -17,6 +17,8 @@ const initialState: ConfigState = {
   asrModel: '',
 
   // VAD Configuration
+  vadMethod: '',
+  availableVADProviders: [],
   outputFormats: DEFAULT_OUTPUT_FORMATS,
   minSpeechDuration: DEFAULT_MIN_SPEECH_DURATION,
   minSilenceDuration: DEFAULT_MIN_SILENCE_DURATION,
@@ -37,6 +39,8 @@ const ActionTypes = {
   SET_ASR_API_URL: 'SET_ASR_API_URL',
   SET_ASR_API_KEY: 'SET_ASR_API_KEY',
   SET_ASR_MODEL: 'SET_ASR_MODEL',
+  SET_VAD_METHOD: 'SET_VAD_METHOD',
+  SET_AVAILABLE_VAD_PROVIDERS: 'SET_AVAILABLE_VAD_PROVIDERS',
   TOGGLE_OUTPUT_FORMAT: 'TOGGLE_OUTPUT_FORMAT',
   SET_MIN_SPEECH_DURATION: 'SET_MIN_SPEECH_DURATION',
   SET_MIN_SILENCE_DURATION: 'SET_MIN_SILENCE_DURATION',
@@ -53,6 +57,8 @@ type ConfigAction =
   | { type: typeof ActionTypes.SET_ASR_API_URL; payload: string }
   | { type: typeof ActionTypes.SET_ASR_API_KEY; payload: string }
   | { type: typeof ActionTypes.SET_ASR_MODEL; payload: string }
+  | { type: typeof ActionTypes.SET_VAD_METHOD; payload: string }
+  | { type: typeof ActionTypes.SET_AVAILABLE_VAD_PROVIDERS; payload: VADProvider[] }
   | { type: typeof ActionTypes.TOGGLE_OUTPUT_FORMAT; payload: OutputFormat }
   | { type: typeof ActionTypes.SET_MIN_SPEECH_DURATION; payload: number }
   | { type: typeof ActionTypes.SET_MIN_SILENCE_DURATION; payload: number }
@@ -82,6 +88,12 @@ function configReducer(state: ConfigState, action: ConfigAction): ConfigState {
     case ActionTypes.SET_ASR_MODEL:
       return { ...state, asrModel: action.payload };
 
+    case ActionTypes.SET_VAD_METHOD:
+      return { ...state, vadMethod: action.payload };
+
+    case ActionTypes.SET_AVAILABLE_VAD_PROVIDERS:
+      return { ...state, availableVADProviders: action.payload };
+
     case ActionTypes.TOGGLE_OUTPUT_FORMAT:
       return {
         ...state,
@@ -109,7 +121,9 @@ function configReducer(state: ConfigState, action: ConfigAction): ConfigState {
       return {
         ...initialState,
         asrMethod: state.asrMethod,
-        availablePlugins: state.availablePlugins
+        availablePlugins: state.availablePlugins,
+        vadMethod: state.vadMethod,
+        availableVADProviders: state.availableVADProviders
       };
 
     default:
@@ -157,6 +171,14 @@ export function ConfigProvider({ children, initialState: providedInitialState }:
     dispatch({ type: ActionTypes.SET_ASR_MODEL, payload: model });
   }, []);
 
+  const setVadMethod = useCallback((method: string) => {
+    dispatch({ type: ActionTypes.SET_VAD_METHOD, payload: method });
+  }, []);
+
+  const setAvailableVADProviders = useCallback((providers: VADProvider[]) => {
+    dispatch({ type: ActionTypes.SET_AVAILABLE_VAD_PROVIDERS, payload: providers });
+  }, []);
+
   const toggleOutputFormat = useCallback((format: OutputFormat) => {
     dispatch({ type: ActionTypes.TOGGLE_OUTPUT_FORMAT, payload: format });
   }, []);
@@ -194,6 +216,8 @@ export function ConfigProvider({ children, initialState: providedInitialState }:
       setAsrApiUrl,
       setAsrApiKey,
       setAsrModel,
+      setVadMethod,
+      setAvailableVADProviders,
       toggleOutputFormat,
       setMinSpeechDuration,
       setMinSilenceDuration,
