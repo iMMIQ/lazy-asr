@@ -184,7 +184,7 @@ async def test_progress_callback_stages(temp_dir):
         mock_plugin_instance.transcribe_segments = mock_transcribe
         mock_plugin_mgr.get_plugin.return_value = mock_plugin_instance
 
-        with patch('app.services.asr_service.silero_vad_segmentation') as mock_vad:
+        with patch('app.services.asr_service.vad_segmentation_with_provider') as mock_vad:
             mock_vad.return_value = ([[0.0, 1.0]], b'audio_data', 16000)
 
             with patch('app.services.asr_service.export_silero_segments') as mock_export:

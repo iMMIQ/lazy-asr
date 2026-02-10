@@ -5,6 +5,7 @@ from app.core.config import settings
 from app.core.logger import get_logger
 from app.utils.audio_processing import (
     silero_vad_segmentation,
+    vad_segmentation_with_provider,
     export_silero_segments,
     parse_transcription_segments,
     time_string_to_seconds,
@@ -64,6 +65,7 @@ class ASRService:
         self,
         media_path: str,
         asr_method: str = "whisper-api",
+        vad_method: str = "silero",
         vad_options: Optional[Dict[str, Any]] = None,
         asr_options: Optional[Dict[str, Any]] = None,
         asr_api_url: Optional[str] = None,
@@ -80,6 +82,7 @@ class ASRService:
         Args:
             media_path: Path to the media file (audio or video)
             asr_method: ASR method to use
+            vad_method: VAD method to use (default: "silero")
             vad_options: VAD options
             asr_options: ASR options
 
@@ -128,21 +131,23 @@ class ASRService:
             logger.info(f"Media type: {media_type}")
             logger.info(f"Processed audio path: {processed_audio_path}")
 
-            # 1. Silero VAD segmentation
+            # 1. VAD segmentation with configurable provider
             await self._report_progress(
                 task_id=task_id,
                 stage="vad_segmentation",
                 progress=10,
-                message="Performing Voice Activity Detection",
+                message=f"Performing Voice Activity Detection using {vad_method}",
                 progress_callback=progress_callback
             )
 
             try:
-                speech_timestamps, audio_data, sample_rate = silero_vad_segmentation(
-                    processed_audio_path, vad_options or {}
+                speech_timestamps, audio_data, sample_rate = vad_segmentation_with_provider(
+                    processed_audio_path,
+                    provider_name=vad_method,
+                    vad_options=vad_options or {}
                 )
             except Exception as e:
-                logger.error(f"Silero VAD detection failed: {e}")
+                logger.error(f"VAD detection failed: {e}")
                 await self._report_progress(
                     task_id=task_id,
                     stage="error",
@@ -151,7 +156,7 @@ class ASRService:
                     progress_callback=progress_callback,
                     error=str(e)
                 )
-                return ASRResponse(success=False, message=f"Silero VAD detection failed: {e}")
+                return ASRResponse(success=False, message=f"VAD detection failed: {e}")
 
             if not speech_timestamps:
                 logger.error("No speech segments detected")
@@ -489,6 +494,7 @@ class ASRService:
         self,
         audio_path: str,
         asr_method: str = "whisper-api",
+        vad_method: str = "silero",
         vad_options: Optional[Dict[str, Any]] = None,
         asr_options: Optional[Dict[str, Any]] = None,
         asr_api_url: Optional[str] = None,
@@ -505,6 +511,7 @@ class ASRService:
         Args:
             audio_path: Path to the audio file
             asr_method: ASR method to use
+            vad_method: VAD method to use (default: "silero")
             vad_options: VAD options
             asr_options: ASR options
             progress_callback: Optional async callback for progress updates
@@ -516,6 +523,7 @@ class ASRService:
         return await self.process_media(
             media_path=audio_path,
             asr_method=asr_method,
+            vad_method=vad_method,
             vad_options=vad_options,
             asr_options=asr_options,
             asr_api_url=asr_api_url,

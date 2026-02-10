@@ -54,7 +54,7 @@ async def test_progress_callback_called_during_processing(asr_service, mock_prog
         mock_plugin_mgr.get_plugin.return_value = mock_plugin_instance
 
         # Mock VAD segmentation
-        with patch('app.services.asr_service.silero_vad_segmentation') as mock_vad:
+        with patch('app.services.asr_service.vad_segmentation_with_provider') as mock_vad:
             mock_vad.return_value = (
                 [[0.0, 1.0]],  # speech timestamps
                 b'audio_data',  # audio data
@@ -115,7 +115,7 @@ async def test_progress_callback_sends_correct_message_format(asr_service, mock_
     with patch('app.services.asr_service.plugin_manager') as mock_plugin_mgr:
         mock_plugin_mgr.get_plugin.return_value = mock_plugin_instance
 
-        with patch('app.services.asr_service.silero_vad_segmentation') as mock_vad:
+        with patch('app.services.asr_service.vad_segmentation_with_provider') as mock_vad:
             mock_vad.return_value = ([[0.0, 1.0]], b'audio_data', 16000)
 
             with patch('app.services.asr_service.export_silero_segments') as mock_export:
@@ -170,7 +170,7 @@ async def test_progress_callback_stages(asr_service, mock_progress_callback, tem
     with patch('app.services.asr_service.plugin_manager') as mock_plugin_mgr:
         mock_plugin_mgr.get_plugin.return_value = mock_plugin_instance
 
-        with patch('app.services.asr_service.silero_vad_segmentation') as mock_vad:
+        with patch('app.services.asr_service.vad_segmentation_with_provider') as mock_vad:
             mock_vad.return_value = ([[0.0, 1.0]], b'audio_data', 16000)
 
             with patch('app.services.asr_service.export_silero_segments') as mock_export:
@@ -227,7 +227,7 @@ async def test_progress_callback_with_task_id(asr_service, mock_progress_callbac
     with patch('app.services.asr_service.plugin_manager') as mock_plugin_mgr:
         mock_plugin_mgr.get_plugin.return_value = mock_plugin_instance
 
-        with patch('app.services.asr_service.silero_vad_segmentation') as mock_vad:
+        with patch('app.services.asr_service.vad_segmentation_with_provider') as mock_vad:
             mock_vad.return_value = ([[0.0, 1.0]], b'audio_data', 16000)
 
             with patch('app.services.asr_service.export_silero_segments') as mock_export:
@@ -339,7 +339,7 @@ async def test_progress_callback_with_websocket_broadcast(asr_service, temp_dir,
             ]
         mock_plugin.transcribe_segments = mock_transcribe
 
-        with patch('app.services.asr_service.silero_vad_segmentation') as mock_vad:
+        with patch('app.services.asr_service.vad_segmentation_with_provider') as mock_vad:
             mock_vad.return_value = ([[0.0, 1.0]], b'audio_data', 16000)
 
             with patch('app.services.asr_service.export_silero_segments') as mock_export:
@@ -389,7 +389,7 @@ async def test_process_media_without_progress_callback(asr_service, temp_dir, sa
     with patch('app.services.asr_service.plugin_manager') as mock_plugin_mgr:
         mock_plugin_mgr.get_plugin.return_value = mock_plugin_instance
 
-        with patch('app.services.asr_service.silero_vad_segmentation') as mock_vad:
+        with patch('app.services.asr_service.vad_segmentation_with_provider') as mock_vad:
             mock_vad.return_value = ([[0.0, 1.0]], b'audio_data', 16000)
 
             with patch('app.services.asr_service.export_silero_segments') as mock_export:
