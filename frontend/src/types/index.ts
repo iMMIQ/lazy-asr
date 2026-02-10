@@ -78,6 +78,7 @@ export interface ScanRequest {
   recursive?: boolean;
   file_patterns?: string[];
   asr_method?: string;
+  vad_method?: string;
   output_formats?: string[];
 }
 

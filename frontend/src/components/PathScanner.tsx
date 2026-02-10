@@ -123,6 +123,7 @@ export function PathScanner(): React.ReactElement {
         max_files: state.maxFiles,
         file_patterns: [],
         ...(state.asrMethod && { asr_method: state.asrMethod }),
+        ...(state.vadMethod && { vad_method: state.vadMethod }),
         output_formats: state.outputFormats
       };
 
