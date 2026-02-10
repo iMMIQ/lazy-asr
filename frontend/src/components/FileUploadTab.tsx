@@ -52,6 +52,7 @@ export function FileUploadTab(): React.ReactElement {
       const formData = buildFormData({
         audioFiles,
         asrMethod: state.asrMethod,
+        vadMethod: state.vadMethod,
         outputFormats: state.outputFormats,
         showAdvancedOptions: true,
         outputMode: 'task',
@@ -83,6 +84,7 @@ export function FileUploadTab(): React.ReactElement {
       const formData = buildFormData({
         audioFiles,
         asrMethod: state.asrMethod,
+        vadMethod: state.vadMethod,
         outputFormats: state.outputFormats,
         showAdvancedOptions: true,
         outputMode: 'task',
@@ -114,6 +116,8 @@ export function FileUploadTab(): React.ReactElement {
         <ConfigPanel
           asrMethod={state.asrMethod}
           availablePlugins={state.availablePlugins}
+          vadMethod={state.vadMethod}
+          availableVADProviders={state.availableVADProviders}
           outputFormats={state.outputFormats}
           minSpeechDuration={state.minSpeechDuration}
           minSilenceDuration={state.minSilenceDuration}
@@ -122,6 +126,7 @@ export function FileUploadTab(): React.ReactElement {
           asrApiKey={state.asrApiKey}
           asrModel={state.asrModel}
           onMethodChange={(e) => actions.setAsrMethod(e.target.value)}
+          onVadMethodChange={(method) => actions.setVadMethod(method)}
           onFormatChange={actions.toggleOutputFormat}
           onVadConfigChange={(field, value) => {
             if (field === 'minSpeechDuration') {
