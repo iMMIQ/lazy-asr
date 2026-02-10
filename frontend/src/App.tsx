@@ -92,7 +92,7 @@ function AppContent({ activeTab, onTabChange, onLanguageChange }: AppContentProp
       }
     };
     loadVADProviders();
-  }, [actions]);
+  }, [actions, state]);
 
   return (
     <div className="App">
