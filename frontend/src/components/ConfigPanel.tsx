@@ -11,6 +11,7 @@ export interface ConfigPanelHandlers {
   onAsrConfigChange?: (field: string, value: string) => void;
   onMaxFilesChange?: (value: number) => void;
   onRecursiveChange?: (checked: boolean) => void;
+  onVadMethodChange?: (method: string) => void;
 }
 
 /** Config panel component props */
@@ -25,12 +26,15 @@ export interface ConfigPanelProps {
   asrApiUrl?: string;
   asrApiKey?: string;
   asrModel?: string;
+  vadMethod?: string;
+  availableVADProviders?: { name: string; display_name: string; description: string }[];
 
   // Event handlers
   onMethodChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   onFormatChange?: (format: OutputFormat) => void;
   onVadConfigChange?: (field: string, value: number) => void;
   onAsrConfigChange?: (field: string, value: string) => void;
+  onVadMethodChange?: (method: string) => void;
 
   // Control options
   showVadConfig?: boolean;
@@ -62,12 +66,15 @@ export function ConfigPanel({
   asrApiUrl = '',
   asrApiKey = '',
   asrModel = '',
+  vadMethod = '',
+  availableVADProviders = [],
 
   // Event handlers
   onMethodChange,
   onFormatChange,
   onVadConfigChange,
   onAsrConfigChange,
+  onVadMethodChange,
 
   // Control options
   showVadConfig = true,
@@ -233,6 +240,26 @@ export function ConfigPanel({
         </select>
         <small>{t('asr.languageDescription')}</small>
       </div>
+
+      {/* VAD Method Selection */}
+      {showVadConfig && availableVADProviders.length > 0 && (
+        <div className="form-group">
+          <label htmlFor="vadMethod">{t('form.vadMethod')}</label>
+          <select
+            id="vadMethod"
+            value={vadMethod || ''}
+            onChange={(e) => onVadMethodChange && onVadMethodChange(e.target.value)}
+            disabled={isProcessing}
+          >
+            {availableVADProviders.map((provider) => (
+              <option key={provider.name} value={provider.name}>
+                {provider.name}
+              </option>
+            ))}
+          </select>
+          <small>{t('form.vadMethodDescription')}</small>
+        </div>
+      )}
 
       {/* VAD Configuration */}
       {showVadConfig && (
