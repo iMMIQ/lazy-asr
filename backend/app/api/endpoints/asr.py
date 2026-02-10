@@ -50,6 +50,7 @@ async def get_available_plugins():
 async def process_media(
     media_file: UploadFile = File(..., description="Media file to process (audio or video)"),
     asr_method: str = Form(settings.DEFAULT_ASR_METHOD),
+    vad_method: str = Form("silero"),  # VAD method to use
     vad_options: Optional[str] = Form(None),
     asr_options: Optional[str] = Form(None),
     min_speech_duration: Optional[int] = Form(None),
@@ -67,6 +68,7 @@ async def process_media(
     Args:
         media_file: Media file to process (audio or video)
         asr_method: ASR method to use
+        vad_method: VAD method to use (silero, ten)
         vad_options: VAD options as JSON string
         asr_options: ASR options as JSON string
         min_speech_duration: Minimum speech duration in milliseconds
@@ -136,6 +138,7 @@ async def process_media(
         result = await asr_service.process_audio(
             audio_path=file_path,
             asr_method=asr_method,
+            vad_method=vad_method,
             vad_options=parsed_vad_options,
             asr_options=parsed_asr_options,
             asr_api_url=asr_api_url,
@@ -157,6 +160,7 @@ async def process_media(
 async def process_multiple_audio(
     audio_files: List[UploadFile] = File(...),
     asr_method: str = Form(settings.DEFAULT_ASR_METHOD),
+    vad_method: str = Form("silero"),  # VAD method to use
     vad_options: Optional[str] = Form(None),
     asr_options: Optional[str] = Form(None),
     min_speech_duration: Optional[int] = Form(None),
@@ -173,6 +177,7 @@ async def process_multiple_audio(
     Args:
         audio_files: List of audio files to process
         asr_method: ASR method to use
+        vad_method: VAD method to use (silero, ten)
         vad_options: VAD options as JSON string
         asr_options: ASR options as JSON string
         min_speech_duration: Minimum speech duration in milliseconds
@@ -245,6 +250,7 @@ async def process_multiple_audio(
                 result = await asr_service.process_audio(
                     audio_path=file_path,
                     asr_method=asr_method,
+                    vad_method=vad_method,
                     vad_options=parsed_vad_options,
                     asr_options=parsed_asr_options,
                     asr_api_url=asr_api_url,
