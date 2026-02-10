@@ -11,7 +11,8 @@ import type {
   MonitorConfig,
   MonitorListResponse,
   MonitorServiceStatus,
-  DatabaseStatus
+  DatabaseStatus,
+  VADProvidersResponse
 } from '../types';
 
 // Use relative path for Vite proxy compatibility
@@ -46,6 +47,19 @@ export async function fetchPlugins(): Promise<{ plugins: ASRPlugin[] }> {
     return response.data;
   } catch (error) {
     console.error('Failed to fetch plugins:', error);
+    throw new Error(getErrorMessage(error));
+  }
+}
+
+/**
+ * Fetch available VAD providers from backend
+ */
+export async function fetchVADProviders(): Promise<VADProvidersResponse> {
+  try {
+    const response = await apiClient.get<VADProvidersResponse>('/vad/providers');
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch VAD providers:', error);
     throw new Error(getErrorMessage(error));
   }
 }
