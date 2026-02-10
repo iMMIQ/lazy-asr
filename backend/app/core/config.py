@@ -34,6 +34,10 @@ class Settings(BaseSettings):
     LOCAL_WHISPER_MODEL: str = "tiny"  # tiny, base, small, medium, large-v1, large-v2, large-v3
     LOCAL_WHISPER_MODEL_CACHE_DIR: str = "models"  # Model cache directory
 
+    # VAD settings
+    DEFAULT_VAD_METHOD: str = "silero"
+    AVAILABLE_VAD_METHODS: list = ["silero", "ten"]
+
     # Concurrency settings
     MAX_CONCURRENT_TASKS: int = 16  # Maximum concurrent transcription tasks
 
