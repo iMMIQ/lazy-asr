@@ -1,6 +1,5 @@
 """Tests for Pydantic schemas."""
 import pytest
-from pydantic import ValidationError
 from app.models.schemas import ASRRequest
 
 

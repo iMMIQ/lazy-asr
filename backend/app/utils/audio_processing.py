@@ -70,9 +70,6 @@ def vad_segmentation_with_provider(
     """
     from app.vad.manager import vad_manager
 
-    logger.info(f"Loading audio file for VAD processing with {provider_name}...")
-    audio_data, sample_rate = sf.read(audio_path)
-
     provider = vad_manager.get_provider(provider_name)
     if not provider:
         raise ValueError(f"VAD provider '{provider_name}' not found")
@@ -87,6 +84,10 @@ def vad_segmentation_with_provider(
         {"threshold": threshold, "min_speech_duration_ms": min_speech_duration_ms,
          "min_silence_duration_ms": min_silence_duration_ms}
     )
+
+    # Read audio after VAD processing for subsequent use
+    logger.info(f"Loading audio file for VAD processing with {provider_name}...")
+    audio_data, sample_rate = sf.read(audio_path)
 
     return speech_timestamps, audio_data, sample_rate
 

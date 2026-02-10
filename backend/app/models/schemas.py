@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
@@ -9,6 +9,15 @@ class ASRRequest(BaseModel):
     vad_options: Optional[Dict[str, Any]] = None
     asr_options: Optional[Dict[str, Any]] = None
     output_mode: str = "task"  # "task": 输出到任务目录, "source": 输出到源文件目录
+
+    @field_validator('vad_method')
+    @classmethod
+    def validate_vad_method(cls, v: str) -> str:
+        """Validate that vad_method is one of the available VAD methods."""
+        from app.core.config import settings
+        if v not in settings.AVAILABLE_VAD_METHODS:
+            raise ValueError(f"vad_method must be one of {settings.AVAILABLE_VAD_METHODS}, got '{v}'")
+        return v
 
 
 class SegmentInfo(BaseModel):

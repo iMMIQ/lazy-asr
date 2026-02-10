@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import Optional, List
 from pydantic_settings import BaseSettings
 
 
@@ -36,7 +36,7 @@ class Settings(BaseSettings):
 
     # VAD settings
     DEFAULT_VAD_METHOD: str = "silero"
-    AVAILABLE_VAD_METHODS: list = ["silero", "ten"]
+    AVAILABLE_VAD_METHODS: List[str] = ["silero", "ten"]
 
     # Concurrency settings
     MAX_CONCURRENT_TASKS: int = 16  # Maximum concurrent transcription tasks

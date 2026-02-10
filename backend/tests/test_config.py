@@ -1,6 +1,6 @@
 """Tests for configuration settings."""
 import pytest
-from backend.app.core.config import settings
+from app.core.config import settings
 
 
 def test_default_vad_method():
