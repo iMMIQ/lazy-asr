@@ -1,10 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
 
 class ASRRequest(BaseModel):
     asr_method: str = "whisper-api"
+    vad_method: str = Field(default="silero", description="VAD method to use (silero, ten)")
     vad_options: Optional[Dict[str, Any]] = None
     asr_options: Optional[Dict[str, Any]] = None
     output_mode: str = "task"  # "task": 输出到任务目录, "source": 输出到源文件目录
