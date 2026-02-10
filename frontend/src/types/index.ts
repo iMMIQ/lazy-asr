@@ -26,6 +26,19 @@ export interface ASRPlugin {
   model_parameter?: string;
 }
 
+/** VAD provider information */
+export interface VADProvider {
+  name: string;
+  display_name: string;
+  description: string;
+}
+
+/** VAD providers response */
+export interface VADProvidersResponse {
+  providers: VADProvider[];
+  default: string;
+}
+
 /** ASR configuration */
 export interface ASRConfig {
   method: string;
@@ -186,6 +199,8 @@ export interface ConfigState {
   outputFormats: OutputFormat[];
   minSpeechDuration: number;
   minSilenceDuration: number;
+  vadMethod: string;
+  availableVADProviders: VADProvider[];
 
   // Path Scanner specific
   maxFiles: number;
@@ -206,6 +221,8 @@ export interface ConfigActions {
   toggleOutputFormat: (format: OutputFormat) => void;
   setMinSpeechDuration: (duration: number) => void;
   setMinSilenceDuration: (duration: number) => void;
+  setVadMethod: (method: string) => void;
+  setAvailableVADProviders: (providers: VADProvider[]) => void;
   setMaxFiles: (max: number) => void;
   setRecursive: (recursive: boolean) => void;
   setProcessing: (isProcessing: boolean) => void;
