@@ -400,16 +400,15 @@ def plugins():
     from plugins.manager import plugin_manager
 
     console.print("[bold]Available ASR Plugins:[/bold]")
-    plugins_info = plugin_manager.get_available_plugins()
+    plugins_list = plugin_manager.get_available_plugins()
 
-    for plugin in plugins_info.get("plugins", []):
-        status = "[green]✓[/green]" if plugin.get("available") else "[red]✗[/red]"
-        console.print(f"  {status} [cyan]{plugin['name']}[/cyan]")
+    for plugin in plugins_list:
+        console.print(f"  [green]✓[/green] [cyan]{plugin['name']}[/cyan]")
         if plugin.get("description"):
             console.print(f"      {plugin['description']}")
 
     console.print()
-    console.print(f"[bold]Default ASR Method:[/bold] {plugins_info.get('default_method', 'none')}")
+    console.print(f"[bold]Default ASR Method:[/bold] {settings.DEFAULT_ASR_METHOD}")
 
     console.print()
     console.print("[bold]Available VAD Providers:[/bold]")
