@@ -1,7 +1,98 @@
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
 .env
 .venv/
 venv/
+ENV/
+
+# Node
 node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+tests/
+test_*.py
+*_test.py
+test_*.ts
+*_test.ts
+*.spec.ts
+*.spec.tsx
+*.test.ts
+*.test.tsx
+vitest.config.ts
+playwright.config.ts
+.mypy_cache/
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+e2e/
+
+# Data and outputs
 output/
 uploads/
+*.wav
+*.mp3
+*.ogg
+*.m4a
+*.flac
+*.aac
+
+# Models
+models/
+*.onnx
+*.bin
+
+# Logs
+*.log
+logs/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Plans
+docs/plans/
+backend/docs/plans/
+
+# Lock files (use COPY in Dockerfile instead)
+bun.lock
+uv.lock
+package-lock.json
+yarn.lock

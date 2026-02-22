@@ -5,34 +5,39 @@ FROM python:3.12-slim
 WORKDIR /app
 
 # Set environment variables
-ENV UV_COMPILE_BYTECODE=1
-ENV UV_SYSTEM_PYTHON=1
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
-ENV PIP_TRUSTED_HOST=pypi.tuna.tsinghua.edu.cn
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_SYSTEM_PYTHON=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
 
-# Update apt sources and install system dependencies
-RUN sed -i 's/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list.d/debian.sources && \
-    apt-get update && \
+# Optional: Use ARG for configurable index URL (default to no proxy for international use)
+ARG INDEX_URL=""
+ARG TRUSTED_HOST=""
+
+# Install runtime dependencies only (no build tools needed for production)
+RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        build-essential \
         libsndfile1 \
         ffmpeg \
         curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv
-RUN pip install uv
+# Install uv using the official method
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # Verify uv installation
 RUN uv --version
 
 # Copy dependency files
-COPY pyproject.toml ./
+COPY pyproject.toml uv.lock ./
 
-# Sync dependencies using uv
-RUN uv pip install -r pyproject.toml --system --index-url https://pypi.tuna.tsinghua.edu.cn/simple
+# Install dependencies using uv
+RUN if [ -n "$INDEX_URL" ]; then \
+        uv pip install system --frozen --index-url "$INDEX_URL"; \
+    else \
+        uv pip install system --frozen; \
+    fi
 
 # Copy application code
 COPY . .
@@ -42,6 +47,10 @@ RUN mkdir -p uploads output
 
 # Expose application port
 EXPOSE 8000
+
+# Health check (endpoint is at /api/v1/asr/health)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/api/v1/asr/health || exit 1
 
 # Start the application
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

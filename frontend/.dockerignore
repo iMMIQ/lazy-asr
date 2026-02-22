@@ -1,7 +1,74 @@
-__pycache__/
-.env
-.venv/
-venv/
+# Dependencies
 node_modules/
-output/
-uploads/
+
+# Build outputs
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+tests/
+test_*.ts
+test_*.tsx
+*_test.ts
+*_test.tsx
+*.spec.ts
+*.spec.tsx
+*.test.ts
+*.test.tsx
+vitest.config.ts
+playwright.config.ts
+msw.config.ts
+
+# E2E tests
+e2e/
+
+# Logs
+*.log
+logs/
+
+# Documentation
+*.md
+!README.md
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Lock files (already installed in container)
+bun.lock
+package-lock.json
+yarn.lock
+
+# Misc
+.DS_Store
+*.tsbuildinfo
+
+# Plans
+plans/

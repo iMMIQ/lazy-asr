@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        INDEX_URL: https://pypi.tuna.tsinghua.edu.cn/simple
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount code for hot reload (development only)
+      - ./backend:/app
+      - uploads:/app/uploads
+      - output:/app/output
+    environment:
+      - QWEN_ASR_API_KEY=${QWEN_ASR_API_KEY}
+      # Enable auto-reload for development
+      - RELOAD=true
+    depends_on:
+      - frontend
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount code for hot reload (development only)
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+volumes:
+  uploads:
+  output:
