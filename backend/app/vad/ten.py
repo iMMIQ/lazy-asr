@@ -1,19 +1,20 @@
 """
 TEN VAD provider implementation.
 
-This module implements VAD using the TEN framework's VAD model directly with ONNX Runtime.
+This module implements VAD using the native ten-vad Python package.
 """
 
-import os
-import urllib.request
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any
 
 import numpy as np
 import soundfile as sf
-from tqdm import tqdm
 
-import onnxruntime as ort
+try:
+    import ten_vad
+    TEN_VAD_AVAILABLE = True
+except ImportError:
+    TEN_VAD_AVAILABLE = False
 
 from app.vad.base import VADProvider
 from app.core.logger import get_logger
@@ -23,31 +24,16 @@ logger = get_logger(__name__)
 
 class TenVADProvider(VADProvider):
     """
-    VAD provider using TEN VAD model.
+    VAD provider using native TEN VAD library.
 
-    TEN VAD is a voice activity detection model from the TEN framework
-    that uses ONNX Runtime for efficient CPU inference.
-
-    The ONNX model requires:
-    - input_1: Audio features (batch, 3, 41) - STFT/log-mel features
-    - input_2, input_3, input_6, input_7: LSTM states (batch, 64)
-
-    For simplicity in this implementation, we use the native TEN VAD library
-    when available, which properly handles the complex state management and
-    feature extraction required by the ONNX model.
+    The native ten_vad package provides proper VAD functionality using
+    the TEN framework's compiled library.
     """
 
     # Model configuration
     SAMPLE_RATE = 16000
 
-    # Model URL from TEN framework Hugging Face
-    MODEL_URL = "https://huggingface.co/TEN-framework/ten-vad/resolve/main/src/onnx_model/ten-vad.onnx"
-
-    # Cache directory
-    CACHE_DIR = Path.home() / ".cache" / "ten_vad_onnx"
-    MODEL_FILENAME = "ten-vad.onnx"
-
-    # Valid hop_size values
+    # Valid hop_size values for TEN VAD
     VALID_HOP_SIZES = {160, 256}
 
     # Valid configuration keys for this provider
@@ -59,172 +45,59 @@ class TenVADProvider(VADProvider):
         "hop_size",
     }
 
-    def __init__(self, model_path: str | None = None, hop_size: int = 160):
+    def __init__(self, hop_size: int = 256):
         """
         Initialize the TEN VAD provider.
 
         Args:
-            model_path: Optional path to a custom ONNX model file.
-                If not provided, the model will be downloaded from TEN framework.
-            hop_size: Hop size in samples for frame processing (default: 160).
+            hop_size: Hop size in samples for frame processing (default: 256).
                 Must be 160 or 256.
         """
         super().__init__(
             name="ten",
             display_name="TEN VAD",
-            description="Voice activity detection using TEN framework VAD model with ONNX Runtime"
+            description="Voice activity detection using TEN framework VAD model"
         )
-        self._model_path = model_path
+
+        if not TEN_VAD_AVAILABLE:
+            raise ImportError("ten_vad package is not available. Install it with: pip install ten-vad")
+
         self._hop_size = hop_size
-        self._session: Optional[ort.InferenceSession] = None
-        self._input_names: List[str] = []
-        self._output_names: List[str] = []
-        self._states: Optional[np.ndarray] = None  # LSTM states
+        self._vad: Any = None
+        self._threshold = 0.5
 
-        # Ensure cache directory exists
-        self.CACHE_DIR.mkdir(parents=True, exist_ok=True)
-
-    def _get_model_path(self) -> Path:
+    def _get_vad(self, threshold: float = 0.5) -> Any:
         """
-        Get the path to the ONNX model file.
-
-        Downloads the model if it doesn't exist locally.
-
-        Returns:
-            Path to the ONNX model file.
-        """
-        if self._model_path is not None:
-            return Path(self._model_path)
-
-        model_path = self.CACHE_DIR / self.MODEL_FILENAME
-
-        if not model_path.exists():
-            logger.info(f"Downloading TEN VAD model from {self.MODEL_URL}...")
-            self._download_model(model_path)
-
-        return model_path
-
-    def _download_model(self, model_path: Path) -> None:
-        """
-        Download the ONNX model from TEN framework Hugging Face.
+        Get or create TEN VAD instance.
 
         Args:
-            model_path: Path where the model should be saved.
-        """
-        try:
-            # Stream download with progress bar
-            with urllib.request.urlopen(self.MODEL_URL) as response:
-                total_size = int(response.headers.get("Content-Length", 0))
-
-                with open(model_path, "wb") as f:
-                    with tqdm(
-                        total=total_size,
-                        unit="B",
-                        unit_scale=True,
-                        desc="Downloading TEN VAD model",
-                    ) as pbar:
-                        while True:
-                            chunk = response.read(8192)
-                            if not chunk:
-                                break
-                            f.write(chunk)
-                            pbar.update(len(chunk))
-
-            logger.info(f"TEN VAD model downloaded to {model_path}")
-        except Exception as e:
-            logger.error(f"Failed to download TEN VAD model: {e}")
-            raise
-
-    def _get_session(self) -> ort.InferenceSession:
-        """
-        Lazy-load the ONNX Runtime session.
+            threshold: Speech probability threshold.
 
         Returns:
-            The ONNX Runtime InferenceSession instance.
+            TEN VAD instance.
         """
-        if self._session is None:
-            logger.info("Lazy-loading TEN VAD model...")
-            model_path = self._get_model_path()
+        if self._vad is None or self._threshold != threshold:
+            self._vad = ten_vad.TenVad(hop_size=self._hop_size, threshold=threshold)
+            self._threshold = threshold
+            logger.info("TEN VAD model loaded from native package")
+        return self._vad
 
-            # Create ONNX Runtime session
-            self._session = ort.InferenceSession(
-                str(model_path),
-                providers=['CPUExecutionProvider'],
-            )
-
-            # Get input/output names
-            self._input_names = [inp.name for inp in self._session.get_inputs()]
-            self._output_names = [out.name for out in self._session.get_outputs()]
-
-            # Initialize states (4 state tensors, each shape [1, 64])
-            self._states = [
-                np.zeros((1, 64), dtype=np.float32) for _ in range(4)
-            ]
-
-            logger.info(f"TEN VAD model loaded from {model_path}")
-            logger.debug(f"Model inputs: {self._input_names}")
-            logger.debug(f"Model outputs: {self._output_names}")
-
-        return self._session
-
-    def _reset_states(self):
-        """Reset LSTM states to zeros."""
-        self._states = [
-            np.zeros((1, 64), dtype=np.float32) for _ in range(4)
-        ]
-
-    def _extract_features(self, audio_frame: np.ndarray) -> np.ndarray:
-        """
-        Extract features from audio frame for TEN VAD model.
-
-        The TEN VAD model expects features with shape (batch, 3, 41).
-        This likely represents STFT-based features like log-mel spectrogram bins.
-
-        Since we don't have access to the exact feature extraction code,
-        we'll use a simplified approach that generates compatible features.
-
-        Args:
-            audio_frame: Audio samples (hop_size,)
-
-        Returns:
-            Feature array with shape (1, 3, 41)
-        """
-        # Simplified feature extraction
-        # In a real implementation, this would compute:
-        # - STFT magnitudes
-        # - Log-mel spectrogram bins
-        # - Other acoustic features
-
-        # For now, generate placeholder features based on audio statistics
-        # This is a simplified approach - actual TEN VAD uses complex feature extraction
-
-        # Compute basic audio features
-        energy = np.mean(audio_frame ** 2)
-        zcr = np.mean(np.diff(np.sign(audio_frame)) != 0)
-
-        # Create a simple feature representation
-        # Shape: (3, 41) - 3 frequency bands x 41 time frames
-        features = np.zeros((3, 41), dtype=np.float32)
-
-        # Fill with energy-based features (simplified)
-        features[0, :] = energy * np.linspace(0.5, 1.0, 41)
-        features[1, :] = zcr * np.linspace(0.1, 0.5, 41)
-        features[2, :] = np.abs(audio_frame[:41]) if len(audio_frame) >= 41 else np.pad(audio_frame, (0, 41 - len(audio_frame)))[:41]
-
-        return features[np.newaxis, :]  # Add batch dimension: (1, 3, 41)
-
-    def _compute_speech_probabilities(self, audio_data: np.ndarray) -> np.ndarray:
+    def _compute_speech_probabilities(
+        self,
+        audio_data: np.ndarray,
+        threshold: float = 0.5,
+    ) -> np.ndarray:
         """
         Compute speech probabilities for audio frames.
 
         Args:
-            audio_data: Audio samples as float32 array.
+            audio_data: Audio samples as float32 array, normalized to [-1, 1].
+            threshold: Speech probability threshold.
 
         Returns:
             Speech probabilities for each frame.
         """
-        self._reset_states()
-        session = self._get_session()
+        vad = self._get_vad(threshold)
         hop_size = self._hop_size
         num_samples = len(audio_data)
 
@@ -242,30 +115,12 @@ class TenVADProvider(VADProvider):
             if len(frame) < hop_size:
                 frame = np.pad(frame, (0, hop_size - len(frame)), mode="constant")
 
-            # Extract features
-            features = self._extract_features(frame)
+            # Convert to int16 as required by TEN VAD
+            frame_int16 = (frame * 32767).astype(np.int16)
 
-            # Prepare inputs - map to the correct input names
-            inputs = {
-                self._input_names[0]: features,  # input_1: audio features
-                self._input_names[1]: self._states[0],  # input_2: state 1
-                self._input_names[2]: self._states[1],  # input_3: state 2
-                self._input_names[3]: self._states[2],  # input_6: state 3
-                self._input_names[4]: self._states[3],  # input_7: state 4
-            }
-
-            # Run inference
-            outputs = session.run(self._output_names, inputs)
-
-            # Update states from outputs
-            # output_1: probability, outputs 2-5: states
-            probability = float(outputs[0][0, 0, 0])  # Shape: [1, 1, 1]
-            self._states[0] = outputs[1]
-            self._states[1] = outputs[2]
-            self._states[2] = outputs[3]
-            self._states[3] = outputs[4]
-
-            probabilities.append(probability)
+            # Process frame
+            prob, flag = vad.process(frame_int16)
+            probabilities.append(prob)
 
         return np.array(probabilities)
 
@@ -357,7 +212,7 @@ class TenVADProvider(VADProvider):
                 - min_speech_duration_ms: Minimum speech duration in ms (default: 250)
                 - min_silence_duration_ms: Minimum silence duration in ms (default: 100)
                 - max_speech_duration_s: Maximum speech duration in seconds (default: 60)
-                - hop_size: Hop size in samples (default: 160, must be 160 or 256)
+                - hop_size: Hop size in samples (default: 256, must be 160 or 256)
 
         Returns:
             List of speech segment dictionaries, each containing:
@@ -375,9 +230,8 @@ class TenVADProvider(VADProvider):
         # Update hop_size if provided in config
         if hop_size != self._hop_size:
             self._hop_size = hop_size
-            # Reset states when hop_size changes
-            if self._states is not None:
-                self._reset_states()
+            # Reset vad instance when hop_size changes
+            self._vad = None
 
         # Load audio file using soundfile
         audio_data, sample_rate = sf.read(audio_path)
@@ -392,11 +246,11 @@ class TenVADProvider(VADProvider):
         if audio_data.ndim > 1:
             audio_data = np.mean(audio_data, axis=1)
 
-        # Convert to float32
+        # Ensure float32
         audio_data = audio_data.astype(np.float32)
 
         # Compute speech probabilities
-        probabilities = self._compute_speech_probabilities(audio_data)
+        probabilities = self._compute_speech_probabilities(audio_data, threshold)
 
         # Convert probabilities to segments
         segments = self._probs_to_segments(
@@ -523,5 +377,5 @@ class TenVADProvider(VADProvider):
 
     def reset(self):
         """Reset VAD internal state."""
-        self._reset_states()
+        self._vad = None
         logger.debug("TEN VAD provider state reset")
