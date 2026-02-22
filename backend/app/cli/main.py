@@ -347,8 +347,10 @@ async def _run_scan(
     scan_id = await scan_service.scan_path(scan_request)
 
     # Wait for scan to complete
-    import time
     while True:
+        # Give event loop time to process background tasks
+        await asyncio.sleep(0.5)
+
         status = scan_service.get_scan_status(scan_id)
         if not status:
             console.print("[red]Error:[/red] Scan lost")
@@ -362,7 +364,6 @@ async def _run_scan(
             f"Progress: {status.progress}% - {status.message}",
             end="\r",
         )
-        time.sleep(0.5)
 
     console.print()  # New line after progress
 
