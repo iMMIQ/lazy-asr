@@ -24,6 +24,9 @@ dependencies = [
     "asyncio>=4.0.0",
     "filetype>=1.2.0",
     "websockets>=16.0",
+    "ten-vad>=1.0.6.8",
+    "typer>=0.12.0",      # CLI framework
+    "rich>=13.0.0",       # Terminal formatting
 ]
 
 [project.optional-dependencies]
