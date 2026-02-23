@@ -13,7 +13,7 @@ from app.core.database import get_db_context
 from app.models.schemas import ScanRequest, ScanStatus, ASRResponse
 from app.repositories.scan_repository import ScanRepository, MediaFileRepository
 from app.services.asr_service import ASRService
-from app.models.database import ScanTask, MediaFile, MonitorConfig
+from app.models.database import ScanTask, MediaFile
 from app.utils.file_type import get_file_type, is_media_file
 
 logger = get_logger(__name__)
@@ -44,9 +44,6 @@ class PersistentScanService:
         if not os.path.isdir(scan_request.path):
             raise ValueError(f"Path is not a directory: {scan_request.path}")
 
-        # Auto-create monitor config if not exists
-        await self._ensure_monitor_exists(scan_request)
-
         # Create scan task in database
         async with get_db_context() as session:
             scan_id = ScanTask.generate_scan_id()
@@ -67,44 +64,6 @@ class PersistentScanService:
             self.active_scans[scan_id] = task
 
         return scan_id
-
-    async def _ensure_monitor_exists(self, scan_request: ScanRequest):
-        """
-        Ensure a monitor configuration exists for the scan path.
-        Create one if it doesn't exist, using the scan request parameters.
-        """
-        try:
-            async with get_db_context() as session:
-                # Check if monitor already exists for this path
-                result = await session.execute(select(MonitorConfig).where(MonitorConfig.path == scan_request.path))
-                existing_monitor = result.scalar_one_or_none()
-
-                if existing_monitor:
-                    logger.info(f"Monitor already exists for path: {scan_request.path}")
-                    return
-
-                # Create new monitor with scan request parameters
-                # Generate a name based on the path
-                path_name = os.path.basename(os.path.normpath(scan_request.path))
-                monitor_name = f"{path_name} Monitor"
-
-                monitor = MonitorConfig(
-                    name=monitor_name,
-                    path=scan_request.path,
-                    is_active=True,
-                    recursive=scan_request.recursive,
-                    asr_method=scan_request.asr_method,
-                    output_formats=scan_request.output_formats or ["srt"],
-                    auto_process=True,  # Auto-process new files by default
-                    scan_interval=3600,  # Default 1 hour interval
-                )
-                session.add(monitor)
-                await session.flush()
-
-                logger.info(f"Auto-created monitor config: {monitor_name} for path: {scan_request.path}")
-        except Exception as e:
-            logger.warning(f"Failed to auto-create monitor config for {scan_request.path}: {e}")
-            # Don't fail the scan if monitor creation fails
 
     def _has_existing_subtitles(self, media_path: str, output_formats: List[str]) -> bool:
         """

@@ -12,9 +12,6 @@ export type ProcessingStatus = 'pending' | 'processing' | 'completed' | 'failed'
 /** Scan status */
 export type ScanStatus = 'idle' | 'scanning' | 'completed' | 'failed' | 'cancelled';
 
-/** Monitor status */
-export type MonitorStatus = 'active' | 'inactive' | 'error';
-
 /** ASR plugin information */
 export interface ASRPlugin {
   name: string;
@@ -130,36 +127,6 @@ export interface PathInfo {
   error?: string;
 }
 
-/** Monitor configuration */
-export interface MonitorConfig {
-  monitor_id?: string;
-  name: string;
-  watch_path: string;
-  recursive: boolean;
-  file_patterns: string[];
-  asr_method: string;
-  language: LanguageCode;
-  output_formats: OutputFormat[];
-  is_active: boolean;
-  created_at?: string;
-  updated_at?: string;
-}
-
-/** Monitor list response */
-export interface MonitorListResponse {
-  monitors: MonitorConfig[];
-  total_count: number;
-  active_count: number;
-}
-
-/** Monitor service status */
-export interface MonitorServiceStatus {
-  is_running: boolean;
-  active_monitors: number;
-  total_monitors: number;
-  uptime_seconds?: number;
-}
-
 /** Database status */
 export interface DatabaseStatus {
   is_connected: boolean;
@@ -237,7 +204,7 @@ export interface ConfigContextValue {
 }
 
 /** Tab type for navigation */
-export type TabType = 'upload' | 'scanner' | 'monitor';
+export type TabType = 'upload' | 'scanner';
 
 /** ASR method field configuration */
 export interface ASRFieldConfig {

@@ -9,7 +9,6 @@ import Header from './components/Header';
 import TabNavigation from './components/TabNavigation';
 import FileUploadTab from './components/FileUploadTab';
 import PathScanner from './components/PathScanner';
-import MonitorManager from './components/MonitorManager';
 
 import './App.css';
 
@@ -106,16 +105,14 @@ function AppContent({ activeTab, onTabChange, onLanguageChange }: AppContentProp
         <TabNavigation
           activeTab={activeTab}
           onTabChange={onTabChange}
-          tabs={['upload', 'scanner', 'monitor']}
+          tabs={['upload', 'scanner']}
         />
 
         {/* Tab Content */}
         {activeTab === 'upload' ? (
           <FileUploadTab />
-        ) : activeTab === 'scanner' ? (
-          <PathScanner />
         ) : (
-          <MonitorManager />
+          <PathScanner />
         )}
       </main>
     </div>

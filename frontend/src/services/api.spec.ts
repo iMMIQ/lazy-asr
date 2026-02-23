@@ -16,18 +16,9 @@ import {
   getScanConfig,
   browseDirectory,
   getPathInfo,
-  createMonitor,
-  getAllMonitors,
-  getMonitor,
-  updateMonitor,
-  deleteMonitor,
-  toggleMonitor,
-  getMonitorServiceStatus,
-  startMonitorService,
-  stopMonitorService,
   getDatabaseStatus
 } from './api'
-import type { ScanRequest, MonitorConfig } from '../types'
+import type { ScanRequest } from '../types'
 
 const mockServer = setupServer(
   // Plugin endpoints - note: axios uses baseURL of '/api/v1' so paths are relative to that
@@ -79,44 +70,6 @@ const mockServer = setupServer(
 
   http.get('/api/v1/asr/scan/path-info', () => {
     return HttpResponse.json({ path: '/', exists: true, is_directory: true, is_readable: true })
-  }),
-
-  // Monitor endpoints
-  http.post('/api/v1/asr/monitor/create', () => {
-    return HttpResponse.json({ monitor_id: 'test-monitor-id' })
-  }),
-
-  http.get('/api/v1/asr/monitor/all', () => {
-    return HttpResponse.json({ monitors: [], total_count: 0, active_count: 0 })
-  }),
-
-  // IMPORTANT: More specific paths must come before parameterized paths
-  http.get('/api/v1/asr/monitor/status', () => {
-    return HttpResponse.json({ is_running: true, active_monitors: 0, total_monitors: 0 })
-  }),
-
-  http.post('/api/v1/asr/monitor/service/start', () => {
-    return HttpResponse.json({ success: true })
-  }),
-
-  http.post('/api/v1/asr/monitor/service/stop', () => {
-    return HttpResponse.json({ success: true })
-  }),
-
-  http.get('/api/v1/asr/monitor/:monitorId', () => {
-    return HttpResponse.json({ monitor_id: 'test-monitor-id', name: 'Test Monitor' })
-  }),
-
-  http.put('/api/v1/asr/monitor/:monitorId', () => {
-    return HttpResponse.json({ success: true })
-  }),
-
-  http.delete('/api/v1/asr/monitor/:monitorId', () => {
-    return HttpResponse.json({ success: true })
-  }),
-
-  http.post('/api/v1/asr/monitor/:monitorId/toggle', () => {
-    return HttpResponse.json({ success: true })
   }),
 
   // Database endpoint
@@ -224,63 +177,6 @@ describe('API Service', () => {
     it('should get path info', async () => {
       const result = await getPathInfo('/test')
       expect(result.exists).toBe(true)
-    })
-  })
-
-  describe('Monitor APIs', () => {
-    it('should create a monitor', async () => {
-      const config: MonitorConfig = {
-        name: 'Test',
-        watch_path: '/test',
-        recursive: true,
-        file_patterns: ['*.mp3'],
-        asr_method: 'whisper-api',
-        language: 'en',
-        output_formats: ['srt'],
-        is_active: true
-      }
-      const result = await createMonitor(config)
-      expect(result.monitor_id).toBe('test-monitor-id')
-    })
-
-    it('should get all monitors', async () => {
-      const result = await getAllMonitors()
-      expect(result.monitors).toBeInstanceOf(Array)
-    })
-
-    it('should get a specific monitor', async () => {
-      const result = await getMonitor('monitor-123')
-      expect(result.monitor_id).toBe('test-monitor-id')
-    })
-
-    it('should update a monitor', async () => {
-      const result = await updateMonitor('monitor-123', { name: 'Updated' })
-      expect(result.success).toBe(true)
-    })
-
-    it('should delete a monitor', async () => {
-      const result = await deleteMonitor('monitor-123')
-      expect(result.success).toBe(true)
-    })
-
-    it('should toggle monitor status', async () => {
-      const result = await toggleMonitor('monitor-123', true)
-      expect(result.success).toBe(true)
-    })
-
-    it('should get monitor service status', async () => {
-      const result = await getMonitorServiceStatus()
-      expect(result.is_running).toBe(true)
-    })
-
-    it('should start monitor service', async () => {
-      const result = await startMonitorService()
-      expect(result.success).toBe(true)
-    })
-
-    it('should stop monitor service', async () => {
-      const result = await stopMonitorService()
-      expect(result.success).toBe(true)
     })
   })
 

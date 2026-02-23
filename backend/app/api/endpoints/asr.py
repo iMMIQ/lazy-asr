@@ -10,7 +10,6 @@ import json
 from app.services.asr_service import ASRService
 from app.services.scan_service import scan_service
 from app.services.persistent_scan_service import persistent_scan_service
-from app.services.monitor_service import monitor_service
 from plugins.manager import plugin_manager
 from app.models.schemas import (
     ASRResponse,

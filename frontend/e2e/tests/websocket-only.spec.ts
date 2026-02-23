@@ -31,7 +31,7 @@ test.describe('WebSocket Real-time Updates', () => {
   });
 
   test('should show "Live" status when WebSocket is connected', async ({ page }) => {
-    // Monitor WebSocket connections
+    // Track WebSocket connections
     const wsConnections: string[] = [];
     page.on('websocket', ws => {
       wsConnections.push(ws.url());

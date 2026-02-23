@@ -91,8 +91,7 @@
   },
   "tabs": {
     "upload": "文件上传",
-    "scanner": "路径扫描",
-    "monitor": "监控管理"
+    "scanner": "路径扫描"
   },
   "pathScanner": {
     "title": "📁 路径扫描器 - NAS媒体处理",
@@ -149,48 +148,5 @@
     "close": "关闭",
     "browse": "浏览文件夹",
     "files": "个文件"
-  },
-  "monitorManager": {
-    "title": "监控管理",
-    "startService": "启动监控服务",
-    "stopService": "停止监控服务",
-    "addMonitor": "新增监控",
-    "serviceStatus": "监控服务状态",
-    "running": "运行中",
-    "stopped": "已停止",
-    "totalMonitors": "总监控数",
-    "activeMonitors": "活跃监控数",
-    "emptyState": "暂无监控配置，点击\"新增监控\"开始使用",
-    "active": "活跃",
-    "inactive": "停止",
-    "monitorPath": "监控路径",
-    "scanInterval": "扫描间隔",
-    "asrMethod": "ASR方法",
-    "outputFormats": "输出格式",
-    "recursiveScan": "递归扫描",
-    "autoProcess": "自动处理",
-    "lastScan": "最后扫描",
-    "neverScanned": "从未扫描",
-    "enable": "启用",
-    "disable": "停用",
-    "rename": "重命名",
-    "delete": "删除",
-    "editNamePrompt": "请输入新的监控名称:",
-    "confirmDelete": "确定要删除此监控配置吗？",
-    "createMonitor": "新增监控",
-    "editMonitor": "编辑监控",
-    "monitorName": "监控名称",
-    "monitorPathPlaceholder": "/path/to/monitor",
-    "intervalSeconds": "扫描间隔 (秒)",
-    "recursiveSubdirs": "递归扫描子目录",
-    "autoProcessNewFiles": "自动处理新文件",
-    "formatsPlaceholder": "srt, vtt, lrc",
-    "cancel": "取消",
-    "create": "创建",
-    "update": "更新",
-    "loading": "加载中...",
-    "seconds": "秒",
-    "minutes": "分钟",
-    "hours": "小时"
   }
 }

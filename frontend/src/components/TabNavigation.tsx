@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import './TabNavigation.css';
 
 /** Tab type for navigation - re-exported from types */
-export type TabType = 'upload' | 'scanner' | 'monitor';
+export type TabType = 'upload' | 'scanner';
 
 /** Tab Navigation component props */
 export interface TabNavigationProps {

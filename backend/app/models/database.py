@@ -1,5 +1,5 @@
 """
-Database models for persistent scan and monitoring functionality
+Database models for persistent scan functionality
 """
 
 from sqlalchemy import Column, String, Integer, Float, Boolean, DateTime, Text, ForeignKey, JSON
@@ -67,37 +67,3 @@ class MediaFile(Base):
     scan_task = relationship("ScanTask", back_populates="media_files")
 
 
-class MonitorConfig(Base):
-    """Monitor configuration table"""
-
-    __tablename__ = "monitor_configs"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(256), nullable=False)
-    path = Column(String(1024), nullable=False)
-    is_active = Column(Boolean, default=True, index=True)
-    recursive = Column(Boolean, default=True)
-    asr_method = Column(String(100), default="local-whisper")
-    output_formats = Column(JSON)  # List of output formats
-    auto_process = Column(Boolean, default=True)
-    scan_interval = Column(Integer, default=3600)  # Scan interval in seconds (default: 1 hour)
-    last_scan_time = Column(DateTime)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    def to_dict(self):
-        """Convert to dictionary"""
-        return {
-            "id": self.id,
-            "name": self.name,
-            "path": self.path,
-            "is_active": self.is_active,
-            "recursive": self.recursive,
-            "asr_method": self.asr_method,
-            "output_formats": self.output_formats,
-            "auto_process": self.auto_process,
-            "scan_interval": self.scan_interval,
-            "last_scan_time": self.last_scan_time.isoformat() if self.last_scan_time else None,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
-        }

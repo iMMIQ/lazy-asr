@@ -5,8 +5,6 @@ from .core.config import settings
 from .api.api import api_router
 from .core.logger import get_logger
 from .core.database import init_database, close_database
-from .services.monitor_service import monitor_service
-
 logger = get_logger(__name__)
 
 
@@ -24,24 +22,10 @@ async def lifespan(app: FastAPI):
         logger.error(f"Failed to initialize database: {e}")
         raise
 
-    # Start monitor service
-    try:
-        await monitor_service.start()
-        logger.info("Monitor service started successfully")
-    except Exception as e:
-        logger.warning(f"Failed to start monitor service: {e}")
-
     yield
 
     # Shutdown
     logger.info("Shutting down ASR Service...")
-
-    # Stop monitor service
-    try:
-        await monitor_service.stop()
-        logger.info("Monitor service stopped successfully")
-    except Exception as e:
-        logger.error(f"Error stopping monitor service: {e}")
 
     # Close database connections
     try:
