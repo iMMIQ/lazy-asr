@@ -303,6 +303,7 @@ export function PathScanner(): React.ReactElement {
           <div className="scan-action-buttons">
             <button
               type="submit"
+              data-testid="start-scan-button"
               disabled={isScanning || !scanPath.trim()}
               className={`scan-button ${isScanning || !scanPath.trim() ? 'disabled' : ''}`}
             >

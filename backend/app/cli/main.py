@@ -339,7 +339,6 @@ async def _run_scan(
         recursive=recursive,
         max_files=max_files,
         asr_method=asr_method,
-        vad_method=vad_method,
         output_formats=output_formats,
     )
 
