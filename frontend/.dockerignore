@@ -61,10 +61,9 @@ docker-compose*
 .gitlab-ci.yml
 .travis.yml
 
-# Lock files (already installed in container)
-bun.lock
-package-lock.json
-yarn.lock
+# Lock files (bun.lock is needed by Dockerfile)
+# package-lock.json
+# yarn.lock
 
 # Misc
 .DS_Store

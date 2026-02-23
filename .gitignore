@@ -6,6 +6,8 @@ __pycache__/
 venv/
 .mypy_cache/
 .ruff_cache/
+*.egg-info/
+docs/plans/
 
 # Environment
 .env
@@ -68,4 +70,3 @@ pnpm-debug.log*
 *.tmp
 *.temp
 
-# Note: docs/plans/ is tracked, not ignored

@@ -16,7 +16,11 @@ ARG INDEX_URL=""
 ARG TRUSTED_HOST=""
 
 # Install runtime dependencies only (no build tools needed for production)
-RUN apt-get update && \
+# Use Tsinghua mirror for faster downloads in China
+# Clear proxy env vars to avoid connection issues inside container
+RUN unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY && \
+    sed -i 's|http://deb.debian.org|https://mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list.d/debian.sources && \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
         libsndfile1 \
         ffmpeg \
@@ -33,10 +37,12 @@ RUN uv --version
 COPY pyproject.toml uv.lock ./
 
 # Install dependencies using uv
-RUN if [ -n "$INDEX_URL" ]; then \
-        uv pip install system --frozen --index-url "$INDEX_URL"; \
+# Clear proxy env vars to avoid connection issues inside container
+RUN unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY && \
+    if [ -n "$INDEX_URL" ]; then \
+        uv sync --frozen --no-dev --index-url "$INDEX_URL"; \
     else \
-        uv pip install system --frozen; \
+        uv sync --frozen --no-dev; \
     fi
 
 # Copy application code
