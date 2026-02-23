@@ -12,17 +12,19 @@ from io import BytesIO
 @pytest.mark.asyncio
 async def test_process_media_creates_progress_callback(temp_dir):
     """Test that /process endpoint creates progress callback for WebSocket"""
-    from app.api.endpoints.asr import asr_service
+    from app.api.endpoints.asr import router, asr_service
     from app.models.schemas import ASRResponse
     import uuid
 
-    # Track the progress_callback passed to process_audio
-    captured_callback = None
-    original_process_audio = asr_service.process_audio
+    # Track if progress_callback was passed to process_audio
+    callback_passed = False
 
-    async def mock_process_audio(*args, **kwargs):
-        nonlocal captured_callback
-        captured_callback = kwargs.get('progress_callback')
+    async def mock_process_audio(*args, progress_callback=None, **kwargs):
+        nonlocal callback_passed
+        if progress_callback is not None:
+            callback_passed = True
+            # Verify callback is callable
+            assert callable(progress_callback)
         return ASRResponse(
             success=True,
             message="Processing completed",
@@ -30,14 +32,16 @@ async def test_process_media_creates_progress_callback(temp_dir):
             output_files={'srt': '/path/to/output.srt'}
         )
 
-    # Patch asr_service.process_audio at the module level
-    with patch('app.api.endpoints.asr.asr_service.process_audio', mock_process_audio):
+    # Patch asr_service.process_audio
+    with patch.object(asr_service, 'process_audio', mock_process_audio):
         # Mock connection_manager
         with patch('app.api.endpoints.asr.connection_manager') as mock_cm:
             mock_cm.broadcast_to_scan = AsyncMock()
 
-            # Import and get the endpoint function
-            from app.api.endpoints.asr import process_media
+            # Mock plugin_manager
+            with patch('app.api.endpoints.asr.plugin_manager') as mock_plugin:
+                mock_plugin.get_plugin_names.return_value = ['whisper-api']
+                mock_plugin.get_plugin.return_value = Mock()
 
             # Create a mock upload file
             content = b"fake audio content"
@@ -54,14 +58,27 @@ async def test_process_media_creates_progress_callback(temp_dir):
                     mock_open.return_value.write = Mock()
 
                     with patch('os.makedirs'):
+                        # Get the process_media function from the router
+                        process_media_func = None
+                        for route in router.routes:
+                            if hasattr(route, 'path') and route.path == '/process' and route.methods == {'POST'}:
+                                process_media_func = route.dependant.call
+                                break
+
+                        if process_media_func is None:
+                            # Fallback: try to import directly
+                            from app.api.endpoints.asr import process_media
+                            process_media_func = process_media
+
                         # Call the endpoint
                         try:
-                            result = await process_media(
+                            await process_media_func(
                                 media_file=mock_file,
                                 asr_method='whisper-api',
                                 language='auto',
                                 output_formats='srt',
                                 output_mode='task',
+                                vad_method='ten',
                                 vad_options=None,
                                 asr_options=None,
                                 min_speech_duration=None,
@@ -75,14 +92,8 @@ async def test_process_media_creates_progress_callback(temp_dir):
                             # The important part is that mock_process_audio was called
                             pass
 
-    # Restore original function (though the patch handles this)
-    asr_service.process_audio = original_process_audio
-
-    # Verify that the callback was captured
-    assert captured_callback is not None, "progress_callback should be created and passed to process_audio"
-
-    # Verify it's a callable
-    assert callable(captured_callback), "progress_callback should be callable"
+    # Verify that the callback was passed
+    assert callback_passed, "progress_callback should be created and passed to process_audio"
 
 
 @pytest.mark.asyncio

@@ -127,15 +127,6 @@ export interface PathInfo {
   error?: string;
 }
 
-/** Database status */
-export interface DatabaseStatus {
-  is_connected: boolean;
-  database_type: string;
-  database_path?: string;
-  total_records?: number;
-  last_checked: string;
-}
-
 /** API error response structure */
 export interface ApiErrorResponse {
   detail?: string;

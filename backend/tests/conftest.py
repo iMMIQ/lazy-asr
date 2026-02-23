@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import AsyncGenerator, Generator
 from unittest.mock import AsyncMock, MagicMock
 
-import aiosqlite
 import pytest
 from httpx import AsyncClient, ASGITransport
 
@@ -58,19 +57,6 @@ def sample_audio_file(temp_dir: str) -> str:
         wav_file.writeframes(silence)
 
     return audio_path
-
-
-@pytest.fixture
-async def test_db() -> AsyncGenerator[aiosqlite.Connection, None]:
-    """Create an in-memory SQLite database for testing.
-
-    This fixture provides a clean database for each test function.
-    Use it for integration tests that need database isolation.
-    """
-    async with aiosqlite.connect(":memory:") as db:
-        # Enable foreign keys
-        await db.execute("PRAGMA foreign_keys = ON")
-        yield db
 
 
 @pytest.fixture

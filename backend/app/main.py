@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .core.config import settings
 from .api.api import api_router
 from .core.logger import get_logger
-from .core.database import init_database, close_database
+
 logger = get_logger(__name__)
 
 
@@ -14,25 +14,10 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting ASR Service...")
 
-    # Initialize database
-    try:
-        await init_database()
-        logger.info("Database initialized successfully")
-    except Exception as e:
-        logger.error(f"Failed to initialize database: {e}")
-        raise
-
     yield
 
     # Shutdown
     logger.info("Shutting down ASR Service...")
-
-    # Close database connections
-    try:
-        await close_database()
-        logger.info("Database connections closed successfully")
-    except Exception as e:
-        logger.error(f"Error closing database: {e}")
 
 
 app = FastAPI(title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_STR}/openapi.json", lifespan=lifespan)

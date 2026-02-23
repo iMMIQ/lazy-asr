@@ -8,7 +8,6 @@ import type {
   ScanStatusResponse,
   DirectoryBrowseResult,
   PathInfo,
-  DatabaseStatus,
   VADProvidersResponse
 } from '../types';
 
@@ -213,19 +212,6 @@ export async function getPathInfo(path: string): Promise<PathInfo> {
     return response.data;
   } catch (error) {
     console.error('Failed to get path info:', error);
-    throw new Error(getErrorMessage(error));
-  }
-}
-
-/**
- * Get database status
- */
-export async function getDatabaseStatus(): Promise<DatabaseStatus> {
-  try {
-    const response = await apiClient.get<DatabaseStatus>('/asr/database/status');
-    return response.data;
-  } catch (error) {
-    console.error('Failed to get database status:', error);
     throw new Error(getErrorMessage(error));
   }
 }

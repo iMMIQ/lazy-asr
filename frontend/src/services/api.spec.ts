@@ -15,8 +15,7 @@ import {
   cancelScan,
   getScanConfig,
   browseDirectory,
-  getPathInfo,
-  getDatabaseStatus
+  getPathInfo
 } from './api'
 import type { ScanRequest } from '../types'
 
@@ -70,11 +69,6 @@ const mockServer = setupServer(
 
   http.get('/api/v1/asr/scan/path-info', () => {
     return HttpResponse.json({ path: '/', exists: true, is_directory: true, is_readable: true })
-  }),
-
-  // Database endpoint
-  http.get('/api/v1/asr/database/status', () => {
-    return HttpResponse.json({ is_connected: true, database_type: 'sqlite', last_checked: new Date().toISOString() })
   })
 )
 
@@ -177,14 +171,6 @@ describe('API Service', () => {
     it('should get path info', async () => {
       const result = await getPathInfo('/test')
       expect(result.exists).toBe(true)
-    })
-  })
-
-  describe('Database API', () => {
-    it('should get database status', async () => {
-      const result = await getDatabaseStatus()
-      expect(result.is_connected).toBe(true)
-      expect(result.database_type).toBe('sqlite')
     })
   })
 })

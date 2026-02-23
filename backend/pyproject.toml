@@ -19,8 +19,6 @@ dependencies = [
     "structlog>=23.0.0",
     "faster-whisper>=1.1.0",
     "ffmpeg-python>=0.2.0",
-    "aiosqlite>=0.22.1",
-    "sqlalchemy>=2.0.45",
     "asyncio>=4.0.0",
     "filetype>=1.2.0",
     "websockets>=16.0",
@@ -81,7 +79,5 @@ module = [
     "dashscope.*",
     "tqdm.*",
     "requests.*",
-    "aiosqlite.*",
-    "sqlalchemy.*",
 ]
 ignore_missing_imports = true

@@ -173,9 +173,9 @@ class TestVADEndpoints:
             data = response.json()
             assert "providers" in data
             assert "default" in data
-            assert data["default"] == "silero"
+            assert data["default"] == "ten"
             assert len(data["providers"]) >= 1
-            assert any(p["name"] == "silero" for p in data["providers"])
+            assert any(p["name"] == "ten" for p in data["providers"])
 
     async def test_vad_providers_structure(self, client: AsyncClient):
         """Test VAD providers response structure."""

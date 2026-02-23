@@ -4,8 +4,8 @@ from app.core.config import settings
 
 
 def test_default_vad_method():
-    """Test that DEFAULT_VAD_METHOD is set to 'silero'."""
-    assert settings.DEFAULT_VAD_METHOD == "silero"
+    """Test that DEFAULT_VAD_METHOD is set to 'ten'."""
+    assert settings.DEFAULT_VAD_METHOD == "ten"
 
 
 def test_available_vad_methods():

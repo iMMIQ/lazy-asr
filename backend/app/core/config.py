@@ -56,11 +56,6 @@ class Settings(BaseSettings):
     CORS_ALLOW_METHODS: list = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
     CORS_ALLOW_HEADERS: list = ["Content-Type", "Authorization", "X-Request-ID", "Sec-WebSocket-Key", "Sec-WebSocket-Version", "Sec-WebSocket-Protocol", "Sec-WebSocket-Extensions", "Connection", "Upgrade"]
 
-    # Database settings
-    DATABASE_URL: str = "sqlite+aiosqlite:///data/asr_service.db"
-    DATABASE_POOL_SIZE: int = 5
-    DATABASE_MAX_OVERFLOW: int = 10
-
     class Config:
         env_file = ".env"
 
