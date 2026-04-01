@@ -61,6 +61,11 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Model files
+models/
+*.pt
+*.bin
+
 # Temporary files
 *.tmp
 *.temp
