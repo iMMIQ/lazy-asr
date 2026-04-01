@@ -14,25 +14,13 @@ class Settings(BaseSettings):
     MAX_FILE_SIZE: int = 100 * 1024 * 1024  # 100MB
 
     # ASR settings
-    DEFAULT_ASR_METHOD: str = "local-whisper"
-    AVAILABLE_ASR_METHODS: list = ["local-whisper", "whisper-api", "qwen-asr"]
+    DEFAULT_ASR_METHOD: str = "whisper-api"
+    AVAILABLE_ASR_METHODS: list = ["whisper-api"]
 
-    # Whisper API settings
-    WHISPER_API_URL: str = "https://funasr-ai.immiqtop.heiyu.space/v1/audio/transcriptions"
+    # ASR API settings (Lazycat ASR service)
+    WHISPER_API_URL: str = "https://asr-ai.${LAZYCAT_BOX_DOMAIN}/v1/audio/transcriptions"
     WHISPER_API_KEY: Optional[str] = None
     WHISPER_API_MODEL: str = "fun-asr-nano"
-
-    # Qwen ASR settings
-    QWEN_ASR_API_KEY: Optional[str] = None
-    QWEN_ASR_MODEL: str = "qwen3-asr-flash"
-    QWEN_ASR_API_URL: str = (
-        "https://dashscope.aliyuncs.com/api/v1/services/aigc/audio/asr"  # Alibaba Cloud ASR API URL (read-only)
-    )
-    QWEN_ASR_AVAILABLE_MODELS: list = ["qwen3-asr-flash"]  # Alibaba Cloud available model list
-
-    # Local Whisper settings (faster-whisper, CPU-only)
-    LOCAL_WHISPER_MODEL: str = "tiny"  # tiny, base, small, medium, large-v1, large-v2, large-v3
-    LOCAL_WHISPER_MODEL_CACHE_DIR: str = "models"  # Model cache directory
 
     # VAD settings
     DEFAULT_VAD_METHOD: str = "ten"

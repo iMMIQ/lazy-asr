@@ -184,23 +184,6 @@ export function ConfigPanel({
 
   return (
     <div className="config-panel">
-      {/* ASR Method Selection */}
-      <div className="form-group">
-        <label htmlFor="asrMethod">{t('form.selectASR')}</label>
-        <select
-          id="asrMethod"
-          value={asrMethod || ''}
-          onChange={onMethodChange}
-          disabled={isProcessing}
-        >
-          {availablePlugins.map((plugin) => (
-            <option key={plugin.name} value={plugin.name}>
-              {plugin.display_name}
-            </option>
-          ))}
-        </select>
-      </div>
-
       {/* Output Format Selection */}
       <div className="form-group">
         <label>{t('form.selectOutputFormats')}</label>

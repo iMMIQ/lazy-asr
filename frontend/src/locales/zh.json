@@ -70,19 +70,11 @@
     "japanese": "日本語",
     "whisper-api": {
       "apiUrl": "API URL:",
-      "apiUrlDescription": "Whisper API服务地址",
+      "apiUrlDescription": "ASR服务地址",
       "apiKey": "API Key (可选):",
       "apiKeyDescription": "如果API需要认证，请输入API密钥",
       "model": "模型名称:",
-      "modelDescription": "使用的语音识别模型"
-    },
-    "qwen-asr": {
-      "apiUrl": "API URL:",
-      "apiUrlDescription": "阿里云ASR服务地址 (固定)",
-      "apiKey": "API Key:",
-      "apiKeyDescription": "阿里云DashScope API密钥",
-      "model": "模型选择:",
-      "modelDescription": "阿里云ASR模型 (目前仅支持qwen3-asr-flash)"
+      "modelDescription": "使用的语音识别模型 (fun-asr-nano / sensevoice-small / paraformer-large)"
     }
   },
   "language": {

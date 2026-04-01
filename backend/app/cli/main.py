@@ -90,7 +90,7 @@ def transcribe(
         lazy-asr transcribe video.mp4
 
         # Use specific ASR method and output multiple formats
-        lazy-asr transcribe video.mp4 --method local-whisper --formats srt,vtt,lrc
+        lazy-asr transcribe video.mp4 --method whisper-api --formats srt,vtt,lrc
 
         # Specify language and output directory
         lazy-asr transcribe audio.wav --language en --output ./subtitles

@@ -35,33 +35,16 @@ export const MAX_FILES = 10;
 export const ASR_METHOD_CONFIGS: Record<string, ASRMethodConfig> = {
   'whisper-api': {
     apiUrl: {
-      placeholder: 'https://funasr-ai.immiqtop.heiyu.space/v1/audio/transcriptions',
-      description: 'Whisper API URL'
+      placeholder: 'https://asr-ai.${LAZYCAT_BOX_DOMAIN}/v1/audio/transcriptions',
+      description: 'ASR API URL'
     },
     apiKey: {
       placeholder: 'API Key',
-      description: 'Whisper API Key'
+      description: 'ASR API Key'
     },
     model: {
       placeholder: 'fun-asr-nano',
-      description: 'Model name for Whisper API'
-    }
-  },
-  'qwen-asr': {
-    apiUrl: {
-      value: 'https://dashscope.aliyuncs.com/api/v1/services/aigc/audio/asr',
-      readOnly: true,
-      description: 'Qwen ASR API URL'
-    },
-    apiKey: {
-      placeholder: 'Enter Alibaba Cloud API Key',
-      description: 'Alibaba Cloud API Key'
-    },
-    model: {
-      options: [
-        { value: 'qwen3-asr-flash', label: 'qwen3-asr-flash' }
-      ],
-      description: 'Model for Qwen ASR'
+      description: 'Model name (fun-asr-nano / sensevoice-small / paraformer-large)'
     }
   }
 };

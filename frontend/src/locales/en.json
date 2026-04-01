@@ -70,19 +70,11 @@
     "japanese": "Japanese",
     "whisper-api": {
       "apiUrl": "API URL:",
-      "apiUrlDescription": "Whisper API service address",
+      "apiUrlDescription": "ASR service address",
       "apiKey": "API Key (optional):",
       "apiKeyDescription": "If API requires authentication, enter API key",
       "model": "Model Name:",
-      "modelDescription": "Speech recognition model to use"
-    },
-    "qwen-asr": {
-      "apiUrl": "API URL:",
-      "apiUrlDescription": "Alibaba Cloud ASR service address (fixed)",
-      "apiKey": "API Key:",
-      "apiKeyDescription": "Alibaba Cloud DashScope API key",
-      "model": "Model Selection:",
-      "modelDescription": "Alibaba Cloud ASR model (currently only supports qwen3-asr-flash)"
+      "modelDescription": "Speech recognition model to use (fun-asr-nano / sensevoice-small / paraformer-large)"
     }
   },
   "language": {

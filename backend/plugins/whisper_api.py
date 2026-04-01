@@ -14,8 +14,8 @@ class WhisperAPIPlugin(ASRPlugin):
     def __init__(self):
         super().__init__(
             name="whisper-api",
-            display_name="Whisper API",
-            description="Whisper API ASR service"
+            display_name="ASR Service",
+            description="Lazycat ASR service (FunASR)"
         )
         self.api_url = settings.WHISPER_API_URL
         self.api_key = settings.WHISPER_API_KEY

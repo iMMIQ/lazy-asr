@@ -33,22 +33,6 @@ export function ASRConfig({
   return (
     <>
       <div className="form-group">
-        <label htmlFor="asrMethod">{t('form.selectASR')}</label>
-        <select
-          id="asrMethod"
-          value={asrMethod}
-          onChange={onMethodChange}
-          disabled={isProcessing}
-        >
-          {availablePlugins.map((plugin) => (
-            <option key={plugin.name} value={plugin.name}>
-              {plugin.display_name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="form-group">
         <label>{t('form.selectOutputFormats')}</label>
         <div className="format-checkboxes">
           {OUTPUT_FORMATS.map((format) => (
